@@ -1,0 +1,29 @@
+{
+  "name": "dbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "dependencies": {
+    "bluebird": "^3.7.2",
+    "cron": "^1.8.2",
+    "mongoose": "^5.13.3",
+    "node-vk-bot-api": "^3.5.0"
+  },
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "nodemon bot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/entyen/dbot.git"
+  },
+  "author": "Entyen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/entyen/dbot/issues"
+  },
+  "homepage": "https://github.com/entyen/dbot#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
+}
