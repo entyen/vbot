@@ -1,157 +1,133 @@
-const Promise = require('bluebird')
-const mongoose = require('mongoose')
+const bp = require('bluebird')
 const CronJob = require('cron').CronJob;
 
+//config file TOKEN OWER or other
 const fs = require('fs')
 const tea = JSON.parse(fs.readFileSync('config.json', 'utf-8'))
+let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 
+//vk api connect
 const VkBot = require('node-vk-bot-api')
 const Markup = require('node-vk-bot-api/lib/markup')
-const Scene = require('node-vk-bot-api/lib/scene');
-const Session = require('node-vk-bot-api/lib/session');
-const Stage = require('node-vk-bot-api/lib/stage');
-const bot = new VkBot(tea.TOKEN);
+const bot = new VkBot({
+  token: tea.TOKEN,
+  group_id: tea.GROUP_ID,
+  execute_timeout: 50, // in ms   (50 by default)
+  polling_timeout: 25, // in secs (25 by default)
+})
 
+//db const
+const mongoose = require('mongoose')
 const userSchem = require('./schema/data.js')
 const userdb = mongoose.model('users', userSchem)
 
-const lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
+const commands = require('./cmds/commands.js')
+const scene = require('./cmds/scene.js')
 
+//error and warn color
+console.errore = (err) => console.error('\x1b[91m%s\x1b[0m', err)
+console.warne = (warn) => console.warn('\x1b[33m%s\x1b[0m', warn)
+console.loge = (log) => console.log('\x1b[96m%s\x1b[0m', log)
+
+//middlewere for bot chek user in database or not create user
 bot.use(async (ctx, next) => {
-  ctx.message.timestamp = new Date().getTime()
-  if (ctx.message.user_id) {
-      ctx.user = await userdb.findOne({ userid: ctx.message.user_id })
+  ctx.timestamp = new Date().getTime()
+  const date = new Date(new Date().toLocaleString('en-US', { timeZone: 'Etc/GMT-6' }))
+//   ctx.message.text = ctx.message.text.replace('[club206762312|@vinmt] ', '')
+  if (ctx.message.type === 'message_event') {
+      ctx.reply('Test')
+  } else
+
+  if (ctx.message.from_id && ctx.message.from_id > 0) {
+
+      ctx.user = await userdb.findOne({ id: ctx.message.from_id })
+
       const response = await bot.execute('users.get', {
-        user_ids: ctx.message.user_id,
+        user_ids: ctx.message.from_id,
       })
+
       if (!ctx.user) {
-          await userdb.create({ userid: ctx.message.user_id, f_name: response[0].first_name, acclvl: 0, balance: 0.00, tel: 0, bl: 0, lang: 'en'})
-          ctx.user = await userdb.findOne({ userid: ctx.message.user_id })
+          const uidgen = await userdb.find({})
+          await userdb.create({ 
+              id: ctx.message.from_id,
+              uid: uidgen.length,
+              regDate: date,
+              f_name: response[0].first_name, 
+              acclvl: 0, 
+              balance: 0.00, 
+              lang: 'ru', 
+              timers: { 
+                  mainWork: null,
+                  hasWorked: false, 
+                  bonus: false 
+                },
+              inv: {
+                herbs: 0,
+                rareHerbs: 0,
+              },
+              exp: 0,
+              level: 0,
+              energy: 100,
+              race: 0,
+              alert: false
+          })
+          ctx.user = await userdb.findOne({ id: ctx.message.from_id})
+          await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
       }
+
       if (ctx.user.f_name != response[0].first_name) {
-          await userdb.updateOne({userid: ctx.user.userid}, {$set: {f_name: responce[0].first_name}})
-          ctx.user = await userdb.findOne({ userid: ctx.message.user_id })
+          await userdb.updateOne({id: ctx.user.id}, {$set: {f_name: responce[0].first_name}})
+          ctx.user = await userdb.findOne({ id: ctx.message.from_id})
       }
-  }
+
+      if (ctx.user.exp === 100*(ctx.user.level+1)) { 
+          ctx.user.exp = 0
+          ctx.user.level = ctx.user.level + 1
+          await ctx.user.save()
+      }
+  } else { return }
+
 
   return next()
 })
 
-const scene = new Scene('menu', 
-    async (ctx) => {
-        if (ctx.user.acclvl >= 5) {
-            ctx.reply(lang[1], null, Markup
-            .keyboard([
-                [
-                  Markup.button(lang[0], 'primary'),
-                ],
-                [
-                  Markup.button(ctx.user.f_name, 'secondary'),
-                  Markup.button(lang[3], 'positive'),
-                  Markup.button(`${ctx.user.balance} ${lang[5]}`, 'secondary'),
-                ],
-                [
-                  Markup.button(`${ctx.user.acclvl == 7 ? 'DEV': ctx.user.acclvl == 6 ? 'Admin' : ctx.user.acclvl == 5 ? 'Moder' : ctx.user.acclvl }`, 'negative'),
-                ],
-            ])
-            )
-        } else {
-        ctx.reply(lang[1], null, Markup
-            .keyboard([
-                [
-                  Markup.button(lang[0], 'primary'),
-                ],
-                [
-                  Markup.button(ctx.user.f_name, 'secondary'),
-                  Markup.button(lang[3], 'positive'),
-                  Markup.button(`${ctx.user.balance} ${lang[5]}`, 'secondary'),
-                ],
-            ])
-            )
-        }
-        ctx.scene.leave()
-    },
+// bot.event('message_event', (ctx) => {
+//     const payload = ctx.message.payload.button
+//     if (payload === 'help') {
+//         ctx.reply('Охуеть оно работает')
+//         console.log(ctx.message)
+//     }
+// })
 
-    async (ctx) => {
-        ctx.scene.next()
-        ctx.reply(lang[6], null, Markup
-            .keyboard([
-                [
-                  Markup.button(lang[6], 'primary'),
-                  Markup.button(lang[6], 'primary'),
-                ],
-            ])
-            )
-    },
+//scene constant here
+scene(bot, lang, bp)
 
-    async (ctx) => {
-        // user = await userdb.updateOne({userid: ctx.message.user_id}, {$set: {lang: ctx.message.body}})  
+//commands module
+commands(bot, lang, userdb, bp)
 
-        await ctx.scene.leave()
-        await ctx.reply(`${lang[6]} ${ctx.message.body}`)
-        await ctx.scene.enter('menu', [0])
-    },
-)
-
-
-const session = new Session()
-const stage = new Stage(scene)
-bot.use(session.middleware())
-bot.use(stage.middleware())
-
-// const getSessionKey = (ctx) => {
-//   const userId = ctx.message.from_id || ctx.message.user_id;
-
-//   return `${userId}`;
-// }
-
-bot.command([lang[2], lang[3]], async (ctx) => {
-    ctx.scene.enter('menu', [0])
-})
-
-bot.command(lang[0], async (ctx) => {
-    ctx.scene.enter('menu', [1])
-})
-
-bot.command('bup', async (ctx) => {
-    const umes = ctx.message.body.split(' ')
-    let locUser = await userdb.findOne({ userid: umes[1] })
-    if (!umes[1] || !umes[2]) { ctx.reply('Не верные значения') }
-    else if (ctx.user.acclvl >= 7) {
-        const balup = (locUser.balance + Number(umes[2]))
-        await userdb.updateOne({userid: umes[1]}, {$set: {balance: balup.toFixed(2)}})  
-        await ctx.reply(`@id${umes[1]} user balance up to ${umes[2] + lang[5]} current balance ${balup.toFixed(2) + lang[5]}`)
-        await bot.sendMessage(umes[1], `Ваш баланс пополнен на ${umes[2] + lang[5]} текущий баланс ${balup.toFixed(2) + lang[5]}`)
-    } else {
-        ctx.reply(lang[7])
-    }
-})
-
-bot.on(async (ctx) => {
-    const cmb = ctx.message.body
-    cmb === ctx.user.f_name ? ctx.reply('Ну да это ваше имя') :
-    cmb === `${ctx.user.balance} ${lang[5]}` ? ctx.reply('Это ваш баланс')
-    : ctx.reply(`${cmb} ${lang[4]}`, null, Markup
-        .keyboard([
-            [
-              Markup.button(lang[2], 'primary'),
-            ],
-        ])
-     )
-})
-
+//Start polling messages
 bot.startPolling((err) => {
-    !!err ? console.error(err) : console.log('Bot Started')
+    !!err ? console.errore(err) : console.loge('Bot Started')
 })
 
-//DataBase
+const job = new CronJob('*/5 * * * *', null, false, 'Europe/Moscow')
+    job.addCallback(async () => {
+        user = await userdb.find({})
+        for (i = 0; i < user.length; i++) { 
+            user[i].energy == 100 ? null : user[i].energy = user[i].energy + 1
+            await user[i].save()
+            }
+    })
+job.start()
+
+//Connect of DataBse
 mongoose.connect(`mongodb://${tea.DBUSER}:${tea.DBPASS}@${tea.SERVER}/${tea.DB}`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
     useCreateIndex: true
 }).then(() => {
-    console.log('MongoDB connected!!')
+    console.loge('MongoDB connected!!')
 }).catch(err => {
-    console.log('Failed to connect to MongoDB', err)
+    console.errore('Failed to connect to MongoDB', err)
 })
