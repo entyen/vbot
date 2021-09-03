@@ -16,7 +16,12 @@ const userSchem = new mongoose.Schema({
     inv: {
         herbs: Number,
         rareHerbs: Number,
+        sand: Number,
+        ore: Number,
+        rareOre: Number,
+        wood: Number,
     },
+    invWeight: Number,
     exp: Number,
     level: Number,
     energy: Number,

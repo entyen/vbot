@@ -12,8 +12,8 @@ const Markup = require('node-vk-bot-api/lib/markup')
 const bot = new VkBot({
   token: tea.TOKEN,
   group_id: tea.GROUP_ID,
-  execute_timeout: 50, // in ms   (50 by default)
-  polling_timeout: 25, // in secs (25 by default)
+  execute_timeout: 500, // in ms   (50 by default)
+  polling_timeout: 250, // in secs (25 by default)
 })
 
 //db const
@@ -34,9 +34,6 @@ bot.use(async (ctx, next) => {
   ctx.timestamp = new Date().getTime()
   const date = new Date(new Date().toLocaleString('en-US', { timeZone: 'Etc/GMT-6' }))
 //   ctx.message.text = ctx.message.text.replace('[club206762312|@vinmt] ', '')
-  if (ctx.message.type === 'message_event') {
-      ctx.reply('Test')
-  } else
 
   if (ctx.message.from_id && ctx.message.from_id > 0) {
 
@@ -64,7 +61,12 @@ bot.use(async (ctx, next) => {
               inv: {
                 herbs: 0,
                 rareHerbs: 0,
+                sand: 0,
+                ore: 0,
+                rareOre: 0,
+                wood: 0,
               },
+              invWeight: 100000,
               exp: 0,
               level: 0,
               energy: 100,
@@ -85,7 +87,7 @@ bot.use(async (ctx, next) => {
           ctx.user.level = ctx.user.level + 1
           await ctx.user.save()
       }
-  } else { return }
+  }
 
 
   return next()
@@ -114,7 +116,7 @@ const job = new CronJob('*/5 * * * *', null, false, 'Europe/Moscow')
     job.addCallback(async () => {
         user = await userdb.find({})
         for (i = 0; i < user.length; i++) { 
-            user[i].energy == 100 ? null : user[i].energy = user[i].energy + 1
+            user[i].energy === 100 ? null : user[i].energy = user[i].energy + 1
             await user[i].save()
             }
     })
