@@ -1,6 +1,121 @@
 module.exports = async(bot, lang, userdb, bp) => {
     const Markup = require('node-vk-bot-api/lib/markup')
 
+    bot.event('message_event', async (ctx) => {
+        const cb = []
+        cb.reply = async (textO) => {
+                bot.execute('messages.sendMessageEventAnswer', {
+                    user_id: ctx.message.user_id,
+                    peer_id: ctx.message.peer_id,
+                    event_id: ctx.message.event_id,
+                    event_data: JSON.stringify({
+                        type: "show_snackbar",
+                        text: textO,
+                    }),
+                })
+        }
+        const randCurr = (min, max) => {
+            return Math.floor(Math.random() * (max - min) + min)
+        }
+
+        const lvl = ctx.user.level
+        const lvlx = ctx.user.level <= 0 ? 1 : 1 + (ctx.user.level * 0.2)
+
+        if (ctx.user.currWeight > ctx.user.invWeight) {
+            if (ctx.cmd === lang[23]) return ctx.scene.enter('menu')
+            return await cb.reply('Инвентарь перегружен разгрузитесь и возвращайтесь')
+        }
+        if (ctx.cmd === lang[19] && lvl >= 0) {
+            if (ctx.user.energy <= 0) {
+                await cb.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            } else {
+                ctx.user.energy = ctx.user.energy - 1
+
+                let earn = randCurr(5, 18)
+                const rare = randCurr(0, 200)
+                earn = Math.round(earn * lvlx)
+
+                rare === 27 ? ctx.user.inv.rareHerbs = ctx.user.inv.rareHerbs + 1 : null
+                ctx.user.inv.herbs = ctx.user.inv.herbs + earn
+                ctx.user.exp = ctx.user.exp + 1
+                await ctx.user.save()
+
+                await cb.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 🍀' : ''} у вас еще ${ctx.user.energy} ⚡`)
+            }
+        } else
+        if (ctx.cmd === lang[21] && lvl >= 0) {
+            if (ctx.user.energy <= 0) {
+                await cb.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            } else {
+
+                ctx.user.energy = ctx.user.energy - 1
+
+                let earn = randCurr(3, 24)
+                const rare = randCurr(0, 400)
+                earn = Math.round(earn * lvlx)
+
+                rare === 277 ? ctx.user.inv.rareOre = ctx.user.inv.rareOre + 1 : null
+                ctx.user.inv.ore = ctx.user.inv.ore + earn
+                ctx.user.exp = ctx.user.exp + 1
+                await ctx.user.save()
+
+                await cb.reply(`Вы направились в горную шахту и добыли ${earn} ⛰ ${rare === 277 ? 'и 1 💎' : ''} у вас еще ${ctx.user.energy} ⚡`)
+            }
+        } else
+        if (ctx.cmd === lang[22] && lvl >= 0) {
+            if (ctx.user.energy <= 0) {
+                await cb.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            } else {
+
+                ctx.user.energy = ctx.user.energy - 1
+
+                let earn = randCurr(8, 48)
+                earn = Math.round(earn * lvlx)
+
+                ctx.user.inv.sand = ctx.user.inv.sand + earn
+                ctx.user.exp = ctx.user.exp + 1
+                await ctx.user.save()
+
+                await cb.reply(`Вы направились на пляж и откопали ${earn} 🏝 у вас еще ${ctx.user.energy} ⚡`)
+            }
+        } else
+        if (ctx.cmd === lang[24] && lvl >= 0) {
+            if (ctx.user.energy <= 0) {
+                await cb.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            } else {
+
+                ctx.user.energy = ctx.user.energy - 1
+
+                let earn = randCurr(16, 28)
+                earn = Math.round(earn * lvlx)
+
+                ctx.user.inv.wood = ctx.user.inv.wood + earn
+                ctx.user.exp = ctx.user.exp + 1
+                await ctx.user.save()
+
+                await cb.reply(`Вы направились в лес и нарубили ${earn} 🌲 у вас еще ${ctx.user.energy} ⚡`)
+            }
+        } else
+        if (ctx.cmd === lang[25] && lvl >= 0) {
+            if (lvl <= 4) return cb.reply(`Протите но рыбалка доступна с 4 уровня.`)
+            if (ctx.user.energy <= 0) {
+                await cb.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            } else {
+
+                // ctx.user.energy = ctx.user.energy - 1
+
+                let earn = randCurr(0, 0)
+                earn = Math.round(earn * lvlx)
+
+                // ctx.user.inv.wood = ctx.user.inv.wood+earn
+                // ctx.user.exp = ctx.user.exp+1
+                // await ctx.user.save()
+
+                await cb.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${ctx.user.energy} энергии.`)
+            } 
+        }
+    })
+
     bot.on(async (ctx) => {
         const cmba = ctx.message.text.split(' ')
 
@@ -47,24 +162,24 @@ module.exports = async(bot, lang, userdb, bp) => {
         if (cmba[0] === 'bup' || cmba[0] === 'alvup') {
             try {
                 if (ctx.user.acclvl >= 7 && cmba[0] === 'bup') {
-                    const locUser = await userdb.findOne({ id: cmba[1] })
+                    const locUser = await userdb.findOne({ uid: cmba[1] })
                     const balup = (locUser.balance + Number(cmba[2]))
                     locUser.balance = balup.toFixed(2)
                     // await locUser.save()
-                    await ctx.reply(`@id${cmba[1]} user balance up to ${cmba[2] + lang[5]} current balance ${balup + lang[5]}`)
-                    await bot.sendMessage(cmba[1], `${lang[14]} ${cmba[2] + lang[5]} ${lang[15]} ${balup + lang[5]}`)
+                    await ctx.reply(`@id${locUser.id} user balance up to ${cmba[2] + lang[5]} current balance ${balup + lang[5]}`)
+                    await bot.sendMessage(locUser.id, `${lang[14]} ${cmba[2] + lang[5]} ${lang[15]} ${balup + lang[5]}`)
                 }
                 else if (ctx.user.acclvl >= 7 && cmba[0] === 'alvup') {
-                    let locUser = await userdb.findOne({ id: cmba[1] })
+                    let locUser = await userdb.findOne({ uid: cmba[1] })
                     console.log(locUser.acclvl)
                     if (locUser.acclvl === 7) { 
                         return ctx.reply(`Нельзя менять уровень у ${lang[11]}a`)
                     } else {
                         locUser.acclvl = Math.round(cmba[2])
                         await locUser.save()
-                        await ctx.reply(`@id${cmba[1]} account level up to ${cmba[2] == 0 ? lang[26]: cmba[2] == 1 ? lang[27]: cmba[2] == 2 ? lang[28]:
+                        await ctx.reply(`@id${locUser.id} account level up to ${cmba[2] == 0 ? lang[26]: cmba[2] == 1 ? lang[27]: cmba[2] == 2 ? lang[28]:
                             cmba[2] == 7 ? lang[11]: cmba[2] == 6 ? lang[10]: cmba[2] == 5 ? lang[9]: cmba[2]}`)
-                        await bot.sendMessage(cmba[1], `Теперь уровень вашего Аккаунта ${cmba[2] == 0 ? lang[26]: cmba[2] == 1 ? lang[27]: cmba[2] == 2 ? lang[28]:
+                        await bot.sendMessage(locUser.id, `Теперь уровень вашего Аккаунта ${cmba[2] == 0 ? lang[26]: cmba[2] == 1 ? lang[27]: cmba[2] == 2 ? lang[28]:
                             cmba[2] == 7 ? lang[11]: cmba[2] == 6 ? lang[10]: cmba[2] == 5 ? lang[9]: cmba[2]}`)
                     }
                 } else { ctx.reply(lang[7]) }

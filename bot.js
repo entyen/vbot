@@ -63,7 +63,8 @@ bot.use(async (ctx, next) => {
             console.log(e)
         }
         return
-    } else if (ctx.message.from_id > 0 && ctx.message.id > 0) {
+    } else
+    if (ctx.message.from_id > 0 && ctx.message.id > 0) {
 
         ctx.user = await userdb.findOne({id: ctx.message.from_id})
         if (!ctx.user) {
@@ -120,13 +121,74 @@ bot.use(async (ctx, next) => {
             ctx.user.level = ctx.user.level + 1
             await ctx.user.save()
         }
-    } else {
+    } else
+    if (ctx.message.user_id) {
+
+        ctx.user = await userdb.findOne({id: ctx.message.user_id})
+        if (!ctx.user) {
+            const response = await bot.execute('users.get', {
+                user_ids: ctx.message.user_id,
+            })
+            const uidgen = await userdb.find({})
+            await userdb.create({
+                id: ctx.message.user_id,
+                uid: uidgen.length,
+                regDate: date,
+                f_name: response[0].first_name,
+                acclvl: 0,
+                balance: 0.00,
+                lang: 'ru',
+                timers: {
+                    mainWork: null,
+                    hasWorked: false,
+                    bonus: false,
+                    eFullAlert: true
+                },
+                inv: {
+                    herbs: 0,
+                    rareHerbs: 0,
+                    sand: 0,
+                    ore: 0,
+                    rareOre: 0,
+                    wood: 0,
+                },
+                invWeight: 50000,
+                exp: 0,
+                level: 0,
+                energy: 100,
+                race: 0,
+                alert: true
+            })
+            ctx.user = await userdb.findOne({id: ctx.message.user_id})
+            await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
+        }
+
+        ctx.cmd = ctx.message.payload.cmd
+        const weightMath = async () => {
+            let wi = JSON.stringify(ctx.user.inv).replace(/["{}:]/g, '').replace(/[a-zA-Z]/g, '').split(',')
+            let sum = 0
+            wi.forEach(x => sum += (+x))
+            return sum
+        }
+        ctx.user.currWeight = await weightMath()
+        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang[26] : ctx.user.acclvl == 1 ? lang[27] : ctx.user.acclvl == 2 ? lang[28] :
+            ctx.user.acclvl == 7 ? lang[11] : ctx.user.acclvl == 6 ? lang[10] : ctx.user.acclvl == 5 ? lang[9] : ctx.user.acclvl
+
+        if (ctx.user.exp === 100 * (ctx.user.level + 1)) {
+            ctx.user.exp = 0
+            ctx.user.level = ctx.user.level + 1
+            await ctx.user.save()
+        }
+
+    }
+    else {
         return
     }
 
 
     return next()
 })
+
 
 const Session = require('node-vk-bot-api/lib/session')
 const Stage = require('node-vk-bot-api/lib/stage')
@@ -142,14 +204,6 @@ bot.use(session.middleware())
 bot.use(stage.middleware())
 
 commands(bot, lang, userdb, bp)
-
-// bot.event('message_event', (ctx) => {
-//     const payload = ctx.message.payload.button
-//     if (payload === 'help') {
-//         ctx.reply('Охуеть оно работает')
-//         console.log(ctx.message)
-//     }
-// })
 
 //Start polling messages
 bot.startPolling((err) => {

@@ -7,7 +7,7 @@ let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 
 const menu = new Scene('menu',
     async (ctx) => {
-        if (ctx.user.acclvl >= 5) {
+        if (ctx.user.acclvl >= 4) {
             await ctx.reply(lang[1], null, Markup
                 .keyboard([
                     [
@@ -21,6 +21,7 @@ const menu = new Scene('menu',
                     ],
                     [
                         Markup.button(`${lang[29]}`, 'secondary'),
+                        Markup.button({ action: { type: 'callback', label: 'Hui', payload: JSON.stringify({cmd: 'help'})},color: 'default',}),
                     ],
                 ])
             )

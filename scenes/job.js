@@ -13,15 +13,20 @@ const job = new Scene('job',
         ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Markup
             .keyboard([
                 [
-                    Markup.button(lang[19], 'primary'),
-                    Markup.button(lang[21], 'primary'),
+                    // Markup.button(lang[19], 'primary'),
+                    // Markup.button(lang[21], 'primary'),
+                    Markup.button({ action: { type: 'callback', label: lang[19], payload: JSON.stringify({cmd: lang[19]})},color: 'primary',}),
+                    Markup.button({ action: { type: 'callback', label: lang[21], payload: JSON.stringify({cmd: lang[21]})},color: 'primary',}),
                 ],
                 [
-                    Markup.button(lang[22], 'primary'),
-                    Markup.button(lang[24], 'primary'),
+                    // Markup.button(lang[22], 'primary'),
+                    // Markup.button(lang[24], 'primary'),
+                    Markup.button({ action: { type: 'callback', label: lang[22], payload: JSON.stringify({cmd: lang[22]})},color: 'primary',}),
+                    Markup.button({ action: { type: 'callback', label: lang[24], payload: JSON.stringify({cmd: lang[24]})},color: 'primary',}),
                 ],
                 [
-                    Markup.button(lang[25], 'primary'),
+                    // Markup.button(lang[25], 'primary'),
+                    Markup.button({ action: { type: 'callback', label: lang[25], payload: JSON.stringify({cmd: lang[25]})},color: 'primary',}),
                     Markup.button(lang[23], 'negative'),
                 ]
             ])
