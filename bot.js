@@ -37,7 +37,7 @@ bot.use(async (ctx, next) => {
         try {
             if (ctx.message.text.split(' ')[0] === '[club206762312|@vinmt]') {
                 const command = ctx.message.text.split(' ')[1]
-                if (command === 'rate') {
+                if (command === 'rate' || command === 'Рейтинг') {
                     user = await userdb.find({})
                     let rate = [{}]
                     let result = `Rate: \n`

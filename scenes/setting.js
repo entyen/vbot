@@ -7,7 +7,7 @@ let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 const setting = new Scene('setting',
     async (ctx) => {
         const alertState = ctx.user.alert ? 'positive' : 'negative'
-        const acclvl = ctx.user.acclvl >= 5 ? 'primary' : 'secondary'
+        const acclvl = ctx.user.acclvl > 5 ? 'negative' : ctx.user.acclvl > 0 ? 'primary' : 'secondary'
         await ctx.reply('Настройки', null, Markup
             .keyboard([
                 [

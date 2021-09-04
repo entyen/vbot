@@ -191,10 +191,10 @@ module.exports = async(bot, lang, userdb, bp) => {
                 console.log(e)
             } 
         } else
-        if (cmba[0] === 'rate') { 
+        if (cmba[0] === 'Рейтинг' || cmba[0] === 'rate') { 
             user = await userdb.find({})
             let rate = [{}]
-            let result = `Rate: \n`
+            let result = `Рейтинг: \n`
             for (i = 0; i < user.length; i++) { 
                 if (user[i].balance > 0) {
                         rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
