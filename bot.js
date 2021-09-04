@@ -10,10 +10,10 @@ let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 const VkBot = require('node-vk-bot-api')
 const Markup = require('node-vk-bot-api/lib/markup')
 const bot = new VkBot({
-  token: tea.TOKEN,
-  group_id: tea.GROUP_ID,
-  execute_timeout: 50, // in ms   (50 by default)
-  polling_timeout: 25, // in secs (25 by default)
+    token: tea.TOKEN,
+    group_id: tea.GROUP_ID,
+    execute_timeout: 50, // in ms   (50 by default)
+    polling_timeout: 25, // in secs (25 by default)
 })
 
 //db const
@@ -31,100 +31,102 @@ console.loge = (log) => console.log('\x1b[96m%s\x1b[0m', log)
 
 //middlewere for bot chek user in database or not create user
 bot.use(async (ctx, next) => {
-  ctx.timestamp = new Date().getTime()
-  const date = new Date(new Date().toLocaleString('en-US', { timeZone: 'Etc/GMT-6' }))
+    ctx.timestamp = new Date().getTime()
+    const date = new Date(new Date().toLocaleString('en-US', {timeZone: 'Etc/GMT-6'}))
 
-  if (ctx.message.from_id > 0 && ctx.message.id == 0) {
-    try {
-        if (ctx.message.text.split(' ')[0] === '[club206762312|@vinmt]') {
-            const command = ctx.message.text.split(' ')[1]
-            if (command === 'rate') {
-                user = await userdb.find({})
-                let rate = [{}]
-                let result = `Rate: \n`
-                for (i = 0; i < user.length; i++) { 
-                    if (user[i].balance > 0) {
+    if (ctx.message.from_id > 0 && ctx.message.id == 0) {
+        try {
+            if (ctx.message.text.split(' ')[0] === '[club206762312|@vinmt]') {
+                const command = ctx.message.text.split(' ')[1]
+                if (command === 'rate') {
+                    user = await userdb.find({})
+                    let rate = [{}]
+                    let result = `Rate: \n`
+                    for (i = 0; i < user.length; i++) {
+                        if (user[i].balance > 0) {
                             rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
+                        }
                     }
-                }
-                rate.sort((a,b) => {return b.b - a.b })
-                for (i = 0; i < 9; i++) {
-                    if(rate[i] !== undefined) {
-                        result += `${i === 0 ? '🥇': i === 1 ? '🥈': i === 2 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang[5]}\n`
+                    rate.sort((a, b) => {
+                        return b.b - a.b
+                    })
+                    for (i = 0; i < 9; i++) {
+                        if (rate[i] !== undefined) {
+                            result += `${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang[5]}\n`
+                        }
                     }
+                    ctx.reply(result)
+                } else {
+                    await ctx.reply('Простите в публичных чатах не работаю я не такая!')
                 }
-                ctx.reply(result)
-            } else {
-                await ctx.reply('Простите в публичных чатах не работаю я не такая!') 
             }
+        } catch (e) {
+            console.log(e)
         }
-    } catch (e) {
-         console.log(e)
-    } return
-  } else
-  if (ctx.message.from_id > 0 && ctx.message.id > 0) {
+        return
+    } else if (ctx.message.from_id > 0 && ctx.message.id > 0) {
 
-      ctx.user = await userdb.findOne({ id: ctx.message.from_id })
-      ctx.cmd = ctx.message.payload ? ctx.message.payload.replace(/["{}:]/g, '').replace('button', '') : ctx.message.payload
-      const weightMath = async () => {
-          let wi = JSON.stringify(ctx.user.inv).replace(/["{}:]/g,'').replace(/[a-zA-Z]/g, '').split(',')
-          let sum = 0
-          wi.forEach(x => sum += (+x))
-          return sum
-      }
-      ctx.user.currWeight = await weightMath()
-      ctx.user._acclvl =ctx.user.acclvl == 0 ? lang[26]: ctx.user.acclvl == 1 ? lang[27]: ctx.user.acclvl == 2 ? lang[28]: 
-        ctx.user.acclvl == 7 ? lang[11]: ctx.user.acclvl == 6 ? lang[10]: ctx.user.acclvl == 5 ? lang[9]: ctx.user.acclvl
-
-      if (!ctx.user) {
-          const response = await bot.execute('users.get', {
-            user_ids: ctx.message.from_id,
-          })
-          const uidgen = await userdb.find({})
-          await userdb.create({ 
-              id: ctx.message.from_id,
-              uid: uidgen.length,
-              regDate: date,
-              f_name: response[0].first_name, 
-              acclvl: 0, 
-              balance: 0.00, 
-              lang: 'ru', 
-              timers: { 
-                  mainWork: null,
-                  hasWorked: false, 
-                  bonus: false, 
-                  eFullAlert: true
+        ctx.user = await userdb.findOne({id: ctx.message.from_id})
+        if (!ctx.user) {
+            const response = await bot.execute('users.get', {
+                user_ids: ctx.message.from_id,
+            })
+            const uidgen = await userdb.find({})
+            await userdb.create({
+                id: ctx.message.from_id,
+                uid: uidgen.length,
+                regDate: date,
+                f_name: response[0].first_name,
+                acclvl: 0,
+                balance: 0.00,
+                lang: 'ru',
+                timers: {
+                    mainWork: null,
+                    hasWorked: false,
+                    bonus: false,
+                    eFullAlert: true
                 },
-              inv: {
-                herbs: 0,
-                rareHerbs: 0,
-                sand: 0,
-                ore: 0,
-                rareOre: 0,
-                wood: 0,
-              },
-              invWeight: 50000,
-              exp: 0,
-              level: 0,
-              energy: 100,
-              race: 0,
-              alert: true
-          })
-          ctx.user = await userdb.findOne({ id: ctx.message.from_id})
-          await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
-      }
+                inv: {
+                    herbs: 0,
+                    rareHerbs: 0,
+                    sand: 0,
+                    ore: 0,
+                    rareOre: 0,
+                    wood: 0,
+                },
+                invWeight: 50000,
+                exp: 0,
+                level: 0,
+                energy: 100,
+                race: 0,
+                alert: true
+            })
+            ctx.user = await userdb.findOne({id: ctx.message.from_id})
+            await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
+        }
+        ctx.cmd = ctx.message.payload ? ctx.message.payload.replace(/["{}:]/g, '').replace('button', '') : ctx.message.payload
+        const weightMath = async () => {
+            let wi = JSON.stringify(ctx.user.inv).replace(/["{}:]/g, '').replace(/[a-zA-Z]/g, '').split(',')
+            let sum = 0
+            wi.forEach(x => sum += (+x))
+            return sum
+        }
+        ctx.user.currWeight = await weightMath()
+        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang[26] : ctx.user.acclvl == 1 ? lang[27] : ctx.user.acclvl == 2 ? lang[28] :
+            ctx.user.acclvl == 7 ? lang[11] : ctx.user.acclvl == 6 ? lang[10] : ctx.user.acclvl == 5 ? lang[9] : ctx.user.acclvl
 
-      if (ctx.user.exp === 100*(ctx.user.level+1)) { 
-          ctx.user.exp = 0
-          ctx.user.level = ctx.user.level + 1
-          await ctx.user.save()
-      }
-  } else {
-      return
-  }
+
+        if (ctx.user.exp === 100 * (ctx.user.level + 1)) {
+            ctx.user.exp = 0
+            ctx.user.level = ctx.user.level + 1
+            await ctx.user.save()
+        }
+    } else {
+        return
+    }
 
 
-  return next()
+    return next()
 })
 
 // bot.event('message_event', (ctx) => {
@@ -147,24 +149,24 @@ bot.startPolling((err) => {
 })
 
 const job = new CronJob('*/5 * * * *', null, false, 'Europe/Moscow')
-    job.addCallback(async () => {
-        user = await userdb.find({})
-        for (i = 0; i < user.length; i++) { 
-            if (user[i].energy === 100) {
-                if (user[i].alert) {
-                    if (!user[i].timers.eFullAlert){
-                        user[i].timers.eFullAlert = true
-                        await user[i].save()
-                        await bot.sendMessage(user[i].id, `Энергия полная, вперед тратить.`)
-                    }
-                }
-            } else { 
-                    user[i].timers.eFullAlert = false
-                    user[i].energy = user[i].energy + 1
+job.addCallback(async () => {
+    user = await userdb.find({})
+    for (i = 0; i < user.length; i++) {
+        if (user[i].energy === 100) {
+            if (user[i].alert) {
+                if (!user[i].timers.eFullAlert) {
+                    user[i].timers.eFullAlert = true
                     await user[i].save()
-                   }
+                    await bot.sendMessage(user[i].id, `Энергия полная, вперед тратить.`)
+                }
             }
-    })
+        } else {
+            user[i].timers.eFullAlert = false
+            user[i].energy = user[i].energy + 1
+            await user[i].save()
+        }
+    }
+})
 job.start()
 
 //Connect of DataBse
