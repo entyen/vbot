@@ -11,7 +11,8 @@ const userSchem = new mongoose.Schema({
     timers: {
         mainWork: Number,
         hasWorked: Boolean,
-        bonus: Boolean
+        bonus: Boolean,
+        eFullAlert: Boolean,
     },
     inv: {
         herbs: Number,
