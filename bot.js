@@ -21,8 +21,7 @@ const mongoose = require('mongoose')
 const userSchem = require('./schema/data.js')
 const userdb = mongoose.model('users', userSchem)
 
-const commands = require('./cmds/commands.js')
-const scene = require('./cmds/scene.js')
+const commands = require('./commands.js')
 
 //error and warn color
 console.errore = (err) => console.error('\x1b[91m%s\x1b[0m', err)
@@ -129,6 +128,21 @@ bot.use(async (ctx, next) => {
     return next()
 })
 
+const Session = require('node-vk-bot-api/lib/session')
+const Stage = require('node-vk-bot-api/lib/stage')
+
+const {menu} = require('./scenes/menu')
+const {job} = require('./scenes/job')
+const {market} = require('./scenes/market')
+const {setting} = require('./scenes/setting')
+
+const session = new Session()
+const stage = new Stage(menu, job, market, setting)
+bot.use(session.middleware())
+bot.use(stage.middleware())
+
+commands(bot, lang, userdb, bp)
+
 // bot.event('message_event', (ctx) => {
 //     const payload = ctx.message.payload.button
 //     if (payload === 'help') {
@@ -137,19 +151,13 @@ bot.use(async (ctx, next) => {
 //     }
 // })
 
-//scene constant here
-scene(bot, lang, bp)
-
-//commands module
-commands(bot, lang, userdb, bp)
-
 //Start polling messages
 bot.startPolling((err) => {
     !!err ? console.errore(err) : console.loge('Bot Started')
 })
 
-const job = new CronJob('*/5 * * * *', null, false, 'Europe/Moscow')
-job.addCallback(async () => {
+const cron = new CronJob('*/5 * * * *', null, false, 'Europe/Moscow')
+cron.addCallback(async () => {
     user = await userdb.find({})
     for (i = 0; i < user.length; i++) {
         if (user[i].energy === 100) {
@@ -167,7 +175,7 @@ job.addCallback(async () => {
         }
     }
 })
-job.start()
+cron.start()
 
 //Connect of DataBse
 mongoose.connect(`mongodb://${tea.DBUSER}:${tea.DBPASS}@${tea.SERVER}/${tea.DB}`, {
