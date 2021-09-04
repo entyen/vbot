@@ -26,6 +26,7 @@ const market = new Scene('market',
     },
     async (ctx) => {
         ctx.session.item = ctx.cmd
+        ctx.session.itemMaxCount = ctx.session.item === lang[33] ? ctx.user.inv.herbs : ctx.session.item === lang[34] ? ctx.user.inv.ore : ctx.session.item === lang[35] ? ctx.user.inv.sand : ctx.session.item === lang[36] && ctx.user.inv.wood
         if (ctx.cmd === lang[23] || ctx.cmd === undefined) {
             await ctx.scene.leave()
             await ctx.scene.enter('menu')
@@ -34,7 +35,8 @@ const market = new Scene('market',
                 .keyboard([
                     100,
                     500,
-                    1000
+                    1000,
+                    lang[38]
                 ])
                 .inline()
             )
@@ -42,7 +44,7 @@ const market = new Scene('market',
         }
     },
     async (ctx) => {
-        ctx.session.count = +ctx.message.text
+        ctx.session.count = ctx.cmd === lang[38] ? ctx.session.itemMaxCount : +ctx.message.text
         if (!Number.isInteger(ctx.session.count)) {
             return ctx.scene.enter('market')
         } else {

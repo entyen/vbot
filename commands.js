@@ -159,6 +159,9 @@ module.exports = async(bot, lang, userdb, bp) => {
         if (ctx.cmd === lang[29]) { 
             await ctx.reply(lang[31])
         } else
+        if (ctx.cmd === lang[39]) {
+            await ctx.scene.enter('menu', [1])
+        } else
         if (cmba[0] === 'bup' || cmba[0] === 'alvup') {
             try {
                 if (ctx.user.acclvl >= 7 && cmba[0] === 'bup') {
@@ -219,10 +222,9 @@ module.exports = async(bot, lang, userdb, bp) => {
                 ])
             )
         } else {
-            if (ctx.message.id === 0) {} else {
+            if (ctx.message.id === 0) {return}
             await ctx.reply(`${ctx.message.text} ${lang[4]}`)
             await ctx.scene.enter('menu')
-            }
         }
     })
 }

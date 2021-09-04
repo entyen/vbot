@@ -15,6 +15,7 @@ const setting = new Scene('setting',
                 ],
                 [
                     Markup.button(lang[30], alertState),
+                    Markup.button(lang[39], 'default'),
                     Markup.button(lang[23], 'negative'),
                 ],
             ])
@@ -23,6 +24,9 @@ const setting = new Scene('setting',
     },
 
     async (ctx) => {
+        if (ctx.cmd === lang[39]) {
+            await ctx.scene.enter('menu', [1])
+        } else
         if (ctx.cmd === lang[30]) {
             if (ctx.user.alert) {
                 ctx.user.alert = false
