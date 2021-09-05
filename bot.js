@@ -94,6 +94,10 @@ bot.use(async (ctx, next) => {
                     rareOre: 0,
                     wood: 0,
                 },
+                plot: {
+                    own: false,
+                    size: 0
+                },
                 invWeight: 50000,
                 exp: 0,
                 level: 0,
@@ -151,6 +155,10 @@ bot.use(async (ctx, next) => {
                     ore: 0,
                     rareOre: 0,
                     wood: 0,
+                },
+                plot: {
+                    own: false,
+                    size: 0
                 },
                 invWeight: 50000,
                 exp: 0,

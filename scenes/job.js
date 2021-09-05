@@ -13,19 +13,14 @@ const job = new Scene('job',
         ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Markup
             .keyboard([
                 [
-                    // Markup.button(lang[19], 'primary'),
-                    // Markup.button(lang[21], 'primary'),
                     Markup.button({ action: { type: 'callback', label: lang[19], payload: JSON.stringify({cmd: lang[19]})},color: 'primary',}),
                     Markup.button({ action: { type: 'callback', label: lang[21], payload: JSON.stringify({cmd: lang[21]})},color: 'primary',}),
                 ],
                 [
-                    // Markup.button(lang[22], 'primary'),
-                    // Markup.button(lang[24], 'primary'),
                     Markup.button({ action: { type: 'callback', label: lang[22], payload: JSON.stringify({cmd: lang[22]})},color: 'primary',}),
                     Markup.button({ action: { type: 'callback', label: lang[24], payload: JSON.stringify({cmd: lang[24]})},color: 'primary',}),
                 ],
                 [
-                    // Markup.button(lang[25], 'primary'),
                     Markup.button({ action: { type: 'callback', label: lang[25], payload: JSON.stringify({cmd: lang[25]})},color: 'primary',}),
                     Markup.button(lang[23], 'negative'),
                 ]
@@ -72,73 +67,6 @@ const job = new Scene('job',
                 await ctx.user.save()
 
                 await ctx.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 🍀' : ''} у вас еще ${ctx.user.energy} ⚡`)
-            }
-        } else if (ctx.cmd === lang[21] && lvl >= 0) {
-            if (ctx.user.energy <= 0) {
-                await ctx.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
-            } else {
-
-                ctx.user.energy = ctx.user.energy - 1
-
-                let earn = randCurr(3, 24)
-                const rare = randCurr(0, 400)
-                earn = Math.round(earn * lvlx)
-
-                rare === 277 ? ctx.user.inv.rareOre = ctx.user.inv.rareOre + 1 : null
-                ctx.user.inv.ore = ctx.user.inv.ore + earn
-                ctx.user.exp = ctx.user.exp + 1
-                await ctx.user.save()
-
-                await ctx.reply(`Вы направились в горную шахту и добыли ${earn} ⛰ ${rare === 277 ? 'и 1 💎' : ''} у вас еще ${ctx.user.energy} ⚡`)
-            }
-        } else if (ctx.cmd === lang[22] && lvl >= 0) {
-            if (ctx.user.energy <= 0) {
-                await ctx.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
-            } else {
-
-                ctx.user.energy = ctx.user.energy - 1
-
-                let earn = randCurr(8, 48)
-                earn = Math.round(earn * lvlx)
-
-                ctx.user.inv.sand = ctx.user.inv.sand + earn
-                ctx.user.exp = ctx.user.exp + 1
-                await ctx.user.save()
-
-                await ctx.reply(`Вы направились на пляж и откопали ${earn} 🏝 у вас еще ${ctx.user.energy} ⚡`)
-            }
-        } else if (ctx.cmd === lang[24] && lvl >= 0) {
-            if (ctx.user.energy <= 0) {
-                await ctx.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
-            } else {
-
-                ctx.user.energy = ctx.user.energy - 1
-
-                let earn = randCurr(16, 28)
-                earn = Math.round(earn * lvlx)
-
-                ctx.user.inv.wood = ctx.user.inv.wood + earn
-                ctx.user.exp = ctx.user.exp + 1
-                await ctx.user.save()
-
-                await ctx.reply(`Вы направились в лес и нарубили ${earn} 🌲 у вас еще ${ctx.user.energy} ⚡`)
-            }
-        } else if (ctx.cmd === lang[25] && lvl >= 0) {
-            if (lvl <= 4) return ctx.reply(`Протите но рыбалка доступна с 4 уровня.`)
-            if (ctx.user.energy <= 0) {
-                await ctx.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
-            } else {
-
-                // ctx.user.energy = ctx.user.energy - 1
-
-                let earn = randCurr(0, 0)
-                earn = Math.round(earn * lvlx)
-
-                // ctx.user.inv.wood = ctx.user.inv.wood+earn
-                // ctx.user.exp = ctx.user.exp+1
-                // await ctx.user.save()
-
-                await ctx.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${ctx.user.energy} энергии.`)
             }
         } else {
             await ctx.scene.leave()

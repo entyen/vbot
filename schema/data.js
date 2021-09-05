@@ -22,6 +22,10 @@ const userSchem = new mongoose.Schema({
         rareOre: Number,
         wood: Number,
     },
+    plot: {
+        own: Boolean,
+        size: Number,
+    },
     invWeight: Number,
     exp: Number,
     level: Number,

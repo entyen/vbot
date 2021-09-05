@@ -21,7 +21,7 @@ const menu = new Scene('menu',
                     ],
                     [
                         Markup.button(`${lang[29]}`, 'secondary'),
-                        Markup.button({ action: { type: 'callback', label: 'Hui', payload: JSON.stringify({cmd: 'help'})},color: 'default',}),
+                        // Markup.button({ action: { type: 'callback', label: 'Hui', payload: JSON.stringify({cmd: 'help'})},color: 'default',}),
                     ],
                 ])
             )

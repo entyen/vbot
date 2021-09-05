@@ -1,3 +1,5 @@
+const { timeout } = require('cron')
+
 module.exports = async(bot, lang, userdb, bp) => {
     const Markup = require('node-vk-bot-api/lib/markup')
 
@@ -157,6 +159,7 @@ module.exports = async(bot, lang, userdb, bp) => {
             await ctx.scene.enter('market')
         } else
         if (ctx.cmd === lang[29]) { 
+            if (!ctx.user.plot.own) {return ctx.reply('У вас нет участка')}
             await ctx.reply(lang[31])
         } else
         if (ctx.cmd === lang[39]) {
