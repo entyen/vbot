@@ -13,50 +13,6 @@ module.exports = async(bot, lang, userdb, bp) => {
     bot.on(async (ctx) => {
         const cmba = ctx.message.text.split(' ')
 
-        if (ctx.cmd === ctx.user.f_name) {
-            let text = ``
-            text += `🔎 UID: ${ctx.user.uid}\n`
-            text += ` 👤 Статус Аккаунта: ${ctx.user._acclvl}\n`
-            text += `🌟 Уровень: ${ctx.user.level} [${ctx.user.exp}/${100*(ctx.user.level+1)}]\n`
-            text += `🧤 Расса: ${ctx.user.race === 0 && 'Без Рассы'}\n`
-            text += `⚡ Очки Энергии: ${ctx.user.energy}\n`
-            text += `🔔 Уведомления: ${ctx.user.alert ? 'Включены' : 'Выключены'}\n`
-            text += `\n📗 Дата регистрации: ${ctx.user.regDate}`
-
-            await ctx.reply(`Профиль\n ${text}`)
-        } else
-        if (ctx.cmd === `${ctx.user.balance} ${lang[5]}`) {
-            let inv = ``
-            inv += `💠 Баланс: ${ctx.user.balance}\n`
-            inv += `${lang[33]}: ${ctx.user.inv.herbs}\n`
-            inv += `${lang[34]}: ${ctx.user.inv.ore}\n`
-            inv += `${lang[35]}: ${ctx.user.inv.sand}\n`
-            inv += `${lang[36]}: ${ctx.user.inv.wood}\n`
-            inv += `${ctx.user.inv.rareHerbs === 0 ? '' : `🍀 Редкие Травы: ${ctx.user.inv.rareHerbs}\n`}`
-            inv += `${ctx.user.inv.rareOre === 0 ? '' : `💎 Редкая Руда: ${ctx.user.inv.rareOre}\n`}`
-            inv += `\n👜 Вес Инвентаря: ${ctx.user.currWeight}/${ctx.user.invWeight}\n`
-
-            await ctx.reply(`Инвентарь\n ${inv}`)
-        } else
-        if (ctx.cmd === lang[2]) {
-            await ctx.scene.enter('menu')
-        } else
-        if (ctx.cmd === lang[3]) {
-            await ctx.scene.enter('setting')
-        } else
-        if (ctx.cmd === lang[8]) {
-            await ctx.scene.enter('job')
-        } else
-        if (ctx.cmd === lang[32]) {
-            await ctx.scene.enter('market')
-        } else
-        if (ctx.cmd === lang[29]) {
-            if (!ctx.user.plot.own) {return ctx.reply('У вас нет участка')}
-            await ctx.reply(lang[31])
-        } else
-        if (ctx.cmd === lang[39]) {
-            await ctx.scene.enter('menu', [1])
-        } else
         if (cmba[0] === 'bup' || cmba[0] === 'alvup') {
             try {
                 if (ctx.user.acclvl >= 7 && cmba[0] === 'bup') {
@@ -116,10 +72,52 @@ module.exports = async(bot, lang, userdb, bp) => {
                     ],
                 ])
             )
-        } else {
-            if (ctx.message.id === 0) {return}
-            await ctx.reply(`${ctx.message.text} ${lang[4]}`)
-            await ctx.scene.enter('menu')
         }
+        
+        switch (ctx.cmd) {
+            case ctx.user.f_name: 
+                let text = ``
+                text += `🔎 UID: ${ctx.user.uid}\n`
+                text += ` 👤 Статус Аккаунта: ${ctx.user._acclvl}\n`
+                text += `🌟 Уровень: ${ctx.user.level} [${ctx.user.exp}/${100*(ctx.user.level+1)}]\n`
+                text += `🧤 Расса: ${ctx.user.race === 0 && 'Без Рассы'}\n`
+                text += `⚡ Очки Энергии: ${ctx.user.energy}\n`
+                text += `🔔 Уведомления: ${ctx.user.alert ? 'Включены' : 'Выключены'}\n`
+                text += `\n📗 Дата регистрации: ${ctx.user.regDate}`
+
+                return await ctx.reply(`Профиль\n ${text}`)
+            case `${ctx.user.balance} ${lang[5]}`:
+                let inv = ``
+                inv += `💠 Баланс: ${ctx.user.balance}\n`
+                inv += `${lang[33]}: ${ctx.user.inv.herbs}\n`
+                inv += `${lang[34]}: ${ctx.user.inv.ore}\n`
+                inv += `${lang[35]}: ${ctx.user.inv.sand}\n`
+                inv += `${lang[36]}: ${ctx.user.inv.wood}\n`
+                inv += `${ctx.user.inv.rareHerbs === 0 ? '' : `🍀 Редкие Травы: ${ctx.user.inv.rareHerbs}\n`}`
+                inv += `${ctx.user.inv.rareOre === 0 ? '' : `💎 Редкая Руда: ${ctx.user.inv.rareOre}\n`}`
+                inv += `\n👜 Вес Инвентаря: ${ctx.user.currWeight}/${ctx.user.invWeight}\n`
+               
+                return await ctx.reply(`Инвентарь\n ${inv}`)
+            case lang[2]:
+                return await ctx.scene.enter('menu')
+            case lang[3]:
+                return await ctx.scene.enter('setting')
+            case lang[8]:
+                return await ctx.scene.enter('job')
+            case lang[32]:
+                return await ctx.scene.enter('market')
+            case lang[29]:
+                if (!ctx.user.plot.own) return await ctx.reply('У вас нет участка')
+                return await ctx.reply(lang[31])
+            case lang[39]:
+                    return await ctx.scene.enter('menu', [1])
+            default: 
+                if (ctx.message.id === 0) return
+                await ctx.reply(`${ctx.message.text} ${lang[4]}`)
+                await ctx.scene.enter('menu')
+
+                return
+        }
+
     })
 }
