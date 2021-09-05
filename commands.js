@@ -1,121 +1,13 @@
 const { timeout } = require('cron')
 
+const { Job } = require('./scenes/job')
+
 module.exports = async(bot, lang, userdb, bp) => {
     const Markup = require('node-vk-bot-api/lib/markup')
 
     bot.event('message_event', async (ctx) => {
-        const cb = []
-        cb.reply = async (textO) => {
-                bot.execute('messages.sendMessageEventAnswer', {
-                    user_id: ctx.message.user_id,
-                    peer_id: ctx.message.peer_id,
-                    event_id: ctx.message.event_id,
-                    event_data: JSON.stringify({
-                        type: "show_snackbar",
-                        text: textO,
-                    }),
-                })
-        }
-        const randCurr = (min, max) => {
-            return Math.floor(Math.random() * (max - min) + min)
-        }
-
-        const lvl = ctx.user.level
-        const lvlx = ctx.user.level <= 0 ? 1 : 1 + (ctx.user.level * 0.2)
-
-        if (ctx.user.currWeight > ctx.user.invWeight) {
-            if (ctx.cmd === lang[23]) return ctx.scene.enter('menu')
-            return await cb.reply('Инвентарь перегружен разгрузитесь и возвращайтесь')
-        }
-        if (ctx.cmd === lang[19] && lvl >= 0) {
-            if (ctx.user.energy <= 0) {
-                await cb.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
-            } else {
-                ctx.user.energy = ctx.user.energy - 1
-
-                let earn = randCurr(5, 18)
-                const rare = randCurr(0, 200)
-                earn = Math.round(earn * lvlx)
-
-                rare === 27 ? ctx.user.inv.rareHerbs = ctx.user.inv.rareHerbs + 1 : null
-                ctx.user.inv.herbs = ctx.user.inv.herbs + earn
-                ctx.user.exp = ctx.user.exp + 1
-                await ctx.user.save()
-
-                await cb.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 🍀' : ''} у вас еще ${ctx.user.energy} ⚡`)
-            }
-        } else
-        if (ctx.cmd === lang[21] && lvl >= 0) {
-            if (ctx.user.energy <= 0) {
-                await cb.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
-            } else {
-
-                ctx.user.energy = ctx.user.energy - 1
-
-                let earn = randCurr(3, 24)
-                const rare = randCurr(0, 400)
-                earn = Math.round(earn * lvlx)
-
-                rare === 277 ? ctx.user.inv.rareOre = ctx.user.inv.rareOre + 1 : null
-                ctx.user.inv.ore = ctx.user.inv.ore + earn
-                ctx.user.exp = ctx.user.exp + 1
-                await ctx.user.save()
-
-                await cb.reply(`Вы направились в горную шахту и добыли ${earn} ⛰ ${rare === 277 ? 'и 1 💎' : ''} у вас еще ${ctx.user.energy} ⚡`)
-            }
-        } else
-        if (ctx.cmd === lang[22] && lvl >= 0) {
-            if (ctx.user.energy <= 0) {
-                await cb.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
-            } else {
-
-                ctx.user.energy = ctx.user.energy - 1
-
-                let earn = randCurr(8, 48)
-                earn = Math.round(earn * lvlx)
-
-                ctx.user.inv.sand = ctx.user.inv.sand + earn
-                ctx.user.exp = ctx.user.exp + 1
-                await ctx.user.save()
-
-                await cb.reply(`Вы направились на пляж и откопали ${earn} 🏝 у вас еще ${ctx.user.energy} ⚡`)
-            }
-        } else
-        if (ctx.cmd === lang[24] && lvl >= 0) {
-            if (ctx.user.energy <= 0) {
-                await cb.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
-            } else {
-
-                ctx.user.energy = ctx.user.energy - 1
-
-                let earn = randCurr(16, 28)
-                earn = Math.round(earn * lvlx)
-
-                ctx.user.inv.wood = ctx.user.inv.wood + earn
-                ctx.user.exp = ctx.user.exp + 1
-                await ctx.user.save()
-
-                await cb.reply(`Вы направились в лес и нарубили ${earn} 🌲 у вас еще ${ctx.user.energy} ⚡`)
-            }
-        } else
-        if (ctx.cmd === lang[25] && lvl >= 0) {
-            if (lvl <= 4) return cb.reply(`Протите но рыбалка доступна с 4 уровня.`)
-            if (ctx.user.energy <= 0) {
-                await cb.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
-            } else {
-
-                // ctx.user.energy = ctx.user.energy - 1
-
-                let earn = randCurr(0, 0)
-                earn = Math.round(earn * lvlx)
-
-                // ctx.user.inv.wood = ctx.user.inv.wood+earn
-                // ctx.user.exp = ctx.user.exp+1
-                // await ctx.user.save()
-
-                await cb.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${ctx.user.energy} энергии.`)
-            } 
-        }
+        const job = new Job()
+        await job.workhard(bot, ctx)
     })
 
     bot.on(async (ctx) => {
@@ -152,13 +44,13 @@ module.exports = async(bot, lang, userdb, bp) => {
         if (ctx.cmd === lang[3]) {
             await ctx.scene.enter('setting')
         } else
-        if (ctx.cmd === lang[8]) { 
+        if (ctx.cmd === lang[8]) {
             await ctx.scene.enter('job')
         } else
-        if (ctx.cmd === lang[32]) { 
+        if (ctx.cmd === lang[32]) {
             await ctx.scene.enter('market')
         } else
-        if (ctx.cmd === lang[29]) { 
+        if (ctx.cmd === lang[29]) {
             if (!ctx.user.plot.own) {return ctx.reply('У вас нет участка')}
             await ctx.reply(lang[31])
         } else
@@ -178,7 +70,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 else if (ctx.user.acclvl >= 7 && cmba[0] === 'alvup') {
                     let locUser = await userdb.findOne({ uid: cmba[1] })
                     console.log(locUser.acclvl)
-                    if (locUser.acclvl === 7) { 
+                    if (locUser.acclvl === 7) {
                         return ctx.reply(`Нельзя менять уровень у ${lang[11]}a`)
                     } else {
                         locUser.acclvl = Math.round(cmba[2])
@@ -192,13 +84,13 @@ module.exports = async(bot, lang, userdb, bp) => {
             } catch (e) {
                 ctx.reply(lang[16])
                 console.log(e)
-            } 
+            }
         } else
-        if (cmba[0] === 'Рейтинг' || cmba[0] === 'rate') { 
+        if (cmba[0] === 'Рейтинг' || cmba[0] === 'rate') {
             user = await userdb.find({})
             let rate = [{}]
             let result = `Рейтинг: \n`
-            for (i = 0; i < user.length; i++) { 
+            for (i = 0; i < user.length; i++) {
                 if (user[i].balance > 0) {
                         rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
                 }
@@ -215,7 +107,7 @@ module.exports = async(bot, lang, userdb, bp) => {
             ctx.user.lang = cmba[1]
             await ctx.user.save()
             await ctx.reply(`Язык изменен на ${cmba[1]}`)
-        } else 
+        } else
         if (!ctx.user) {
             await ctx.reply(`${ctx.mesage.text} ${lang[4]}`, null, Markup
                 .keyboard([

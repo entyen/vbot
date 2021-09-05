@@ -202,12 +202,12 @@ const Session = require('node-vk-bot-api/lib/session')
 const Stage = require('node-vk-bot-api/lib/stage')
 
 const {menu} = require('./scenes/menu')
-const {job} = require('./scenes/job')
+const { Job } = require('./scenes/job')
 const {market} = require('./scenes/market')
 const {setting} = require('./scenes/setting')
 
 const session = new Session()
-const stage = new Stage(menu, job, market, setting)
+const stage = new Stage(menu, Job.getScene(), market, setting)
 bot.use(session.middleware())
 bot.use(stage.middleware())
 
