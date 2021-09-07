@@ -26,7 +26,7 @@ const menu = new Scene('menu',
                 ])
             )
         } else {
-            await ctx.reply(lang.navmvm, null, Markup
+            await ctx.reply(lang.navm, null, Markup
                 .keyboard([
                     [
                         Markup.button(lang.crafts, 'primary'),
@@ -54,7 +54,7 @@ const menu = new Scene('menu',
     async (ctx) => {
             ctx.session.nick = ctx.message.text
             const tek = ctx.session.nick
-            let regex1 = /^[a-zA-Z ]+$/
+            let regex1 = /^[a-zA-Zа-яА-Я ]+$/
             if (!regex1.test(tek) || tek === undefined || ctx.session.nick.length >= 14) { 
                 await ctx.reply('Некорректный ник нейм') 
                 await ctx.scene.enter('menu')
@@ -84,11 +84,9 @@ const menu = new Scene('menu',
                 return
             }
             ctx.reply('Ник Изменен')
-            ctx.user.f_name = ctx.session.nick
-            ctx.user.balance = ctx.user.balance - 10000
-            ctx.bank.balance = ctx.bank.balance + 10000
-            await ctx.bank.save()
-            await ctx.user.save()
+            await ctx.user.set('f_name', ctx.session.nick)
+            await ctx.user.dec('balance', 10000)
+            await ctx.bank.inc('balance', 10000)
                 
             await ctx.scene.enter('menu')
             return

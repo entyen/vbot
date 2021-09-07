@@ -189,9 +189,8 @@ bot.use(async (ctx, next) => {
             ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
 
         if (ctx.user.exp === 100 * (ctx.user.level + 1)) {
-            ctx.user.exp = 0
-            ctx.user.level = ctx.user.level + 1
-            await ctx.user.save()
+            await ctx.user.set('exp', 0)
+            await ctx.user.inc('level', 1)
         }
 
     }

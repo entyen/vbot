@@ -52,17 +52,20 @@ module.exports = async(bot, lang, userdb, bp) => {
     bot.on(async (ctx) => {
         const cmba = ctx.message.text.split(' ')
 
-        const marketSell = async (q, qn) => {
-            q = +ctx.cmd.split('.')[2]
-            qn = ctx.cmd.split('.')[0]
-            if (ctx.user.inv[qn] < q || q === 0) {
-                await ctx.reply(`Недостаточно ${lang[qn]}`)
+        const marketSell = async (count, item, eachPrice) => {
+            count === 'all' ? count = +ctx.user.inv[item] : count = +ctx.cmd.split('.')[2]
+            item = ctx.cmd.split('.')[0]
+            if (ctx.user.inv[item] < count || count === 0) {
+                await ctx.reply(`Недостаточно ${lang[item]}`)
             } else {
-                await ctx.bank.inc('inv', q , qn)
-                await ctx.bank.dec('balance', q)
-                await ctx.user.dec('inv', q , qn)
-                await ctx.user.inc('balance', q)
-                await ctx.reply(`Вы продали ${q} ${lang[qn]} и выручили ${q} ${lang.curr}`)
+                let summ = 0
+                eachPrice ? summ = count * eachPrice : summ = count
+                summ = Math.round(summ)
+                await ctx.bank.inc('inv', count , item)
+                await ctx.bank.dec('balance', summ)
+                await ctx.user.dec('inv', count , item)
+                await ctx.user.inc('balance', summ)
+                await ctx.reply(`Вы продали ${count} ${lang[item]} и выручили ${summ} ${lang.curr}`)
             }
         }
 
@@ -95,7 +98,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 console.log(e)
             }
         } else
-        if (cmba[0] === 'Рейтинг' || cmba[0] === 'rate') {
+        if (cmba[0] === 'Рейтинг' || cmba[0] === 'rate' || cmba[0] === 'top') {
             user = await userdb.find({})
             let rate = [{}]
             let result = `Рейтинг: \n`
@@ -185,11 +188,11 @@ module.exports = async(bot, lang, userdb, bp) => {
                     .keyboard([
                         [
                             Markup.button(lang.herbs, 'primary', 'herbs'),
-                            Markup.button(lang.ore, 'primary',),
+                            Markup.button(lang.ore, 'primary', 'ore'),
                         ],
                         [
                             Markup.button(lang.sand, 'primary', 'sand'),
-                            Markup.button(lang.wood, 'primary'),
+                            Markup.button(lang.wood, 'primary', 'wood'),
                         ],
                         [
                             Markup.button(lang.back, 'negative', 'menu'),
@@ -198,54 +201,104 @@ module.exports = async(bot, lang, userdb, bp) => {
                 )
                 return
             case 'herbs':
-                ctx.reply(`Сколько ${!!ctx.cmd && lang.herbs} вы хотите продать?`, null, Markup
+                ctx.reply(`Сколько ${lang[ctx.cmd]} вы хотите продать?`, null, Markup
                     .keyboard(
                         [
                             Markup.button(100, 'default', `${ctx.cmd}.sell.100`),
                             Markup.button(500, 'default', `${ctx.cmd}.sell.500`),
                             Markup.button(1000, 'default', `${ctx.cmd}.sell.1000`),
-                            Markup.button(lang.all, 'default', `${ctx.cmd}.sell.${ctx.user.inv.herbs}`),
+                            Markup.button(lang.all, 'default', `${ctx.cmd}.sell.all`),
                         ],
                     )
                     .inline()
                 )
                 return
             case 'herbs.sell.100':
-                marketSell(+ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 1.3)
                 return
             case 'herbs.sell.500':
-                marketSell(+ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 1.3)
                 return
             case 'herbs.sell.1000':
-                marketSell(+ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 1.3)
                 return
-            case `herbs.sell.${ctx.user.inv.herbs}`:
-                marketSell(+ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
+            case `herbs.sell.all`:
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 1.3)
                 return
-            case 'sand':
-                ctx.reply(`Сколько ${!!ctx.cmd && lang.sand} вы хотите продать?`, null, Markup
+            case 'ore':
+                ctx.reply(`Сколько ${lang[ctx.cmd]} вы хотите продать?`, null, Markup
                     .keyboard(
                         [
                             Markup.button(100, 'default', `${ctx.cmd}.sell.100`),
                             Markup.button(500, 'default', `${ctx.cmd}.sell.500`),
                             Markup.button(1000, 'default', `${ctx.cmd}.sell.1000`),
-                            Markup.button(lang.all, 'default', `${ctx.cmd}.sell.${ctx.user.inv.sand}`),
+                            Markup.button(lang.all, 'default', `${ctx.cmd}.sell.all`),
+                        ],
+                    )
+                    .inline()
+                )
+                return
+            case 'ore.sell.100':
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 1.3)
+                return
+            case 'ore.sell.500':
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 1.3)
+                return
+            case 'ore.sell.1000':
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 1.3)
+                return
+            case `ore.sell.all`:
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 1.3)
+                return
+            case 'sand':
+                ctx.reply(`Сколько ${lang[ctx.cmd]} вы хотите продать?`, null, Markup
+                    .keyboard(
+                        [
+                            Markup.button(100, 'default', `${ctx.cmd}.sell.100`),
+                            Markup.button(500, 'default', `${ctx.cmd}.sell.500`),
+                            Markup.button(1000, 'default', `${ctx.cmd}.sell.1000`),
+                            Markup.button(lang.all, 'default', `${ctx.cmd}.sell.all`),
                         ],
                     )
                     .inline()
                 )
                 return
             case 'sand.sell.100':
-                marketSell(+ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
                 return
             case 'sand.sell.500':
-                marketSell(+ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
                 return
             case 'sand.sell.1000':
-                marketSell(+ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
                 return
-            case `sand.sell.${ctx.user.inv.sand}`:
-                marketSell(+ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
+            case `sand.sell.all`:
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
+                return
+            case 'wood':
+                ctx.reply(`Сколько ${lang[ctx.cmd]} вы хотите продать?`, null, Markup
+                    .keyboard(
+                        [
+                            Markup.button(100, 'default', `${ctx.cmd}.sell.100`),
+                            Markup.button(500, 'default', `${ctx.cmd}.sell.500`),
+                            Markup.button(1000, 'default', `${ctx.cmd}.sell.1000`),
+                            Markup.button(lang.all, 'default', `${ctx.cmd}.sell.all`),
+                        ],
+                    )
+                    .inline()
+                )
+                return
+            case 'wood.sell.100':
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
+                return
+            case 'wood.sell.500':
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
+                return
+            case 'wood.sell.1000':
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
+                return
+            case `wood.sell.all`:
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0])
                 return
             case lang.land:
                 if (!ctx.user.plot.own) return await ctx.reply('У вас нет участка')
