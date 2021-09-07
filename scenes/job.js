@@ -72,55 +72,51 @@ class Job {
     }
 
     async collectHerbs(ctx, cb, lvlx) {
-        ctx.user.energy = ctx.user.energy - this.collectCost.herb.energy
+        await ctx.user.dec('energy', this.collectCost.herb.energy)
 
         const rare = randCurr(0, 200)
         const earn = Math.round(randCurr(5, 18) * lvlx)
 
-        rare === 27 ? ctx.user.inv.rareHerbs = ctx.user.inv.rareHerbs + 1 : null
-        ctx.user.inv.herbs = ctx.user.inv.herbs + earn
-        ctx.user.exp = ctx.user.exp + 1
-        await ctx.user.save()
+        rare === 27 ? await ctx.user.inc('inv', 1, 'rareHerbs') : null
+        await ctx.user.inc('inv', earn, 'herbs')
+        await ctx.user.inc('exp', 1)
         await cb.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 🍀' : ''} у вас еще ${ctx.user.energy} ⚡`)
     }
 
     async collectOre(ctx, cb, lvlx) {
-        ctx.user.energy = ctx.user.energy - this.collectCost.ore.energy
+        await ctx.user.dec('energy', this.collectCost.ore.energy)
 
         const rare = randCurr(0, 400)
         const earn = Math.round(randCurr(3, 24) * lvlx)
 
-        rare === 277 ? ctx.user.inv.rareOre = ctx.user.inv.rareOre + 1 : null
-        ctx.user.inv.ore = ctx.user.inv.ore + earn
-        ctx.user.exp = ctx.user.exp + 1
-        await ctx.user.save()
+        rare === 277 ? await ctx.user.inc('inv', 1, 'rareOre') : null
+        await ctx.user.inc('inv', earn, 'ore')
+        await ctx.user.inc('exp', 1)
         await cb.reply(`Вы направились в горную шахту и добыли ${earn} ⛰ ${rare === 277 ? 'и 1 💎' : ''} у вас еще ${ctx.user.energy} ⚡`)
     }
 
     async collectSand(ctx, cb, lvlx) {
-        ctx.user.energy = ctx.user.energy - this.collectCost.sand.energy
+        await ctx.user.dec('energy', this.collectCost.sand.energy)
 
         const earn = Math.round(randCurr(8, 48) * lvlx)
 
-        ctx.user.inv.sand = ctx.user.inv.sand + earn
-        ctx.user.exp = ctx.user.exp + 1
-        await ctx.user.save()
+        await ctx.user.inc('inv', earn, 'sand')
+        await ctx.user.inc('exp', 1)
         await cb.reply(`Вы направились на пляж и откопали ${earn} 🏝 у вас еще ${ctx.user.energy} ⚡`)
     }
 
     async collectForest(ctx, cb, lvlx) {
-        ctx.user.energy = ctx.user.energy - this.collectCost.forest.energy
+        await ctx.user.dec('energy', this.collectCost.forest.energy)
 
         const earn = Math.round(randCurr(16, 28) * lvlx)
 
-        ctx.user.inv.wood = ctx.user.inv.wood + earn
-        ctx.user.exp = ctx.user.exp + 1
-        await ctx.user.save()
+        await ctx.user.inc('inv', earn, 'wood')
+        await ctx.user.inc('exp', 1)
         await cb.reply(`Вы направились в лес и нарубили ${earn} 🌲 у вас еще ${ctx.user.energy} ⚡`)
     }
 
     async fishing(ctx, cb, lvlx) {
-        //ctx.user.energy = ctx.user.energy - this.collectCost.fishing.energy
+        //await ctx.user.dec('energy', this.collectCost.fishing.energy)
 
         const earn = Math.round(randCurr(0, 0) * lvlx)
 
@@ -171,7 +167,7 @@ class Job {
     static getScene() {
         return new Scene('job',
             async (ctx) => {
-                ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, this.getKeyboard())
+                setTimeout(()=>{ ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, this.getKeyboard())}, 200)
                 await ctx.scene.next()
             },
             async (ctx) => {
