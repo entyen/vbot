@@ -46,19 +46,19 @@ class Job {
         }
 
         const boringMessage = `Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`
-        if (ctx.cmd === lang[19] && ctx.user.energy < this.collectCost.herb.energy) { // проверка энергии на сбор трав
+        if (ctx.cmd === lang.field && ctx.user.energy < this.collectCost.herb.energy) { // проверка энергии на сбор трав
             cb.reply(boringMessage)
             return false
-        } else if (ctx.cmd === lang[21] && ctx.user.energy < this.collectCost.ore.energy) { // проверка энергии на сбор руды
+        } else if (ctx.cmd === lang.mine && ctx.user.energy < this.collectCost.ore.energy) { // проверка энергии на сбор руды
             cb.reply(boringMessage)
             return false
-        } else if (ctx.cmd === lang[22] && ctx.user.energy < this.collectCost.sand.energy) { // проверка энергии на сбор песка
+        } else if (ctx.cmd === lang.beach && ctx.user.energy < this.collectCost.sand.energy) { // проверка энергии на сбор песка
             cb.reply(boringMessage)
             return false
-        } else if (ctx.cmd === lang[24] && ctx.user.energy < this.collectCost.forest.energy) { // проверка энергии на сбор леса
+        } else if (ctx.cmd === lang.forest && ctx.user.energy < this.collectCost.forest.energy) { // проверка энергии на сбор леса
             cb.reply(boringMessage)
             return false
-        } else if (ctx.cmd === lang[25]) { // проверка энергии и уровня на рыбалку
+        } else if (ctx.cmd === lang.fishing) { // проверка энергии и уровня на рыбалку
             if (ctx.user.level < this.collectCost.fishing.level) {
                 cb.reply(`Простите, но рыбалка доступна с ${this.collectCost.fishing.level} уровня.`)
                 return false
@@ -152,15 +152,15 @@ class Job {
 
         const lvlx = ctx.user.level <= 0 ? 1 : 1 + (ctx.user.level * 0.2)
         switch (ctx.cmd) {
-            case lang[19]:
+            case lang.field:
                 return await this.collectHerbs(ctx, cb, lvlx)
-            case lang[21]:
+            case lang.mine:
                 return await this.collectOre(ctx, cb, lvlx)
-            case lang[22]:
+            case lang.beach:
                 return await this.collectSand(ctx, cb, lvlx)
-            case lang[24]:
+            case lang.forest:
                 return await this.collectForest(ctx, cb, lvlx)
-            case lang[25]:
+            case lang.fishing:
                 return await this.fishing(ctx, cb, lvlx)
             default:
                 return await ctx.scene.enter('menu')
@@ -179,10 +179,10 @@ class Job {
                 const lvlx = ctx.user.level <= 0 ? 1 : 1 + (ctx.user.level * 0.2)
 
                 if (ctx.user.currWeight > ctx.user.invWeight) {
-                    if (ctx.cmd === lang[23]) return ctx.scene.enter('menu')
+                    if (ctx.cmd === lang.back) return ctx.scene.enter('menu')
                     return await ctx.reply('Инвентарь перегружен разгрузитесь и возвращайтесь')
                 }
-                if (ctx.cmd === lang[19] && lvl >= 0) {
+                if (ctx.cmd === lang.field && lvl >= 0) {
                     // const coldown = Math.ceil((ctx.user.timers.mainWork - ctx.timestamp)/60/1000)
                     // if (coldown >= 1) {
                     //    await ctx.reply(`Вы устали, ⏳ отдохните ${coldown} минут и возвращайтесь.`)
@@ -226,15 +226,15 @@ class Job {
                 Markup.button({
                     action: {
                         type: 'callback',
-                        label: lang[19],
-                        payload: JSON.stringify({cmd: lang[19]})
+                        label: lang.field,
+                        payload: JSON.stringify({cmd: lang.field})
                     }, color: 'primary',
                 }),
                 Markup.button({
                     action: {
                         type: 'callback',
-                        label: lang[21],
-                        payload: JSON.stringify({cmd: lang[21]})
+                        label: lang.mine,
+                        payload: JSON.stringify({cmd: lang.mine})
                     }, color: 'primary',
                 }),
             ],
@@ -242,15 +242,15 @@ class Job {
                 Markup.button({
                     action: {
                         type: 'callback',
-                        label: lang[22],
-                        payload: JSON.stringify({cmd: lang[22]})
+                        label: lang.beach,
+                        payload: JSON.stringify({cmd: lang.beach})
                     }, color: 'primary',
                 }),
                 Markup.button({
                     action: {
                         type: 'callback',
-                        label: lang[24],
-                        payload: JSON.stringify({cmd: lang[24]})
+                        label: lang.forest,
+                        payload: JSON.stringify({cmd: lang.forest})
                     }, color: 'primary',
                 }),
             ],
@@ -258,11 +258,11 @@ class Job {
                 Markup.button({
                     action: {
                         type: 'callback',
-                        label: lang[25],
-                        payload: JSON.stringify({cmd: lang[25]})
+                        label: lang.fishing,
+                        payload: JSON.stringify({cmd: lang.fishing})
                     }, color: 'primary',
                 }),
-                Markup.button(lang[23], 'negative'),
+                Markup.button(lang.back, 'negative'),
             ],
         ])
     }

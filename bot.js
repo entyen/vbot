@@ -34,7 +34,6 @@ console.loge = (log) => console.log('\x1b[96m%s\x1b[0m', log)
 bot.use(async (ctx, next) => {
     ctx.timestamp = new Date().getTime()
     const date = new Date(new Date().toLocaleString('en-US', {timeZone: 'Etc/GMT-6'}))
-    console.log(ctx.message)
 
     if (ctx.message.from_id > 0 && ctx.message.id == 0) {
         try {
@@ -54,7 +53,7 @@ bot.use(async (ctx, next) => {
                     })
                     for (i = 0; i < 9; i++) {
                         if (rate[i] !== undefined) {
-                            result += `${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang[5]}\n`
+                            result += `${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang.curr}\n`
                         }
                     }
                     ctx.reply(result)
@@ -76,10 +75,10 @@ bot.use(async (ctx, next) => {
             const response = await bot.execute('users.get', {
                 user_ids: ctx.message.from_id,
             })
-            const uidgen = await userdb.find({})
+            const uidgen = await userdb.countDocuments()
             await userdb.create({
                 id: ctx.message.from_id,
-                uid: uidgen.length,
+                uid: uidgen,
                 regDate: date,
                 f_name: response[0].first_name,
                 acclvl: 0,
@@ -121,8 +120,8 @@ bot.use(async (ctx, next) => {
             return sum
         }
         ctx.user.currWeight = await weightMath()
-        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang[26] : ctx.user.acclvl == 1 ? lang[27] : ctx.user.acclvl == 2 ? lang[28] :
-            ctx.user.acclvl == 7 ? lang[11] : ctx.user.acclvl == 6 ? lang[10] : ctx.user.acclvl == 5 ? lang[9] : ctx.user.acclvl
+        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang.user : ctx.user.acclvl == 1 ? lang.vip : ctx.user.acclvl == 2 ? lang.plat :
+            ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
 
 
         if (ctx.user.exp === 100 * (ctx.user.level + 1)) {
@@ -140,10 +139,10 @@ bot.use(async (ctx, next) => {
             const response = await bot.execute('users.get', {
                 user_ids: ctx.message.user_id,
             })
-            const uidgen = await userdb.find({})
+            const uidgen = await userdb.countDocuments()
             await userdb.create({
                 id: ctx.message.user_id,
-                uid: uidgen.length,
+                uid: uidgen,
                 regDate: date,
                 f_name: response[0].first_name,
                 acclvl: 0,
@@ -186,8 +185,8 @@ bot.use(async (ctx, next) => {
             return sum
         }
         ctx.user.currWeight = await weightMath()
-        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang[26] : ctx.user.acclvl == 1 ? lang[27] : ctx.user.acclvl == 2 ? lang[28] :
-            ctx.user.acclvl == 7 ? lang[11] : ctx.user.acclvl == 6 ? lang[10] : ctx.user.acclvl == 5 ? lang[9] : ctx.user.acclvl
+        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang.user : ctx.user.acclvl == 1 ? lang.vip : ctx.user.acclvl == 2 ? lang.plat :
+            ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
 
         if (ctx.user.exp === 100 * (ctx.user.level + 1)) {
             ctx.user.exp = 0
@@ -245,6 +244,60 @@ cron.addCallback(async () => {
     }
 })
 cron.start()
+
+userdb.prototype.inc = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] += value
+  } else {
+    this[field] += value
+  }
+  return this.save()
+}
+
+userdb.prototype.dec = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] -= value
+  } else {
+    this[field] -= value
+  }
+  return this.save()
+}
+
+userdb.prototype.set = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] = value
+  } else {
+    this[field] = value
+  }
+  return this.save()
+}
+
+bankdb.prototype.inc = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] += value
+  } else {
+    this[field] += value
+  }
+  return this.save()
+}
+
+bankdb.prototype.dec = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] -= value
+  } else {
+    this[field] -= value
+  }
+  return this.save()
+}
+
+bankdb.prototype.set = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] = value
+  } else {
+    this[field] = value
+  }
+  return this.save()
+}
 
 //Connect of DataBse
 mongoose.connect(`mongodb://${tea.DBUSER}:${tea.DBPASS}@${tea.SERVER}/${tea.DB}`, {
