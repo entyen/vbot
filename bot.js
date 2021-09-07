@@ -14,12 +14,18 @@ const bot = new VkBot({
     group_id: tea.GROUP_ID,
     execute_timeout: 50, // in ms   (50 by default)
     polling_timeout: 25, // in secs (25 by default)
+
+    // webhooks options only
+    secret: '',                   // secret key (optional)
+    confirmation: '65a62691',       // confirmation string
 })
+
+// bot.execute('',{ "type": "confirmation", "group_id": 206762312 })
 
 //db const
 const mongoose = require('mongoose')
 const userSchem = require('./schema/data.js')
-const bankSchem = require('./schema/data.js')
+const bankSchem = require('./schema/bank.js')
 const userdb = mongoose.model('users', userSchem)
 const bankdb = mongoose.model('bank', bankSchem)
 
@@ -241,6 +247,35 @@ cron.addCallback(async () => {
             await user[i].save()
         }
     }
+})
+cron.addCallback(async () => {
+    const bank = await bankdb.findOne({id: 0})
+    const massItems = [
+    { n: 'herbs', count: bank.inv.herbs },
+    { n: 'sand', count: bank.inv.sand },
+    { n: 'wood', count: bank.inv.wood },
+    { n: 'ore', count: bank.inv.ore },
+    ] 
+    massItems.sort((a,b) => {return b.count - a.count})
+    let itemPrice = []
+    massItems.forEach( (x, y) => {return itemPrice[y] = {price: 0.4+y*0.6 , name: x.n}})
+    const price = (prop, val) => {
+        for (i=0; i < itemPrice.length; i++) {
+            if (itemPrice[i][prop] === val){
+                return itemPrice[i]
+            }
+        }
+    }
+
+    const sand = await price('name', 'sand')
+    const wood = await price('name', 'wood')
+    const ore = await price('name', 'ore')
+    const herbs = await price('name', 'herbs')
+
+    await bank.set('dpi', ctx.bank.dpi.sand.toFixed(1), 'sand')
+    await bank.set('dpi', ctx.bank.dpi.wood.toFixed(1), 'wood')
+    await bank.set('dpi', ctx.bank.dpi.ore.toFixed(1), 'ore')
+    await bank.set('dpi', ctx.bank.dpi.herbs.toFixed(1), 'herbs')
 })
 cron.start()
 

@@ -124,7 +124,8 @@ class Job {
         // ctx.user.exp = ctx.user.exp+1
         // await ctx.user.save()
 
-        await cb.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${ctx.user.energy} энергии.`)
+        // await cb.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${ctx.user.energy} энергии.`)
+        await cb.reply(lang.inDev)
     }
 
     async workhard(bot, ctx) {
