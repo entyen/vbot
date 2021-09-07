@@ -1,6 +1,6 @@
 {
-  "name": "dbot",
-  "version": "1.0.0",
+  "name": "vbot",
+  "version": "1.0.5",
   "description": "",
   "main": "bot.js",
   "dependencies": {
