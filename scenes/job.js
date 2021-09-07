@@ -168,7 +168,7 @@ class Job {
     static getScene() {
         return new Scene('job',
             async (ctx) => {
-                setTimeout(()=>{ ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, this.getKeyboard())}, 200)
+                await ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, this.getKeyboard())
                 await ctx.scene.next()
             },
             async (ctx) => {

@@ -272,10 +272,10 @@ cron.addCallback(async () => {
     const ore = await price('name', 'ore')
     const herbs = await price('name', 'herbs')
 
-    await bank.set('dpi', ctx.bank.dpi.sand.toFixed(1), 'sand')
-    await bank.set('dpi', ctx.bank.dpi.wood.toFixed(1), 'wood')
-    await bank.set('dpi', ctx.bank.dpi.ore.toFixed(1), 'ore')
-    await bank.set('dpi', ctx.bank.dpi.herbs.toFixed(1), 'herbs')
+    await bank.set('dpi', bank.dpi.sand.toFixed(1), 'sand')
+    await bank.set('dpi', bank.dpi.wood.toFixed(1), 'wood')
+    await bank.set('dpi', bank.dpi.ore.toFixed(1), 'ore')
+    await bank.set('dpi', bank.dpi.herbs.toFixed(1), 'herbs')
 })
 cron.start()
 

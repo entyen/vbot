@@ -32,13 +32,11 @@ const setting = new Scene('setting',
                 ctx.user.alert = false
                 await ctx.user.save()
                 await ctx.reply(`${lang.alert} ${ctx.user.alert ? 'Включены' : 'Выключены'}`)
-                await ctx.scene.leave()
                 await ctx.scene.enter('setting')
             } else {
                 ctx.user.alert = true
                 await ctx.user.save()
                 await ctx.reply(`${lang.alert} ${ctx.user.alert ? 'Включены' : 'Выключены'}`)
-                await ctx.scene.leave()
                 await ctx.scene.enter('setting')
             }
         } else if (ctx.cmd === lang.dev || ctx.cmd === lang.adm || ctx.cmd === lang.moder || ctx.cmd === lang.user || ctx.cmd === lang.vip || ctx.cmd === lang.plat) {
@@ -50,7 +48,6 @@ const setting = new Scene('setting',
                   : ctx.user.acclvl == 0 ? ctx.reply(`${lang.userGrpCmd} ${lang.user} ${lang.rate}`)
                    : ctx.reply(lang.noPerm)
         } else if (ctx.cmd === lang.back) {
-            await ctx.scene.leave()
             await ctx.scene.enter('menu')
         }
     }

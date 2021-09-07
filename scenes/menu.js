@@ -21,7 +21,7 @@ const menu = new Scene('menu',
                     [
                         Markup.button(`${lang.land}`, 'secondary'),
                         // Markup.button({ action: { type: 'text', label: 'Hui', payload: JSON.stringify({cmd: 'help'})},color: 'default',}),
-                        Markup.button('Тест Работ', 'default' , {button: 'jobs'}),
+                        // Markup.button('Тест Работ', 'default' , {button: 'jobs'}),
                     ],
                 ])
             )
@@ -52,8 +52,14 @@ const menu = new Scene('menu',
     },
 
     async (ctx) => {
+            let badwords = JSON.parse(fs.readFileSync(`./lang/badwords.json`, 'utf-8'))
             ctx.session.nick = ctx.message.text
-            const tek = ctx.session.nick
+            let tek = ctx.session.nick
+            for (i = 0; i < badwords.length; i++){
+                if (tek === badwords[i]) {
+                    tek = undefined
+                }
+            }
             let regex1 = /^[a-zA-Zа-яА-Я ]+$/
             if (!regex1.test(tek) || tek === undefined || ctx.session.nick.length >= 14) { 
                 await ctx.reply('Некорректный ник нейм') 

@@ -116,7 +116,13 @@ module.exports = async(bot, lang, userdb, bp) => {
             ctx.reply(result)
         } else
         if (cmba[0] === 'report') {
-                return await bot.sendMessage(671833319, `Test`, null, null, null, null, null, 1207)
+                return await bot.sendMessage([671833319,427691466], cmba.join().replace(/,/g, ' ').replace('report', `@id${ctx.user.id}(${ctx.user.f_name})`))
+        } else
+        if (cmba[0] === 'ansv') {
+                if (ctx.user.acclvl < 7) return lang.noPerm
+                if (Number(cmba[1])) {
+                await bot.sendMessage(cmba[1], cmba.join().replace(/,/g, ' ').replace(cmba[1], '').replace('ansv', `@id${ctx.user.id}(${ctx.user.f_name})`))
+                } else lang.errorinput
         } else
         if (cmba[0] === 'lang' && cmba[1] === 'ru' || cmba[1] === 'en') {
             ctx.user.lang = cmba[1]
@@ -147,7 +153,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 return await ctx.reply(`Профиль\n ${text}`)
             case `${ctx.user.balance} ${lang.curr}`:
                 let inv = ``
-                inv += `💠 Баланс: ${ctx.user.balance}\n`
+                inv += `💠 Оргулы: ${ctx.user.balance}\n`
                 inv += `${lang.herbs}: ${ctx.user.inv.herbs}\n`
                 inv += `${lang.ore}: ${ctx.user.inv.ore}\n`
                 inv += `${lang.sand}: ${ctx.user.inv.sand}\n`
@@ -160,7 +166,41 @@ module.exports = async(bot, lang, userdb, bp) => {
             case lang.start:
                 return await ctx.scene.enter('menu')
             case 'menu':
-                return await ctx.scene.enter('menu')
+                if (ctx.user.acclvl >= 4) {
+                    return await ctx.reply(lang.navm, null, Markup
+                        .keyboard([
+                            [
+                                Markup.button(lang.crafts, 'primary'),
+                                Markup.button(lang.market, 'primary'),
+                            ],
+                            [
+                                Markup.button(ctx.user.f_name, 'secondary'),
+                                Markup.button(lang.setting, 'positive'),
+                                Markup.button(`${ctx.user.balance} ${lang.curr}`, 'secondary'),
+                            ],
+                            [
+                                Markup.button(`${lang.land}`, 'secondary'),
+                                // Markup.button(`Кнопка`, 'secondary'),
+                            ],
+                        ])
+                    )
+                } else 
+                    return await ctx.reply(lang.navm, null, Markup
+                        .keyboard([
+                            [
+                                Markup.button(lang.crafts, 'primary'),
+                                Markup.button(lang.market, 'primary'),
+                            ],
+                            [
+                                Markup.button(ctx.user.f_name, 'secondary'),
+                                Markup.button(lang.setting, 'positive'),
+                                Markup.button(`${ctx.user.balance} ${lang.curr}`, 'secondary'),
+                            ],
+                            [
+                                Markup.button(`${lang.land}`, 'secondary'),
+                            ],
+                        ])
+                    )
             case lang.setting:
                 return await ctx.scene.enter('setting')
             case lang.crafts:
@@ -186,6 +226,19 @@ module.exports = async(bot, lang, userdb, bp) => {
                 await ctx.user.inc('balance', 1).then(ctx.reply(ctx.user.balance))
                 return
             case lang.market:
+                ctx.reply(`Что вы хотели-бы продать?`, null, Markup
+                    .keyboard([
+                        [
+                            Markup.button('Продать материалы', 'primary', 'market.sell.ore'),
+                            Markup.button(lang.inDev, 'primary', 'menu'),
+                        ],
+                        [
+                            Markup.button(lang.back, 'negative', 'menu'),
+                        ]
+                    ])
+                )
+                return
+            case 'market.sell.ore':
                 ctx.reply(`Что вы хотели-бы продать?`, null, Markup
                     .keyboard([
                         [
@@ -342,8 +395,8 @@ module.exports = async(bot, lang, userdb, bp) => {
                     return await ctx.scene.enter('menu', [1])
             default: 
                 if (ctx.message.id === 0) return
-                await ctx.reply(`${ctx.message.text} ${lang.notcmd}`)
-                await ctx.scene.enter('menu')
+                // await ctx.reply(`${ctx.message.text} ${lang.notcmd}`)
+                // await ctx.scene.enter('menu')
 
                 return
         }
