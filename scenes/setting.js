@@ -4,23 +4,6 @@ const Scene = require('node-vk-bot-api/lib/scene')
 const fs = require('fs')
 let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 
-const accRankName = [
-    lang[26],
-    lang[27],
-    lang[28],
-    lang[40],
-    lang[41],
-    lang[9],
-    lang[10],
-    lang[11]
-]
-
-console.log(...accRankName)
-
-// const hear = async () => {
-//     if (ctx.cmd === lang)
-// }
-
 const setting = new Scene('setting',
     async (ctx) => {
         const alertState = ctx.user.alert ? 'positive' : 'negative'

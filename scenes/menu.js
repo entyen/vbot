@@ -4,7 +4,6 @@ const Scene = require('node-vk-bot-api/lib/scene')
 const fs = require('fs')
 let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 
-
 const menu = new Scene('menu',
     async (ctx) => {
         if (ctx.user.acclvl >= 4) {
@@ -21,7 +20,7 @@ const menu = new Scene('menu',
                     ],
                     [
                         Markup.button(`${lang[29]}`, 'secondary'),
-                        // Markup.button({ action: { type: 'callback', label: 'Hui', payload: JSON.stringify({cmd: 'help'})},color: 'default',}),
+                        Markup.button({ action: { type: 'text', label: 'Hui', payload: JSON.stringify({cmd: 'help'})},color: 'default',}),
                     ],
                 ])
             )
@@ -86,6 +85,8 @@ const menu = new Scene('menu',
             ctx.reply('Ник Изменен')
             ctx.user.f_name = ctx.session.nick
             ctx.user.balance = ctx.user.balance - 10000
+            ctx.bank.balance = ctx.bank.balance + 10000
+            await ctx.bank.save()
             await ctx.user.save()
                 
             await ctx.scene.enter('menu')

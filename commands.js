@@ -5,6 +5,45 @@ const { Job } = require('./scenes/job')
 module.exports = async(bot, lang, userdb, bp) => {
     const Markup = require('node-vk-bot-api/lib/markup')
 
+    bot.command([lang[2],'Начать','Меню'], async (ctx) => {
+        if (ctx.user.acclvl >= 4) {
+            return await ctx.reply(lang[1], null, Markup
+                .keyboard([
+                    [
+                        Markup.button(lang[8], 'primary'),
+                        Markup.button(lang[32], 'primary'),
+                    ],
+                    [
+                        Markup.button(ctx.user.f_name, 'secondary'),
+                        Markup.button(lang[3], 'positive'),
+                        Markup.button(`${ctx.user.balance} ${lang[5]}`, 'secondary'),
+                    ],
+                    [
+                        Markup.button(`${lang[29]}`, 'secondary'),
+                        Markup.button({ action: { type: 'callback', label: 'Hui', payload: JSON.stringify({cmd: 'help'})},color: 'default',}),
+                    ],
+                ])
+            )
+        } else 
+            return await ctx.reply(lang[1], null, Markup
+                .keyboard([
+                    [
+                        Markup.button(lang[8], 'primary'),
+                        Markup.button(lang[32], 'primary'),
+                    ],
+                    [
+                        Markup.button(ctx.user.f_name, 'secondary'),
+                        Markup.button(lang[3], 'positive'),
+                        Markup.button(`${ctx.user.balance} ${lang[5]}`, 'secondary'),
+                    ],
+                    [
+                        Markup.button(`${lang[29]}`, 'secondary'),
+                    ],
+                ])
+            )
+        
+    })
+
     bot.event('message_event', async (ctx) => {
         const job = new Job()
         await job.workhard(bot, ctx)
@@ -58,6 +97,9 @@ module.exports = async(bot, lang, userdb, bp) => {
                 }
             }
             ctx.reply(result)
+        } else
+        if (cmba[0] === 'report') {
+                return await bot.sendMessage(671833319, `Test`, null, null, null, null, null, 1207)
         } else
         if (cmba[0] === 'lang' && cmba[1] === 'ru' || cmba[1] === 'en') {
             ctx.user.lang = cmba[1]

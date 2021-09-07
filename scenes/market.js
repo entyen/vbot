@@ -4,7 +4,6 @@ const Scene = require('node-vk-bot-api/lib/scene')
 const fs = require('fs')
 let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 
-
 const market = new Scene('market',
     async (ctx) => {
         ctx.reply(`Что вы хотели-бы продать?`, null, Markup
@@ -53,6 +52,9 @@ const market = new Scene('market',
                     await ctx.reply(`Недостаточно ${ctx.session.item}`)
                     await ctx.scene.enter('menu')
                 } else {
+                    ctx.bank.inv.herbs = ctx.bank.inv.herbs + ctx.session.count
+                    ctx.bank.balance = ctx.bank.balance - ctx.session.count
+                    await ctx.bank.save()
                     ctx.user.inv.herbs = ctx.user.inv.herbs - ctx.session.count
                     ctx.user.balance = ctx.user.balance + ctx.session.count
                     await ctx.user.save()
@@ -65,6 +67,9 @@ const market = new Scene('market',
                     await ctx.reply(`Недостаточно ${ctx.session.item}`)
                     await ctx.scene.enter('menu')
                 } else {
+                    ctx.bank.inv.ore = ctx.bank.inv.ore + ctx.session.count
+                    ctx.bank.balance = ctx.bank.balance - ctx.session.count
+                    await ctx.bank.save()
                     ctx.user.inv.ore = ctx.user.inv.ore - ctx.session.count
                     ctx.user.balance = ctx.user.balance + ctx.session.count
                     await ctx.user.save()
@@ -77,6 +82,9 @@ const market = new Scene('market',
                     await ctx.reply(`Недостаточно ${ctx.session.item}`)
                     await ctx.scene.enter('menu')
                 } else {
+                    ctx.bank.inv.sand = ctx.bank.inv.sand + ctx.session.count
+                    ctx.bank.balance = ctx.bank.balance - ctx.session.count
+                    await ctx.bank.save()
                     ctx.user.inv.sand = ctx.user.inv.sand - ctx.session.count
                     ctx.user.balance = ctx.user.balance + ctx.session.count
                     await ctx.user.save()
@@ -89,6 +97,9 @@ const market = new Scene('market',
                     await ctx.reply(`Недостаточно ${ctx.session.item}`)
                     await ctx.scene.enter('menu')
                 } else {
+                    ctx.bank.inv.wood = ctx.bank.inv.wood + ctx.session.count
+                    ctx.bank.balance = ctx.bank.balance - ctx.session.count
+                    await ctx.bank.save()
                     ctx.user.inv.wood = ctx.user.inv.wood - ctx.session.count
                     ctx.user.balance = ctx.user.balance + ctx.session.count
                     await ctx.user.save()

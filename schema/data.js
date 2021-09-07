@@ -34,4 +34,19 @@ const userSchem = new mongoose.Schema({
     alert: Boolean
 })
 
-module.exports = userSchem
+const bankSchem = new mongoose.Schema({ 
+    id: {type: Number, required: true, unique: true}, 
+    uid: {type: Number, required: true, unique: true}, 
+    name: String,
+    balance: Number, 
+    inv: {
+        herbs: Number,
+        rareHerbs: Number,
+        sand: Number,
+        ore: Number,
+        rareOre: Number,
+        wood: Number,
+    },
+})
+
+module.exports = userSchem, bankSchem

@@ -19,7 +19,9 @@ const bot = new VkBot({
 //db const
 const mongoose = require('mongoose')
 const userSchem = require('./schema/data.js')
+const bankSchem = require('./schema/data.js')
 const userdb = mongoose.model('users', userSchem)
+const bankdb = mongoose.model('bank', bankSchem)
 
 const commands = require('./commands.js')
 
@@ -32,6 +34,7 @@ console.loge = (log) => console.log('\x1b[96m%s\x1b[0m', log)
 bot.use(async (ctx, next) => {
     ctx.timestamp = new Date().getTime()
     const date = new Date(new Date().toLocaleString('en-US', {timeZone: 'Etc/GMT-6'}))
+    console.log(ctx.message)
 
     if (ctx.message.from_id > 0 && ctx.message.id == 0) {
         try {
@@ -67,6 +70,8 @@ bot.use(async (ctx, next) => {
     if (ctx.message.from_id > 0 && ctx.message.id > 0) {
 
         ctx.user = await userdb.findOne({id: ctx.message.from_id})
+        ctx.bank = await bankdb.findOne({id: 0})
+
         if (!ctx.user) {
             const response = await bot.execute('users.get', {
                 user_ids: ctx.message.from_id,
@@ -129,6 +134,8 @@ bot.use(async (ctx, next) => {
     if (ctx.message.user_id) {
 
         ctx.user = await userdb.findOne({id: ctx.message.user_id})
+        ctx.bank = await bankdb.findOne({id: 0})
+
         if (!ctx.user) {
             const response = await bot.execute('users.get', {
                 user_ids: ctx.message.user_id,
