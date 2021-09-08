@@ -16,11 +16,27 @@ const bot = new VkBot({
     polling_timeout: 25, // in secs (25 by default)
 
     // webhooks options only
-    secret: '',                   // secret key (optional)
-    confirmation: '65a62691',       // confirmation string
+    secret: tea.SECRETHOOK,                   // secret key (optional)
+    confirmation: tea.CONFIRMATION,       // confirmation string
 })
 
+const express = require('express')
+const app = express()
+
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+
+// app.post(`/${tea.GROUP_ID}`, bot.webhookCallback)
+
+app.listen(3000, () => { console.loge('Running webhook') })
+
 // bot.execute('',{ "type": "confirmation", "group_id": 206762312 })
+//subscribe group check
+// async function test() {
+//     const test = await bot.execute('groups.isMember', {user_id: tea.OWNER, group_id: tea.GROUP_ID })
+//     console.log(test)
+// }
+// test()
 
 //db const
 const mongoose = require('mongoose')
@@ -30,6 +46,23 @@ const userdb = mongoose.model('users', userSchem)
 const bankdb = mongoose.model('bank', bankSchem)
 
 const commands = require('./commands.js')
+
+app.post('/post', function(request, response){
+    response.send('ok');    // echo the result back
+    app.get('/', async (req, res) => {
+        let sloan = []
+        sloan = request.body
+        res.send(sloan)
+    })
+})
+app.get('/users', async (req, res) => {
+    user = await userdb.find({})
+    res.send(`${JSON.stringify(user)}`)
+})
+app.get('/bank', async (req, res) => {
+    bank = await bankdb.find({})
+    res.send(`${JSON.stringify(bank)}`)
+})
 
 //error and warn color
 console.errore = (err) => console.error('\x1b[91m%s\x1b[0m', err)

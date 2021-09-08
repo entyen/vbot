@@ -160,7 +160,9 @@ class Job {
             case lang.fishing:
                 return await this.fishing(ctx, cb, lvlx)
             default:
-                return await ctx.scene.enter('menu')
+                await ctx.scene.leave()
+                await ctx.scene.enter('menu')
+                return
         }
 
     }
