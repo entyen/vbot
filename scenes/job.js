@@ -1,5 +1,4 @@
 const Markup = require('node-vk-bot-api/lib/markup')
-const Scene = require('node-vk-bot-api/lib/scene')
 
 const fs = require('fs')
 let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
@@ -26,37 +25,37 @@ class Job {
                 }),
             })
         }
-        this.eventAnswer = eventAnswer;
+        this.cb = eventAnswer;
 
         const lvlx = this.ctx.user.level <= 0 ? 1 : 1 + (this.ctx.user.level * 0.2)
 
         this.jobs = {
             herb: {
-                id: lang[19],
+                id: lang.field,
                 energy: 1,
                 level: 1,
                 lvlx: lvlx,
             },
             ore: {
-                id: lang[21],
+                id: lang.mine,
                 energy: 1,
                 level: 1,
                 lvlx: lvlx,
             },
             sand: {
-                id: lang[22],
+                id: lang.beach,
                 energy: 1,
                 level: 1,
                 lvlx: lvlx,
             },
             forest: {
-                id: lang[24],
+                id: lang.forest,
                 energy: 1,
                 level: 1,
                 lvlx: lvlx,
             },
             fishing: {
-                id: lang[25],
+                id: lang.fishing,
                 energy: 4,
                 level: 4,
                 lvlx: lvlx,
@@ -67,10 +66,10 @@ class Job {
     async canStartJob() {
 
         if (this.ctx.user.level < 0) {
-            await this.eventAnswer.reply('Ваш уровень слишком низкий. Извините, на данный момент вы не можете работать')
+            await this.cb.reply('Ваш уровень слишком низкий. Извините, на данный момент вы не можете работать')
             return false
         } else if (this.ctx.user.currWeight > this.ctx.user.invWeight) {
-            await this.eventAnswer.reply('Инвентарь перегружен разгрузитесь и возвращайтесь')
+            await this.cb.reply('Инвентарь перегружен разгрузитесь и возвращайтесь')
             return false
         }
 
@@ -79,7 +78,7 @@ class Job {
 
     async collectHerbs() {
         if (this.ctx.user.energy < this.jobs.herb.energy) {
-            await this.eventAnswer.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            await this.cb.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
             return
         }
 
@@ -92,12 +91,12 @@ class Job {
         this.ctx.user.inv.herbs = this.ctx.user.inv.herbs + earn
         this.ctx.user.exp = this.ctx.user.exp + 1
         await this.ctx.user.save()
-        await this.eventAnswer.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 🍀' : ''} у вас еще ${this.ctx.user.energy} ⚡`)
+        await this.cb.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 🍀' : ''} у вас еще ${this.ctx.user.energy} ⚡`)
     }
 
     async collectOre() {
         if (this.ctx.user.energy < this.jobs.ore.energy) {
-            await this.eventAnswer.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            await this.cb.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
             return
         }
 
@@ -110,12 +109,12 @@ class Job {
         this.ctx.user.inv.ore = this.ctx.user.inv.ore + earn
         this.ctx.user.exp = this.ctx.user.exp + 1
         await this.ctx.user.save()
-        await this.eventAnswer.reply(`Вы направились в горную шахту и добыли ${earn} ⛰ ${rare === 277 ? 'и 1 💎' : ''} у вас еще ${this.ctx.user.energy} ⚡`)
+        await this.cb.reply(`Вы направились в горную шахту и добыли ${earn} ⛰ ${rare === 277 ? 'и 1 💎' : ''} у вас еще ${this.ctx.user.energy} ⚡`)
     }
 
     async collectSand() {
         if (this.ctx.user.energy < this.jobs.sand.energy) {
-            await this.eventAnswer.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            await this.cb.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
             return
         }
 
@@ -126,12 +125,12 @@ class Job {
         this.ctx.user.inv.sand = this.ctx.user.inv.sand + earn
         this.ctx.user.exp = this.ctx.user.exp + 1
         await this.ctx.user.save()
-        await this.eventAnswer.reply(`Вы направились на пляж и откопали ${earn} 🏝 у вас еще ${this.ctx.user.energy} ⚡`)
+        await this.cb.reply(`Вы направились на пляж и откопали ${earn} 🏝 у вас еще ${this.ctx.user.energy} ⚡`)
     }
 
     async collectForest() {
         if (this.ctx.user.energy < this.jobs.forest.energy) {
-            return await this.eventAnswer.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            return await this.cb.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
         }
 
         this.ctx.user.energy = this.ctx.user.energy - this.jobs.forest.energy
@@ -141,35 +140,26 @@ class Job {
         this.ctx.user.inv.wood = this.ctx.user.inv.wood + earn
         this.ctx.user.exp = this.ctx.user.exp + 1
         await this.ctx.user.save()
-        await this.eventAnswer.reply(`Вы направились в лес и нарубили ${earn} 🌲 у вас еще ${this.ctx.user.energy} ⚡`)
+        await this.cb.reply(`Вы направились в лес и нарубили ${earn} 🌲 у вас еще ${this.ctx.user.energy} ⚡`)
     }
 
     async fishing() {
         if (this.ctx.user.level < this.jobs.fishing.level) {
-            return await this.eventAnswer.reply(`Простите, но рыбалка доступна с ${this.jobs.fishing.level} уровня.`)
+            return await this.cb.reply(`Простите, но рыбалка доступна с ${this.jobs.fishing.level} уровня.`)
         } else if (this.ctx.user.energy < this.jobs.fishing.energy) {
-            return await this.eventAnswer.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            return await this.cb.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
         }
 
-        //ctx.user.energy = ctx.user.energy - this.jobs.fishing.energy
+        //await ctx.user.dec('energy', this.collectCost.fishing.energy)
 
         const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
 
         // ctx.user.inv.wood = ctx.user.inv.wood+earn
         // ctx.user.exp = ctx.user.exp+1
         // await ctx.user.save()
-        // ctx.reply(`Сколько ${ctx.cmd} вы хотите продать? Вы так-же можете ввести кол-во вручную`, null, Markup
-        //     .keyboard([
-        //         100,
-        //         500,
-        //         1000,
-        //         lang[38]
-        //     ])
-        //     .inline()
-        // )
 
-
-        await this.eventAnswer.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
+        // await cb.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${ctx.user.energy} энергии.`)
+        await this.cb.reply(lang.inDev)
     }
 
     async workhard() {
@@ -190,7 +180,8 @@ class Job {
             case this.jobs.fishing.id:
                 return await this.fishing()
             default:
-                return await this.ctx.scene.enter('menu')
+                await this.ctx.scene.enter('menu')
+                return
         }
 
     }
@@ -201,15 +192,15 @@ class Job {
                 Markup.button({
                     action: {
                         type: 'callback',
-                        label: lang[19],
-                        payload: JSON.stringify({cmd: lang[19]})
+                        label: lang.field,
+                        payload: JSON.stringify({cmd: lang.field})
                     }, color: 'primary',
                 }),
                 Markup.button({
                     action: {
                         type: 'callback',
-                        label: lang[21],
-                        payload: JSON.stringify({cmd: lang[21]})
+                        label: lang.mine,
+                        payload: JSON.stringify({cmd: lang.mine})
                     }, color: 'primary',
                 }),
             ],
@@ -217,15 +208,15 @@ class Job {
                 Markup.button({
                     action: {
                         type: 'callback',
-                        label: lang[22],
-                        payload: JSON.stringify({cmd: lang[22]})
+                        label: lang.beach,
+                        payload: JSON.stringify({cmd: lang.beach})
                     }, color: 'primary',
                 }),
                 Markup.button({
                     action: {
                         type: 'callback',
-                        label: lang[24],
-                        payload: JSON.stringify({cmd: lang[24]})
+                        label: lang.forest,
+                        payload: JSON.stringify({cmd: lang.forest})
                     }, color: 'primary',
                 }),
             ],
@@ -233,11 +224,18 @@ class Job {
                 Markup.button({
                     action: {
                         type: 'callback',
-                        label: lang[25],
-                        payload: JSON.stringify({cmd: lang[25]})
+                        label: lang.fishing,
+                        payload: JSON.stringify({cmd: lang.fishing})
                     }, color: 'primary',
                 }),
-                Markup.button(lang[23], 'negative'),
+                Markup.button({
+                    action: {
+                        type: 'callback',
+                        label: lang.back,
+                        payload: JSON.stringify({cmd: lang.back})
+                    }, color: 'negative',
+                }),
+                // Markup.button(lang.back, 'negative'),
             ],
         ])
     }

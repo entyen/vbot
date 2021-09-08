@@ -204,7 +204,7 @@ module.exports = async(bot, lang, userdb, bp) => {
             case lang.setting:
                 return await ctx.scene.enter('setting')
             case lang.crafts:
-                return await ctx.scene.enter('job')
+                return await ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Job.getKeyboard())
             case 'jobs':
                 return await ctx.reply('Где будем работать?', null, Markup
                 .keyboard(
