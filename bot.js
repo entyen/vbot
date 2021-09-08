@@ -261,6 +261,12 @@ bot.startPolling((err) => {
     !!err ? console.errore(err) : console.loge('Bot Started')
 })
 
+const randCurr = (min, max) => {
+    const rand = Math.random() * (max - min) + min
+    return rand.toFixed(1)
+}
+
+
 const cron = new CronJob('*/5 * * * *', null, false, 'Europe/Moscow')
 cron.addCallback(async () => {
     user = await userdb.find({})
@@ -280,6 +286,7 @@ cron.addCallback(async () => {
         }
     }
 })
+
 cron.addCallback(async () => {
     const bank = await bankdb.findOne({id: 0})
     const massItems = [
@@ -290,7 +297,8 @@ cron.addCallback(async () => {
     ] 
     massItems.sort((a,b) => {return b.count - a.count})
     let itemPrice = []
-    massItems.forEach( (x, y) => {return itemPrice[y] = {price: 0.4+y*0.6 , name: x.n}})
+    const randX = randCurr(0.3,0.9)
+    massItems.forEach( (x, y) => {return itemPrice[y] = {price: 0.4+y*randX , name: x.n}})
     const price = (prop, val) => {
         for (i=0; i < itemPrice.length; i++) {
             if (itemPrice[i][prop] === val){
@@ -303,11 +311,12 @@ cron.addCallback(async () => {
     const wood = await price('name', 'wood')
     const ore = await price('name', 'ore')
     const herbs = await price('name', 'herbs')
+    console.log(randX, sand.price, wood.price, ore.price, herbs.price)
 
-    await bank.set('dpi', bank.dpi.sand.toFixed(1), 'sand')
-    await bank.set('dpi', bank.dpi.wood.toFixed(1), 'wood')
-    await bank.set('dpi', bank.dpi.ore.toFixed(1), 'ore')
-    await bank.set('dpi', bank.dpi.herbs.toFixed(1), 'herbs')
+    await bank.set('dpi', sand.price.toFixed(1), 'sand')
+    await bank.set('dpi', wood.price.toFixed(1), 'wood')
+    await bank.set('dpi', ore.price.toFixed(1), 'ore')
+    await bank.set('dpi', herbs.price.toFixed(1), 'herbs')
 })
 cron.start()
 
