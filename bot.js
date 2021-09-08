@@ -230,6 +230,7 @@ bot.use(async (ctx, next) => {
         if (ctx.user.exp === 100 * (ctx.user.level + 1)) {
             await ctx.user.set('exp', 0)
             await ctx.user.inc('level', 1)
+            await ctx.reply(`Поздравляю вы повысили уровень до ${ctx.user.level} 🎉`)
         }
 
     }
@@ -246,11 +247,10 @@ const Session = require('node-vk-bot-api/lib/session')
 const Stage = require('node-vk-bot-api/lib/stage')
 
 const {menu} = require('./scenes/menu')
-const {market} = require('./scenes/market')
 const {setting} = require('./scenes/setting')
 
 const session = new Session()
-const stage = new Stage(menu, market, setting)
+const stage = new Stage(menu, setting)
 bot.use(session.middleware())
 bot.use(stage.middleware())
 
