@@ -24,7 +24,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                     ],
                 ])
             )
-        } else 
+        } else
             return await ctx.reply(lang.navm, null, Markup
                 .keyboard([
                     [
@@ -41,12 +41,12 @@ module.exports = async(bot, lang, userdb, bp) => {
                     ],
                 ])
             )
-        
+
     })
 
     bot.event('message_event', async (ctx) => {
-        const job = new Job()
-        await job.workhard(bot, ctx)
+        const job = new Job(bot, ctx)
+        await job.workhard()
     })
 
     bot.on(async (ctx) => {
@@ -68,7 +68,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 await ctx.reply(`Вы продали ${count} ${lang[item]} и выручили ${summ} ${lang.curr}`)
             }
         }
- 
+
         if (cmba[0] === 'bup' || cmba[0] === 'alvup') {
             try {
                 if (ctx.user.acclvl >= 7 && cmba[0] === 'bup') {
@@ -138,9 +138,9 @@ module.exports = async(bot, lang, userdb, bp) => {
                 ])
             )
         }
-        
+
         switch (ctx.cmd) {
-            case ctx.user.f_name: 
+            case ctx.user.f_name:
                 let text = ``
                 text += `🔎 UID: ${ctx.user.uid}\n`
                 text += ` 👤 Статус Аккаунта: ${ctx.user._acclvl}\n`
@@ -161,7 +161,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 inv += `${ctx.user.inv.rareHerbs === 0 ? '' : `🍀 Редкие Травы: ${ctx.user.inv.rareHerbs}\n`}`
                 inv += `${ctx.user.inv.rareOre === 0 ? '' : `💎 Редкая Руда: ${ctx.user.inv.rareOre}\n`}`
                 inv += `\n👜 Вес Инвентаря: ${ctx.user.currWeight}/${ctx.user.invWeight}\n`
-               
+
                 return await ctx.reply(`Инвентарь\n ${inv}`)
             case lang.start:
                 return await ctx.scene.enter('menu')
@@ -184,7 +184,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                             ],
                         ])
                     )
-                } else 
+                } else
                     return await ctx.reply(lang.navm, null, Markup
                         .keyboard([
                             [
@@ -204,7 +204,7 @@ module.exports = async(bot, lang, userdb, bp) => {
             case lang.setting:
                 return await ctx.scene.enter('setting')
             case lang.crafts:
-                return await ctx.scene.enter('job')
+                return await ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Job.getKeyboard())
             case 'jobs':
                 return await ctx.reply('Где будем работать?', null, Markup
                 .keyboard(
@@ -393,7 +393,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 return
             case lang.nick:
                     return await ctx.scene.enter('menu', [1])
-            default: 
+            default:
                 if (ctx.message.id === 0) return
                 // await ctx.reply(`${ctx.message.text} ${lang.notcmd}`)
                 // await ctx.scene.enter('menu')
