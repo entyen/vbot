@@ -14,16 +14,55 @@ const bot = new VkBot({
     group_id: tea.GROUP_ID,
     execute_timeout: 50, // in ms   (50 by default)
     polling_timeout: 25, // in secs (25 by default)
+
+    // webhooks options only
+    secret: tea.SECRETHOOK,                   // secret key (optional)
+    confirmation: tea.CONFIRMATION,       // confirmation string
 })
+
+const express = require('express')
+const app = express()
+
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+
+// app.post(`/${tea.GROUP_ID}`, bot.webhookCallback)
+
+app.listen(3000, () => { console.loge('Running webhook') })
+
+// bot.execute('',{ "type": "confirmation", "group_id": 206762312 })
+//subscribe group check
+// async function test() {
+//     const test = await bot.execute('groups.isMember', {user_id: tea.OWNER, group_id: tea.GROUP_ID })
+//     console.log(test)
+// }
+// test()
 
 //db const
 const mongoose = require('mongoose')
 const userSchem = require('./schema/data.js')
-const bankSchem = require('./schema/data.js')
+const bankSchem = require('./schema/bank.js')
 const userdb = mongoose.model('users', userSchem)
 const bankdb = mongoose.model('bank', bankSchem)
 
 const commands = require('./commands.js')
+
+app.post('/post', function(request, response){
+    response.send('ok');    // echo the result back
+    app.get('/', async (req, res) => {
+        let sloan = []
+        sloan = request.body
+        res.send(sloan)
+    })
+})
+app.get('/users', async (req, res) => {
+    user = await userdb.find({})
+    res.send(`${JSON.stringify(user)}`)
+})
+app.get('/bank', async (req, res) => {
+    bank = await bankdb.find({})
+    res.send(`${JSON.stringify(bank)}`)
+})
 
 //error and warn color
 console.errore = (err) => console.error('\x1b[91m%s\x1b[0m', err)
@@ -34,7 +73,6 @@ console.loge = (log) => console.log('\x1b[96m%s\x1b[0m', log)
 bot.use(async (ctx, next) => {
     ctx.timestamp = new Date().getTime()
     const date = new Date(new Date().toLocaleString('en-US', {timeZone: 'Etc/GMT-6'}))
-    console.log(ctx.message)
 
     if (ctx.message.from_id > 0 && ctx.message.id == 0) {
         try {
@@ -54,7 +92,7 @@ bot.use(async (ctx, next) => {
                     })
                     for (i = 0; i < 9; i++) {
                         if (rate[i] !== undefined) {
-                            result += `${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang[5]}\n`
+                            result += `${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang.curr}\n`
                         }
                     }
                     ctx.reply(result)
@@ -76,10 +114,10 @@ bot.use(async (ctx, next) => {
             const response = await bot.execute('users.get', {
                 user_ids: ctx.message.from_id,
             })
-            const uidgen = await userdb.find({})
+            const uidgen = await userdb.countDocuments()
             await userdb.create({
                 id: ctx.message.from_id,
-                uid: uidgen.length,
+                uid: uidgen,
                 regDate: date,
                 f_name: response[0].first_name,
                 acclvl: 0,
@@ -121,8 +159,8 @@ bot.use(async (ctx, next) => {
             return sum
         }
         ctx.user.currWeight = await weightMath()
-        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang[26] : ctx.user.acclvl == 1 ? lang[27] : ctx.user.acclvl == 2 ? lang[28] :
-            ctx.user.acclvl == 7 ? lang[11] : ctx.user.acclvl == 6 ? lang[10] : ctx.user.acclvl == 5 ? lang[9] : ctx.user.acclvl
+        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang.user : ctx.user.acclvl == 1 ? lang.vip : ctx.user.acclvl == 2 ? lang.plat :
+            ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
 
 
         if (ctx.user.exp === 100 * (ctx.user.level + 1)) {
@@ -140,10 +178,10 @@ bot.use(async (ctx, next) => {
             const response = await bot.execute('users.get', {
                 user_ids: ctx.message.user_id,
             })
-            const uidgen = await userdb.find({})
+            const uidgen = await userdb.countDocuments()
             await userdb.create({
                 id: ctx.message.user_id,
-                uid: uidgen.length,
+                uid: uidgen,
                 regDate: date,
                 f_name: response[0].first_name,
                 acclvl: 0,
@@ -186,13 +224,12 @@ bot.use(async (ctx, next) => {
             return sum
         }
         ctx.user.currWeight = await weightMath()
-        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang[26] : ctx.user.acclvl == 1 ? lang[27] : ctx.user.acclvl == 2 ? lang[28] :
-            ctx.user.acclvl == 7 ? lang[11] : ctx.user.acclvl == 6 ? lang[10] : ctx.user.acclvl == 5 ? lang[9] : ctx.user.acclvl
+        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang.user : ctx.user.acclvl == 1 ? lang.vip : ctx.user.acclvl == 2 ? lang.plat :
+            ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
 
         if (ctx.user.exp === 100 * (ctx.user.level + 1)) {
-            ctx.user.exp = 0
-            ctx.user.level = ctx.user.level + 1
-            await ctx.user.save()
+            await ctx.user.set('exp', 0)
+            await ctx.user.inc('level', 1)
         }
 
     }
@@ -243,7 +280,90 @@ cron.addCallback(async () => {
         }
     }
 })
+cron.addCallback(async () => {
+    const bank = await bankdb.findOne({id: 0})
+    const massItems = [
+    { n: 'herbs', count: bank.inv.herbs },
+    { n: 'sand', count: bank.inv.sand },
+    { n: 'wood', count: bank.inv.wood },
+    { n: 'ore', count: bank.inv.ore },
+    ] 
+    massItems.sort((a,b) => {return b.count - a.count})
+    let itemPrice = []
+    massItems.forEach( (x, y) => {return itemPrice[y] = {price: 0.4+y*0.6 , name: x.n}})
+    const price = (prop, val) => {
+        for (i=0; i < itemPrice.length; i++) {
+            if (itemPrice[i][prop] === val){
+                return itemPrice[i]
+            }
+        }
+    }
+
+    const sand = await price('name', 'sand')
+    const wood = await price('name', 'wood')
+    const ore = await price('name', 'ore')
+    const herbs = await price('name', 'herbs')
+
+    await bank.set('dpi', bank.dpi.sand.toFixed(1), 'sand')
+    await bank.set('dpi', bank.dpi.wood.toFixed(1), 'wood')
+    await bank.set('dpi', bank.dpi.ore.toFixed(1), 'ore')
+    await bank.set('dpi', bank.dpi.herbs.toFixed(1), 'herbs')
+})
 cron.start()
+
+userdb.prototype.inc = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] += value
+  } else {
+    this[field] += value
+  }
+  return this.save()
+}
+
+userdb.prototype.dec = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] -= value
+  } else {
+    this[field] -= value
+  }
+  return this.save()
+}
+
+userdb.prototype.set = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] = value
+  } else {
+    this[field] = value
+  }
+  return this.save()
+}
+
+bankdb.prototype.inc = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] += value
+  } else {
+    this[field] += value
+  }
+  return this.save()
+}
+
+bankdb.prototype.dec = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] -= value
+  } else {
+    this[field] -= value
+  }
+  return this.save()
+}
+
+bankdb.prototype.set = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] = value
+  } else {
+    this[field] = value
+  }
+  return this.save()
+}
 
 //Connect of DataBse
 mongoose.connect(`mongodb://${tea.DBUSER}:${tea.DBPASS}@${tea.SERVER}/${tea.DB}`, {
