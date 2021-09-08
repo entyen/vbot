@@ -10,214 +10,189 @@ const randCurr = (min, max) => {
 
 class Job {
 
-    constructor() {
-        this.collectCost = {
-            herb: {
-                energy: 1,
-                level: 1,
-            },
-            ore: {
-                energy: 1,
-                level: 1,
-            },
-            sand: {
-                energy: 1,
-                level: 1,
-            },
-            forest: {
-                energy: 1,
-                level: 1,
-            },
-            fishing: {
-                energy: 4,
-                level: 4,
-            }
-        }
-    }
+    constructor(bot, ctx) {
+        this.bot = bot
+        this.ctx = ctx
 
-    canWork(ctx, cb) {
-
-        if (ctx.user.level < 0) {
-            cb.reply('Ваш уровень слишком низкий. Извините, на данный момент вы не можете работать')
-            return false
-        } else if (ctx.user.currWeight > ctx.user.invWeight) {
-            cb.reply('Инвентарь перегружен разгрузитесь и возвращайтесь')
-            return false
-        }
-
-        const boringMessage = `Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`
-        if (ctx.cmd === lang[19] && ctx.user.energy < this.collectCost.herb.energy) { // проверка энергии на сбор трав
-            cb.reply(boringMessage)
-            return false
-        } else if (ctx.cmd === lang[21] && ctx.user.energy < this.collectCost.ore.energy) { // проверка энергии на сбор руды
-            cb.reply(boringMessage)
-            return false
-        } else if (ctx.cmd === lang[22] && ctx.user.energy < this.collectCost.sand.energy) { // проверка энергии на сбор песка
-            cb.reply(boringMessage)
-            return false
-        } else if (ctx.cmd === lang[24] && ctx.user.energy < this.collectCost.forest.energy) { // проверка энергии на сбор леса
-            cb.reply(boringMessage)
-            return false
-        } else if (ctx.cmd === lang[25]) { // проверка энергии и уровня на рыбалку
-            if (ctx.user.level < this.collectCost.fishing.level) {
-                cb.reply(`Простите, но рыбалка доступна с ${this.collectCost.fishing.level} уровня.`)
-                return false
-            } else if (ctx.user.energy < this.collectCost.fishing.energy) {
-                cb.reply(boringMessage)
-                return false
-            }
-        }
-
-        return true
-    }
-
-    async collectHerbs(ctx, cb, lvlx) {
-        ctx.user.energy = ctx.user.energy - this.collectCost.herb.energy
-
-        const rare = randCurr(0, 200)
-        const earn = Math.round(randCurr(5, 18) * lvlx)
-
-        rare === 27 ? ctx.user.inv.rareHerbs = ctx.user.inv.rareHerbs + 1 : null
-        ctx.user.inv.herbs = ctx.user.inv.herbs + earn
-        ctx.user.exp = ctx.user.exp + 1
-        await ctx.user.save()
-        await cb.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 🍀' : ''} у вас еще ${ctx.user.energy} ⚡`)
-    }
-
-    async collectOre(ctx, cb, lvlx) {
-        ctx.user.energy = ctx.user.energy - this.collectCost.ore.energy
-
-        const rare = randCurr(0, 400)
-        const earn = Math.round(randCurr(3, 24) * lvlx)
-
-        rare === 277 ? ctx.user.inv.rareOre = ctx.user.inv.rareOre + 1 : null
-        ctx.user.inv.ore = ctx.user.inv.ore + earn
-        ctx.user.exp = ctx.user.exp + 1
-        await ctx.user.save()
-        await cb.reply(`Вы направились в горную шахту и добыли ${earn} ⛰ ${rare === 277 ? 'и 1 💎' : ''} у вас еще ${ctx.user.energy} ⚡`)
-    }
-
-    async collectSand(ctx, cb, lvlx) {
-        ctx.user.energy = ctx.user.energy - this.collectCost.sand.energy
-
-        const earn = Math.round(randCurr(8, 48) * lvlx)
-
-        ctx.user.inv.sand = ctx.user.inv.sand + earn
-        ctx.user.exp = ctx.user.exp + 1
-        await ctx.user.save()
-        await cb.reply(`Вы направились на пляж и откопали ${earn} 🏝 у вас еще ${ctx.user.energy} ⚡`)
-    }
-
-    async collectForest(ctx, cb, lvlx) {
-        ctx.user.energy = ctx.user.energy - this.collectCost.forest.energy
-
-        const earn = Math.round(randCurr(16, 28) * lvlx)
-
-        ctx.user.inv.wood = ctx.user.inv.wood + earn
-        ctx.user.exp = ctx.user.exp + 1
-        await ctx.user.save()
-        await cb.reply(`Вы направились в лес и нарубили ${earn} 🌲 у вас еще ${ctx.user.energy} ⚡`)
-    }
-
-    async fishing(ctx, cb, lvlx) {
-        //ctx.user.energy = ctx.user.energy - this.collectCost.fishing.energy
-
-        const earn = Math.round(randCurr(0, 0) * lvlx)
-
-        // ctx.user.inv.wood = ctx.user.inv.wood+earn
-        // ctx.user.exp = ctx.user.exp+1
-        // await ctx.user.save()
-
-        await cb.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${ctx.user.energy} энергии.`)
-    }
-
-    async workhard(bot, ctx) {
-        const cb = {}
-
-        cb.reply = async (message) => {
-            bot.execute('messages.sendMessageEventAnswer', {
-                user_id: ctx.message.user_id,
-                peer_id: ctx.message.peer_id,
-                event_id: ctx.message.event_id,
+        const eventAnswer = {}
+        eventAnswer.reply = async (message) => {
+            this.bot.execute('messages.sendMessageEventAnswer', {
+                user_id: this.ctx.message.user_id,
+                peer_id: this.ctx.message.peer_id,
+                event_id: this.ctx.message.event_id,
                 event_data: JSON.stringify({
                     type: "show_snackbar",
                     text: message,
                 }),
             })
         }
+        this.eventAnswer = eventAnswer;
 
-        if (!this.canWork(ctx, cb)) {
-            return //await ctx.scene.enter('menu')
+        const lvlx = this.ctx.user.level <= 0 ? 1 : 1 + (this.ctx.user.level * 0.2)
+
+        this.jobs = {
+            herb: {
+                id: lang[19],
+                energy: 1,
+                level: 1,
+                lvlx: lvlx,
+            },
+            ore: {
+                id: lang[21],
+                energy: 1,
+                level: 1,
+                lvlx: lvlx,
+            },
+            sand: {
+                id: lang[22],
+                energy: 1,
+                level: 1,
+                lvlx: lvlx,
+            },
+            forest: {
+                id: lang[24],
+                energy: 1,
+                level: 1,
+                lvlx: lvlx,
+            },
+            fishing: {
+                id: lang[25],
+                energy: 4,
+                level: 4,
+                lvlx: lvlx,
+            }
         }
-
-        const lvlx = ctx.user.level <= 0 ? 1 : 1 + (ctx.user.level * 0.2)
-        switch (ctx.cmd) {
-            case lang[19]:
-                return await this.collectHerbs(ctx, cb, lvlx)
-            case lang[21]:
-                return await this.collectOre(ctx, cb, lvlx)
-            case lang[22]:
-                return await this.collectSand(ctx, cb, lvlx)
-            case lang[24]:
-                return await this.collectForest(ctx, cb, lvlx)
-            case lang[25]:
-                return await this.fishing(ctx, cb, lvlx)
-            default:
-                return await ctx.scene.enter('menu')
-        }
-
     }
 
-    static getScene() {
-        return new Scene('job',
-            async (ctx) => {
-                ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, this.getKeyboard())
-                await ctx.scene.next()
-            },
-            async (ctx) => {
-                const lvl = ctx.user.level
-                const lvlx = ctx.user.level <= 0 ? 1 : 1 + (ctx.user.level * 0.2)
+    async canStartJob() {
 
-                if (ctx.user.currWeight > ctx.user.invWeight) {
-                    if (ctx.cmd === lang[23]) return ctx.scene.enter('menu')
-                    return await ctx.reply('Инвентарь перегружен разгрузитесь и возвращайтесь')
-                }
-                if (ctx.cmd === lang[19] && lvl >= 0) {
-                    // const coldown = Math.ceil((ctx.user.timers.mainWork - ctx.timestamp)/60/1000)
-                    // if (coldown >= 1) {
-                    //    await ctx.reply(`Вы устали, ⏳ отдохните ${coldown} минут и возвращайтесь.`)
-                    //    await ctx.scene.leave()
-                    //    await ctx.scene.enter('menu', [0])
-                    // } else {
+        if (this.ctx.user.level < 0) {
+            await this.eventAnswer.reply('Ваш уровень слишком низкий. Извините, на данный момент вы не можете работать')
+            return false
+        } else if (this.ctx.user.currWeight > this.ctx.user.invWeight) {
+            await this.eventAnswer.reply('Инвентарь перегружен разгрузитесь и возвращайтесь')
+            return false
+        }
 
-                    if (ctx.user.energy <= 0) {
-                        await ctx.reply(`Вы устали, у вас ${ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
-                    } else {
+        return true
+    }
 
-                        // if (ctx.user.alert) {
-                        //   bp.delay(10*60*1000).then( () => ctx.reply('Работа снова доступна') )
-                        // }
+    async collectHerbs() {
+        if (this.ctx.user.energy < this.jobs.herb.energy) {
+            await this.eventAnswer.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            return
+        }
 
-                        // ctx.user.timers.mainWork = ctx.timestamp + 10 * 60 * 1000
-                        ctx.user.energy = ctx.user.energy - 1
+        this.ctx.user.energy = this.ctx.user.energy - this.jobs.herb.energy
 
-                        let earn = randCurr(5, 18)
-                        const rare = randCurr(0, 200)
-                        earn = Math.round(earn * lvlx)
+        const rare = randCurr(0, 200)
+        const earn = Math.round(randCurr(5, 18) * this.jobs.herb.lvlx)
 
-                        rare === 27 ? ctx.user.inv.rareHerbs = ctx.user.inv.rareHerbs + 1 : null
-                        ctx.user.inv.herbs = ctx.user.inv.herbs + earn
-                        ctx.user.exp = ctx.user.exp + 1
-                        await ctx.user.save()
+        rare === 27 ? this.ctx.user.inv.rareHerbs = this.ctx.user.inv.rareHerbs + 1 : null
+        this.ctx.user.inv.herbs = this.ctx.user.inv.herbs + earn
+        this.ctx.user.exp = this.ctx.user.exp + 1
+        await this.ctx.user.save()
+        await this.eventAnswer.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 🍀' : ''} у вас еще ${this.ctx.user.energy} ⚡`)
+    }
 
-                        await ctx.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 🍀' : ''} у вас еще ${ctx.user.energy} ⚡`)
-                    }
-                } else {
-                    await ctx.scene.leave()
-                    await ctx.scene.enter('menu')
-                }
-            },
-        )
+    async collectOre() {
+        if (this.ctx.user.energy < this.jobs.ore.energy) {
+            await this.eventAnswer.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            return
+        }
+
+        this.ctx.user.energy = this.ctx.user.energy - this.jobs.ore.energy
+
+        const rare = randCurr(0, 400)
+        const earn = Math.round(randCurr(3, 24) * this.jobs.ore.lvlx)
+
+        rare === 277 ? this.ctx.user.inv.rareOre = this.ctx.user.inv.rareOre + 1 : null
+        this.ctx.user.inv.ore = this.ctx.user.inv.ore + earn
+        this.ctx.user.exp = this.ctx.user.exp + 1
+        await this.ctx.user.save()
+        await this.eventAnswer.reply(`Вы направились в горную шахту и добыли ${earn} ⛰ ${rare === 277 ? 'и 1 💎' : ''} у вас еще ${this.ctx.user.energy} ⚡`)
+    }
+
+    async collectSand() {
+        if (this.ctx.user.energy < this.jobs.sand.energy) {
+            await this.eventAnswer.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+            return
+        }
+
+        this.ctx.user.energy = this.ctx.user.energy - this.jobs.sand.energy
+
+        const earn = Math.round(randCurr(8, 48) * this.jobs.sand.lvlx)
+
+        this.ctx.user.inv.sand = this.ctx.user.inv.sand + earn
+        this.ctx.user.exp = this.ctx.user.exp + 1
+        await this.ctx.user.save()
+        await this.eventAnswer.reply(`Вы направились на пляж и откопали ${earn} 🏝 у вас еще ${this.ctx.user.energy} ⚡`)
+    }
+
+    async collectForest() {
+        if (this.ctx.user.energy < this.jobs.forest.energy) {
+            return await this.eventAnswer.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+        }
+
+        this.ctx.user.energy = this.ctx.user.energy - this.jobs.forest.energy
+
+        const earn = Math.round(randCurr(16, 28) * this.jobs.forest.lvlx)
+
+        this.ctx.user.inv.wood = this.ctx.user.inv.wood + earn
+        this.ctx.user.exp = this.ctx.user.exp + 1
+        await this.ctx.user.save()
+        await this.eventAnswer.reply(`Вы направились в лес и нарубили ${earn} 🌲 у вас еще ${this.ctx.user.energy} ⚡`)
+    }
+
+    async fishing() {
+        if (this.ctx.user.level < this.jobs.fishing.level) {
+            return await this.eventAnswer.reply(`Простите, но рыбалка доступна с ${this.jobs.fishing.level} уровня.`)
+        } else if (this.ctx.user.energy < this.jobs.fishing.energy) {
+            return await this.eventAnswer.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+        }
+
+        //ctx.user.energy = ctx.user.energy - this.jobs.fishing.energy
+
+        const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
+
+        // ctx.user.inv.wood = ctx.user.inv.wood+earn
+        // ctx.user.exp = ctx.user.exp+1
+        // await ctx.user.save()
+        // ctx.reply(`Сколько ${ctx.cmd} вы хотите продать? Вы так-же можете ввести кол-во вручную`, null, Markup
+        //     .keyboard([
+        //         100,
+        //         500,
+        //         1000,
+        //         lang[38]
+        //     ])
+        //     .inline()
+        // )
+
+
+        await this.eventAnswer.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
+    }
+
+    async workhard() {
+
+        if (!await this.canStartJob()) {
+            return
+        }
+
+        switch (this.ctx.cmd) {
+            case this.jobs.herb.id:
+                return await this.collectHerbs()
+            case this.jobs.ore.id:
+                return await this.collectOre()
+            case this.jobs.sand.id:
+                return await this.collectSand()
+            case this.jobs.forest.id:
+                return await this.collectForest()
+            case this.jobs.fishing.id:
+                return await this.fishing()
+            default:
+                return await this.ctx.scene.enter('menu')
+        }
+
     }
 
     static getKeyboard() {

@@ -24,7 +24,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                     ],
                 ])
             )
-        } else 
+        } else
             return await ctx.reply(lang[1], null, Markup
                 .keyboard([
                     [
@@ -41,12 +41,12 @@ module.exports = async(bot, lang, userdb, bp) => {
                     ],
                 ])
             )
-        
+
     })
 
     bot.event('message_event', async (ctx) => {
-        const job = new Job()
-        await job.workhard(bot, ctx)
+        const job = new Job(bot, ctx)
+        await job.workhard()
     })
 
     bot.on(async (ctx) => {
@@ -115,9 +115,9 @@ module.exports = async(bot, lang, userdb, bp) => {
                 ])
             )
         }
-        
+
         switch (ctx.cmd) {
-            case ctx.user.f_name: 
+            case ctx.user.f_name:
                 let text = ``
                 text += `🔎 UID: ${ctx.user.uid}\n`
                 text += ` 👤 Статус Аккаунта: ${ctx.user._acclvl}\n`
@@ -138,14 +138,15 @@ module.exports = async(bot, lang, userdb, bp) => {
                 inv += `${ctx.user.inv.rareHerbs === 0 ? '' : `🍀 Редкие Травы: ${ctx.user.inv.rareHerbs}\n`}`
                 inv += `${ctx.user.inv.rareOre === 0 ? '' : `💎 Редкая Руда: ${ctx.user.inv.rareOre}\n`}`
                 inv += `\n👜 Вес Инвентаря: ${ctx.user.currWeight}/${ctx.user.invWeight}\n`
-               
+
                 return await ctx.reply(`Инвентарь\n ${inv}`)
             case lang[2]:
                 return await ctx.scene.enter('menu')
             case lang[3]:
                 return await ctx.scene.enter('setting')
             case lang[8]:
-                return await ctx.scene.enter('job')
+                ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Job.getKeyboard())
+                // return await ctx.scene.enter('job')
             case lang[32]:
                 return await ctx.scene.enter('market')
             case lang[29]:
@@ -153,7 +154,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 return await ctx.reply(lang[31])
             case lang[39]:
                     return await ctx.scene.enter('menu', [1])
-            default: 
+            default:
                 if (ctx.message.id === 0) return
                 await ctx.reply(`${ctx.message.text} ${lang[4]}`)
                 await ctx.scene.enter('menu')
