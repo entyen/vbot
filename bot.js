@@ -311,7 +311,6 @@ cron.addCallback(async () => {
     const wood = await price('name', 'wood')
     const ore = await price('name', 'ore')
     const herbs = await price('name', 'herbs')
-    console.log(randX, sand.price, wood.price, ore.price, herbs.price)
 
     await bank.set('dpi', sand.price.toFixed(1), 'sand')
     await bank.set('dpi', wood.price.toFixed(1), 'wood')
