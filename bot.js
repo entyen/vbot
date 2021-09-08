@@ -1,5 +1,7 @@
 const bp = require('bluebird')
-const CronJob = require('cron').CronJob;
+const CronJob = require('cron').CronJob
+const queue = require('queue')
+const q = queue({ results: [] })
 
 //config file TOKEN OWER or other
 const fs = require('fs')
@@ -73,6 +75,18 @@ console.loge = (log) => console.log('\x1b[96m%s\x1b[0m', log)
 bot.use(async (ctx, next) => {
     ctx.timestamp = new Date().getTime()
     const date = new Date(new Date().toLocaleString('en-US', {timeZone: 'Etc/GMT-6'}))
+    // const storageSet = await bot.execute('storage.set', {
+    //     user_id: ctx.message.peer_id,
+    //     key: 'waitTime',
+    //     value: ctx.timestamp,
+    // })
+    // const storageGet = await bot.execute('storage.get', {
+    //     user_id: ctx.message.peer_id,
+    //     key: 'waitTime',
+    // })
+    // console.log(storageSet, storageGet, ctx.timestamp)
+    // if (storageGet === ctx.timestamp) {return ctx.reply('gkd')}
+
 
     if (ctx.message.from_id > 0 && ctx.message.id == 0) {
         try {
@@ -239,7 +253,7 @@ bot.use(async (ctx, next) => {
     }
 
 
-    return next()
+    return await next()
 })
 
 

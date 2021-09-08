@@ -25,7 +25,7 @@ class Job {
                 }),
             })
         }
-        this.cb = eventAnswer;
+        this.cb = eventAnswer
 
         const lvlx = this.ctx.user.level <= 0 ? 1 : 1 + (this.ctx.user.level * 0.2)
 
@@ -56,9 +56,22 @@ class Job {
             },
             fishing: {
                 id: lang.fishing,
-                energy: 4,
+                energy: 0,
                 level: 4,
                 lvlx: lvlx,
+                places: {
+                    baikal: {
+                        id: 'baikal',
+                        label: 'Байкал',
+                        fish_x: '🐟',
+                        fish_y: '🐠',
+                        fish_z: '🐡'
+                    },
+                    hafen: {
+                        id: 'hafen',
+                        label: 'Морской порт',
+                    }
+                }
             }
         }
     }
@@ -71,6 +84,10 @@ class Job {
         } else if (this.ctx.user.currWeight > this.ctx.user.invWeight) {
             await this.cb.reply('Инвентарь перегружен разгрузитесь и возвращайтесь')
             return false
+        } else if ([this.jobs.fishing.id, this.jobs.fishing.places.baikal.id, this.jobs.fishing.places.hafen.id].includes(this.ctx.cmd) && this.ctx.user.level < this.jobs.fishing.level) {
+            return await this.cb.reply(`Простите, но рыбалка доступна с ${this.jobs.fishing.level} уровня.`)
+        } else if ([this.jobs.fishing.id, this.jobs.fishing.places.baikal.id, this.jobs.fishing.places.hafen.id].includes(this.ctx.cmd) && this.ctx.user.energy < this.jobs.fishing.energy) {
+            return await this.cb.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
         }
 
         return true
@@ -144,22 +161,113 @@ class Job {
     }
 
     async fishing() {
-        if (this.ctx.user.level < this.jobs.fishing.level) {
-            return await this.cb.reply(`Простите, но рыбалка доступна с ${this.jobs.fishing.level} уровня.`)
-        } else if (this.ctx.user.energy < this.jobs.fishing.energy) {
-            return await this.cb.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+        // if (this.ctx.user.level < this.jobs.fishing.level) {
+        //     return await this.cb.reply(`Простите, но рыбалка доступна с ${this.jobs.fishing.level} уровня.`)
+        // } else if (this.ctx.user.energy < this.jobs.fishing.energy) {
+        //     return await this.cb.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+        // }
+
+        await this.cb.reply('Вы отправляетесь на рыбалку, выберите место, куда идти')
+        await this.ctx.reply(`Места для рыбалки:`, null, Markup
+            .keyboard([
+                [
+                    Markup.button({
+                        action: {
+                            type: 'callback',
+                            label: this.jobs.fishing.places.baikal.label,
+                            payload: JSON.stringify({cmd: this.jobs.fishing.places.baikal.id})
+                        }, color: 'default',
+                    }),
+                    Markup.button({
+                        action: {
+                            type: 'callback',
+                            label: this.jobs.fishing.places.hafen.label,
+                            payload: JSON.stringify({cmd: this.jobs.fishing.places.hafen.id})
+                        }, color: 'default',
+                    }),
+                ],
+            ])
+            .inline()
+        )
+    }
+
+    async fishingBaikal() {
+        await this.cb.reply('Выбирайте место куда закинуть удочку')
+        let massFish = []
+        let buttonMass = []
+        for (let i = 0; i < 10; i++) {
+            const randFish = randCurr(0, 100)
+                if (randFish < 30) {
+                    massFish[i] = this.jobs.fishing.places.baikal.fish_y
+                } else
+                if (randFish > 50 && randFish < 55) {
+                    massFish[i] = this.jobs.fishing.places.baikal.fish_z
+                } else {
+                    massFish[i] = this.jobs.fishing.places.baikal.fish_x
+                }
+            buttonMass[i] = 
+                        Markup.button({
+                            action: {
+                                type: 'callback',
+                                label: massFish[i],
+                                payload: JSON.stringify({cmd: massFish[i]})
+                            }, color: 'default',
+                        })
         }
+        await this.ctx.reply(`Рыбалка на байкале:`, null, Markup
+            .keyboard([
+                [
+                    buttonMass[0],
+                    buttonMass[1],
+                    buttonMass[2],
+                    buttonMass[3],
+                    buttonMass[4],
+                ],
+                [
+                    buttonMass[5],
+                    buttonMass[6],
+                    buttonMass[7],
+                    buttonMass[8],
+                    buttonMass[9],
+                ],
+            ])
+            .inline()
+        )
 
-        //await ctx.user.dec('energy', this.collectCost.fishing.energy)
+        // await this.ctx.user.dec('energy', this.jobs.fishing.energy)
 
-        const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
+        //const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
 
         // ctx.user.inv.wood = ctx.user.inv.wood+earn
         // ctx.user.exp = ctx.user.exp+1
         // await ctx.user.save()
 
         // await cb.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${ctx.user.energy} энергии.`)
-        await this.cb.reply(lang.inDev)
+        //await this.cb.reply(lang.inDev)
+    }
+
+    async collectBaikalX() {
+        await this.ctx.user.dec('energy', this.jobs.fishing.energy)
+        const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
+        await this.cb.reply(`Эххх ну так себе вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
+    }
+
+    async collectBaikalY() {
+        await this.ctx.user.dec('energy', this.jobs.fishing.energy)
+        const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
+        await this.cb.reply(`Неплохо неплохо вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
+    }
+
+    async collectBaikalZ() {
+        await this.ctx.user.dec('energy', this.jobs.fishing.energy)
+        const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
+        await this.cb.reply(`Уххх удачный улов вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
+    }
+
+    async collectHafen() {
+        await this.ctx.user.dec('energy', this.jobs.fishing.energy)
+        const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
+        await this.cb.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
     }
 
     async workhard() {
@@ -179,6 +287,16 @@ class Job {
                 return await this.collectForest()
             case this.jobs.fishing.id:
                 return await this.fishing()
+            case this.jobs.fishing.places.baikal.fish_x:
+                return await this.collectBaikalX()
+            case this.jobs.fishing.places.baikal.fish_y:
+                return await this.collectBaikalY()
+            case this.jobs.fishing.places.baikal.fish_z:
+                return await this.collectBaikalZ()
+            case this.jobs.fishing.places.baikal.id:
+                return await this.fishingBaikal()
+            case this.jobs.fishing.places.hafen.id:
+                return await this.collectHafen()
             default:
                 await this.ctx.scene.enter('menu')
                 return

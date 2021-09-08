@@ -44,9 +44,66 @@ module.exports = async(bot, lang, userdb, bp) => {
 
     })
 
+    const usersMap = new Map()
+    const LIMIT = 5
+    const DIFF = 105
+    const TIME = 100
     bot.event('message_event', async (ctx) => {
-        const job = new Job(bot, ctx)
-        await job.workhard()
+        const cb = (message) => {
+            bot.execute('messages.sendMessageEventAnswer', {
+                user_id: ctx.message.user_id,
+                peer_id: ctx.message.peer_id,
+                event_id: ctx.message.event_id,
+                event_data: JSON.stringify({
+                    type: "show_snackbar",
+                    text: message,
+                }),
+            })
+        }
+        ctx.message.createdTimestamp = ctx.timestamp
+        if(usersMap.has(ctx.message.peer_id)) {
+        const userData = usersMap.get(ctx.message.peer_id);
+        const { lastMessage, timer } = userData;
+        const difference = ctx.message.createdTimestamp - lastMessage.createdTimestamp;
+        let msgCount = userData.msgCount
+        cb(`Подождите немного ${difference} ms`)
+
+        if(difference > DIFF) {
+            clearTimeout(timer)
+            console.log('Cleared Timeout')
+            userData.msgCount = 1
+            userData.lastMessage = ctx.message
+            userData.timer = setTimeout(() => {
+                usersMap.delete(ctx.message.peer_id)
+                console.log('Removed from map.')
+            }, TIME)
+            usersMap.set(ctx.message.peer_id, userData)
+        }
+        else {
+            ++msgCount
+            if(parseInt(msgCount) === LIMIT) {
+
+               ctx.reply("Warning: Spamming forbidden.")
+               
+            } else {
+                userData.msgCount = msgCount;
+                usersMap.set(ctx.message.peer_id, userData)
+            }
+        }
+        }
+        else {
+            let fn = setTimeout(async () => {
+                usersMap.delete(ctx.message.peer_id)
+                // console.log('Removed from map.')
+                const job = new Job(bot, ctx)
+                await job.workhard()
+            }, TIME);
+            usersMap.set(ctx.message.peer_id, {
+                msgCount: 1,
+                lastMessage : ctx.message,
+                timer : fn
+            })
+        }
     })
 
     bot.on(async (ctx) => {
