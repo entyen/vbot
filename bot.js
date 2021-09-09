@@ -110,10 +110,12 @@ bot.use(async (ctx, next) => {
             }
         } catch (e) {
             console.log(e)
+            ctx.reply('Что-то пошло не так ошибка')
         }
         return
     } else
     if (ctx.message.from_id > 0 && ctx.message.id > 0) {
+        try {
 
         ctx.user = await userdb.findOne({id: ctx.message.from_id})
         ctx.bank = await bankdb.findOne({id: 0})
@@ -193,8 +195,10 @@ bot.use(async (ctx, next) => {
             ctx.user.level = ctx.user.level + 1
             await ctx.user.save()
         }
+        } catch (e) {console.log(e)}
     } else
     if (ctx.message.user_id) {
+        try {
 
         ctx.user = await userdb.findOne({id: ctx.message.user_id})
         ctx.bank = await bankdb.findOne({id: 0})
@@ -275,6 +279,10 @@ bot.use(async (ctx, next) => {
             await ctx.user.inc('level', 1)
             await ctx.reply(`Поздравляю вы повысили уровень до ${ctx.user.level} 🎉`)
         }
+        } catch (e) {
+            console.log(e)
+            ctx.reply('Что-то пошло не так ошибка')
+        }
     }
     else return
 
@@ -326,7 +334,7 @@ energy.addCallback(async () => {
     }
 })
 
-const updater = new CronJob('*/10 * * * *', null, false, 'Europe/Moscow')
+const updater = new CronJob('*/30 * * * *', null, false, 'Europe/Moscow')
 updater.addCallback(async () => {
     const bank = await bankdb.findOne({id: 0})
     const massItems = [
