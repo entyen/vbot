@@ -32,6 +32,10 @@ const userSchem = new mongoose.Schema({
     plot: {
         own: Boolean,
         size: Number,
+        house: Number,
+        wh: Number,
+        temple: Number,
+        mc: Number,
     },
     invWeight: Number,
     exp: Number,

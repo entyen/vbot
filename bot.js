@@ -154,7 +154,11 @@ bot.use(async (ctx, next) => {
                 },
                 plot: {
                     own: false,
-                    size: 0
+                    size: 0,
+                    house: 0,
+                    wh: 0,
+                    temple: 0,
+                    mc: 0,
                 },
                 invWeight: 50000,
                 exp: 0,
@@ -225,7 +229,11 @@ bot.use(async (ctx, next) => {
                 },
                 plot: {
                     own: false,
-                    size: 0
+                    size: 0,
+                    house: 0,
+                    wh: 0,
+                    temple: 0,
+                    mc: 0,
                 },
                 invWeight: 50000,
                 exp: 0,

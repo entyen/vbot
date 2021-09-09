@@ -191,13 +191,8 @@ class Job {
                         }, color: 'default',
                     }),
                 ],
-                [   Markup.button({
-                        action: {
-                            type: 'callback',
-                            label: lang.back,
-                            payload: JSON.stringify({cmd: lang.back})
-                        }, color: 'negative',
-                    }),
+                [
+                Markup.button(lang.back, 'negative', 'menu'),
                 ]
             ])
         )
@@ -361,7 +356,7 @@ class Job {
             case this.jobs.fishing.places.hafen.id:
                 return await this.collectHafen()
             default:
-                await this.ctx.scene.enter('menu')
+                // await this.ctx.scene.enter('menu')
                 return
         }
 
@@ -409,14 +404,14 @@ class Job {
                         payload: JSON.stringify({cmd: lang.fishing})
                     }, color: 'primary',
                 }),
-                Markup.button({
-                    action: {
-                        type: 'callback',
-                        label: lang.back,
-                        payload: JSON.stringify({cmd: lang.back})
-                    }, color: 'negative',
-                }),
-                // Markup.button(lang.back, 'negative'),
+                // Markup.button({
+                //     action: {
+                //         type: 'callback',
+                //         label: lang.back,
+                //         payload: JSON.stringify({cmd: lang.back})
+                //     }, color: 'negative',
+                // }),
+                Markup.button(lang.back, 'negative', 'menu'),
             ],
         ])
     }

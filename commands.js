@@ -5,45 +5,6 @@ const { Job } = require('./scenes/job')
 module.exports = async(bot, lang, userdb, bp) => {
     const Markup = require('node-vk-bot-api/lib/markup')
 
-    bot.command([lang.start,lang.back,'Начать','Меню','menu'], async (ctx) => {
-        if (ctx.user.acclvl >= 4) {
-            return await ctx.reply(lang.navm, null, Markup
-                .keyboard([
-                    [
-                        Markup.button(lang.crafts, 'primary'),
-                        Markup.button(lang.market, 'primary'),
-                    ],
-                    [
-                        Markup.button(ctx.user.f_name, 'secondary'),
-                        Markup.button(lang.setting, 'positive'),
-                        Markup.button(`${ctx.user.balance} ${lang.curr}`, 'secondary'),
-                    ],
-                    [
-                        Markup.button(`${lang.land}`, 'secondary'),
-                        Markup.button(`Кнопка`, 'secondary'),
-                    ],
-                ])
-            )
-        } else
-            return await ctx.reply(lang.navm, null, Markup
-                .keyboard([
-                    [
-                        Markup.button(lang.crafts, 'primary'),
-                        Markup.button(lang.market, 'primary'),
-                    ],
-                    [
-                        Markup.button(ctx.user.f_name, 'secondary'),
-                        Markup.button(lang.setting, 'positive'),
-                        Markup.button(`${ctx.user.balance} ${lang.curr}`, 'secondary'),
-                    ],
-                    [
-                        Markup.button(`${lang.land}`, 'secondary'),
-                    ],
-                ])
-            )
-
-    })
-
     const usersMap = new Map()
     const LIMIT = 5
     const DIFF = 105
@@ -200,6 +161,43 @@ module.exports = async(bot, lang, userdb, bp) => {
                     ],
                 ])
             )
+        } else
+        if (!ctx.cmd) { 
+            if (ctx.user.acclvl >= 4) {
+                return await ctx.reply(lang.navm, null, Markup
+                    .keyboard([
+                        [
+                            Markup.button(lang.crafts, 'primary'),
+                            Markup.button(lang.market, 'primary'),
+                        ],
+                        [
+                            Markup.button(ctx.user.f_name, 'secondary'),
+                            Markup.button(lang.setting, 'positive'),
+                            Markup.button(`${ctx.user.balance} ${lang.curr}`, 'secondary'),
+                        ],
+                        [
+                            Markup.button(`${lang.land}`, 'secondary'),
+                            // Markup.button(`Кнопка`, 'secondary'),
+                        ],
+                    ])
+                )
+            } else
+                return await ctx.reply(lang.navm, null, Markup
+                    .keyboard([
+                        [
+                            Markup.button(lang.crafts, 'primary'),
+                            Markup.button(lang.market, 'primary'),
+                        ],
+                        [
+                            Markup.button(ctx.user.f_name, 'secondary'),
+                            Markup.button(lang.setting, 'positive'),
+                            Markup.button(`${ctx.user.balance} ${lang.curr}`, 'secondary'),
+                        ],
+                        [
+                            Markup.button(`${lang.land}`, 'secondary'),
+                        ],
+                    ])
+                )
         }
 
         switch (ctx.cmd) {
@@ -221,9 +219,9 @@ module.exports = async(bot, lang, userdb, bp) => {
                 inv += `${lang.ore}: ${ctx.user.inv.ore}\n`
                 inv += `${lang.sand}: ${ctx.user.inv.sand}\n`
                 inv += `${lang.wood}: ${ctx.user.inv.wood}\n`
+                inv += `${lang.fish}: ${ctx.user.inv.fish}\n`
                 inv += `${ctx.user.inv.rareHerbs === 0 ? '' : `🍀 Редкие Травы: ${ctx.user.inv.rareHerbs}\n`}`
                 inv += `${ctx.user.inv.rareOre === 0 ? '' : `💎 Редкая Руда: ${ctx.user.inv.rareOre}\n`}`
-                inv += `🐟 Рыба: ${ctx.user.inv.fish}\n`
                 inv += `${ctx.user.inv.rareFish === 0 ? '' : `🐡 Редкая Рыба: ${ctx.user.inv.rareFish}\n`}`
                 inv += `\n${!ctx.user.items.fishingRod ? '' : `🎣 Удочка: Есть\n`}`
                 inv += `${ctx.user.items.bait === 0 ? '' : `🐛 Наживка: ${ctx.user.items.bait}\n`}`
@@ -315,7 +313,6 @@ module.exports = async(bot, lang, userdb, bp) => {
                         ],
                         [
                             Markup.button('Банка ОЭ', 'primary', 'energyPotion'),
-                            Markup.button(lang.inDev, 'primary'),
                         ],
                         [
                             Markup.button(lang.back, 'negative', lang.market),
@@ -403,12 +400,38 @@ module.exports = async(bot, lang, userdb, bp) => {
                         [
                             Markup.button(lang.sand, 'primary', 'sand'),
                             Markup.button(lang.wood, 'primary', 'wood'),
+                            Markup.button(lang.fish, 'primary', 'fish'),
                         ],
                         [
                             Markup.button(lang.back, 'negative', lang.market),
                         ]
                     ])
                 )
+                return
+            case 'fish':
+                ctx.reply(`Текущий курс 1 ${lang.fish} = 25 ${lang.curr}\nСколько вы хотите продать?.`, null, Markup
+                    .keyboard(
+                        [
+                            Markup.button(10, 'default', `${ctx.cmd}.sell.10`),
+                            Markup.button(100, 'default', `${ctx.cmd}.sell.100`),
+                            Markup.button(500, 'default', `${ctx.cmd}.sell.500`),
+                            Markup.button(lang.all, 'default', `${ctx.cmd}.sell.all`),
+                        ],
+                    )
+                    .inline()
+                )
+                return
+            case 'fish.sell.10':
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 25)
+                return
+            case 'fish.sell.100':
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 25)
+                return
+            case 'fish.sell.500':
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 25)
+                return
+            case `fish.sell.all`:
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 25)
                 return
             case 'herbs':
                 ctx.reply(`Текущий курс 1 ${lang.herbs} = ${ctx.bank.dpi.herbs} ${lang.curr}\nСколько вы хотите продать?.`, null, Markup
@@ -522,10 +545,10 @@ module.exports = async(bot, lang, userdb, bp) => {
                 )
 
                 let plot = ``
-                plot += `🏠 Дом: ${null}\n`
-                plot += `🏚 Склад: ${null}\n`
-                plot += `⛪️ Храм: ${null}\n`
-                plot += `⛰ Рудник: ${null}\n`
+                plot += `🏠 Дом: ${ctx.user.plot.house === 0 ? 'Нет' : 'Есть'}\n`
+                plot += `🏚 Склад: ${ctx.user.plot.wh === 0 ? 'Нет' : 'Есть'}\n`
+                plot += `⛪️ Храм: ${ctx.user.plot.temple === 0 ? 'Нет' : 'Есть'}\n`
+                plot += `⛰ Рудник: ${ctx.user.plot.mc === 0 ? 'Нет' : 'Есть'}\n`
 
                 plot += `\n\nРазмер участка: ${ctx.user.plot.size === 0 && 'Малый'}`
 
