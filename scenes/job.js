@@ -68,6 +68,18 @@ class Job {
                         fish_y: '🐠',
                         fish_z: '🐡'
                     },
+                    fishX: {
+                        id: 'fishX',
+                        label: '🐟',
+                    },
+                    fishY: {
+                        id: 'fishY',
+                        label: '🐠',
+                    },
+                    fishZ: {
+                        id: 'fishZ',
+                        label: '🐡',
+                    },
                     hafen: {
                         id: 'hafen',
                         label: 'Морской порт',
@@ -87,7 +99,9 @@ class Job {
             return false
         } else if ([this.jobs.fishing.id, this.jobs.fishing.places.baikal.id, this.jobs.fishing.places.hafen.id].includes(this.ctx.cmd) && this.ctx.user.level < this.jobs.fishing.level) {
             return await this.cb.reply(`Простите, но рыбалка доступна с ${this.jobs.fishing.level} уровня.`)
-        } else if ([this.jobs.fishing.id, this.jobs.fishing.places.baikal.id, this.jobs.fishing.places.hafen.id].includes(this.ctx.cmd) && this.ctx.user.energy < this.jobs.fishing.energy) {
+        } else if ([this.jobs.fishing.places.baikal.id, this.jobs.fishing.places.hafen.id].includes(this.ctx.cmd) && this.ctx.user.energy < this.jobs.fishing.energy) {
+            return await this.cb.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
+        } else if ([this.jobs.fishing.places.fishX.id, this.jobs.fishing.places.fishY.id, this.jobs.fishing.places.fishZ.id].includes(this.ctx.cmd) && this.ctx.user.energy < this.jobs.fishing.energyX) {
             return await this.cb.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
         }
 
@@ -201,7 +215,6 @@ class Job {
     async fishingBaikal() {
         if (!this.ctx.user.items.fishingRod) {return this.cb.reply('У вас нет удочки 🎣')}
         if (this.ctx.user.items.bait === 0) {return this.cb.reply('У вас нет наживки 🐛')}
-        if (this.ctx.user.energy < this.jobs.fishing.energy) {return this.cb.reply('Недостаточно энергии')}
         await this.ctx.user.dec('energy', this.jobs.fishing.energy)
         await this.cb.reply(`Вы закинули удочку у вас еще ${this.ctx.user.energy} энергии.`)
         let massFish = []
@@ -209,23 +222,23 @@ class Job {
         for (let i = 0; i < 10; i++) {
             const randFish = randCurr(0, 100)
                 if (randFish < 30) {
-                    massFish[i] = this.jobs.fishing.places.baikal.fish_y
+                    massFish[i] = this.jobs.fishing.places.fishY
                 } else
                 if (randFish > 50 && randFish < 55) {
-                    massFish[i] = this.jobs.fishing.places.baikal.fish_z
+                    massFish[i] = this.jobs.fishing.places.fishZ
                 } else {
-                    massFish[i] = this.jobs.fishing.places.baikal.fish_x
+                    massFish[i] = this.jobs.fishing.places.fishX
                 }
             buttonMass[i] = 
                         Markup.button({
                             action: {
                                 type: 'callback',
-                                label: massFish[i],
-                                payload: JSON.stringify({cmd: massFish[i]})
+                                label: massFish[i].label,
+                                payload: JSON.stringify({cmd: massFish[i].id})
                             }, color: 'default',
                         })
         }
-        await this.ctx.reply(`На рыбалку дается 3 секунды вылови сколько успеешь\nРыбалка на байкале:`, null, Markup
+        await this.ctx.reply(`На рыбалку дается 2 секунды вылови сколько успеешь\nРыбалка на байкале:`, null, Markup
             .keyboard([
                 [
                     buttonMass[0],
@@ -345,11 +358,11 @@ class Job {
                 return await this.collectForest()
             case this.jobs.fishing.id:
                 return await this.fishing()
-            case this.jobs.fishing.places.baikal.fish_x:
+            case this.jobs.fishing.places.fishX.id:
                 return await this.collectBaikalX()
-            case this.jobs.fishing.places.baikal.fish_y:
+            case this.jobs.fishing.places.fishY.id:
                 return await this.collectBaikalY()
-            case this.jobs.fishing.places.baikal.fish_z:
+            case this.jobs.fishing.places.fishZ.id:
                 return await this.collectBaikalZ()
             case this.jobs.fishing.places.baikal.id:
                 return await this.fishingBaikal()

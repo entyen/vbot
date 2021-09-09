@@ -409,7 +409,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 )
                 return
             case 'fish':
-                ctx.reply(`Текущий курс 1 ${lang.fish} = 25 ${lang.curr}\nСколько вы хотите продать?.`, null, Markup
+                ctx.reply(`Текущий курс 1 ${lang.fish} = ${ctx.bank.dpi.fish} ${lang.curr}\nСколько вы хотите продать?.`, null, Markup
                     .keyboard(
                         [
                             Markup.button(10, 'default', `${ctx.cmd}.sell.10`),
@@ -422,16 +422,16 @@ module.exports = async(bot, lang, userdb, bp) => {
                 )
                 return
             case 'fish.sell.10':
-                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 25)
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], ctx.bank.dpi.fish)
                 return
             case 'fish.sell.100':
-                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 25)
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], ctx.bank.dpi.fish)
                 return
             case 'fish.sell.500':
-                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 25)
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], ctx.bank.dpi.fish)
                 return
             case `fish.sell.all`:
-                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], 25)
+                marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], ctx.bank.dpi.fish)
                 return
             case 'herbs':
                 ctx.reply(`Текущий курс 1 ${lang.herbs} = ${ctx.bank.dpi.herbs} ${lang.curr}\nСколько вы хотите продать?.`, null, Markup

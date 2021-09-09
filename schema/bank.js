@@ -12,12 +12,15 @@ const bankSchem = new mongoose.Schema({
         ore: Number,
         rareOre: Number,
         wood: Number,
+        fish: Number,
+        rareFish: Number,
     },
     dpi: { 
         herbs: Number,
         sand: Number,
         ore: Number,
         wood: Number,
+        fish: Number,
     }
 })
 

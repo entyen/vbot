@@ -350,11 +350,13 @@ cron.addCallback(async () => {
     const wood = await price('name', 'wood')
     const ore = await price('name', 'ore')
     const herbs = await price('name', 'herbs')
+    const fish = await randCurr(8,15)
 
     await bank.set('dpi', sand.price.toFixed(1), 'sand')
     await bank.set('dpi', wood.price.toFixed(1), 'wood')
     await bank.set('dpi', ore.price.toFixed(1), 'ore')
     await bank.set('dpi', herbs.price.toFixed(1), 'herbs')
+    await bank.set('dpi', Math.round(fish), 'fish')
 
     const user = await userdb.find({})
     let rate = [{}]
@@ -386,6 +388,7 @@ cron.addCallback(async () => {
         ${lang.ore}: ${ore.price.toFixed(1)}
         ${lang.wood}: ${wood.price.toFixed(1)}
         ${lang.herbs}: ${herbs.price.toFixed(1)}
+        ${lang.fish}: ${Math.round(fish)}
         `,
     }
     try {
