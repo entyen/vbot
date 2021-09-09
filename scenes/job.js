@@ -56,7 +56,8 @@ class Job {
             },
             fishing: {
                 id: lang.fishing,
-                energy: 0,
+                energy: 4,
+                energyX: 1,
                 level: 4,
                 lvlx: lvlx,
                 places: {
@@ -102,13 +103,17 @@ class Job {
         this.ctx.user.energy = this.ctx.user.energy - this.jobs.herb.energy
 
         const rare = randCurr(0, 200)
+        const rareBait = randCurr(0, 50)
         const earn = Math.round(randCurr(5, 18) * this.jobs.herb.lvlx)
+        let bait = 0
 
         rare === 27 ? this.ctx.user.inv.rareHerbs = this.ctx.user.inv.rareHerbs + 1 : null
+        rareBait === 10 ? bait = 5 : bait = 0
         this.ctx.user.inv.herbs = this.ctx.user.inv.herbs + earn
         this.ctx.user.exp = this.ctx.user.exp + 1
         await this.ctx.user.save()
-        await this.cb.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 🍀' : ''} у вас еще ${this.ctx.user.energy} ⚡`)
+        await this.ctx.user.inc('items', bait, 'bait')
+        await this.cb.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 🍀' : ''} ${rareBait === 10 ? `и ${bait} 🐛` : ''} у вас еще ${this.ctx.user.energy} ⚡`)
     }
 
     async collectOre() {
@@ -174,7 +179,7 @@ class Job {
                     Markup.button({
                         action: {
                             type: 'callback',
-                            label: this.jobs.fishing.places.baikal.label,
+                            label: `${this.jobs.fishing.places.baikal.label} 4 ⚡`,
                             payload: JSON.stringify({cmd: this.jobs.fishing.places.baikal.id})
                         }, color: 'default',
                     }),
@@ -186,13 +191,24 @@ class Job {
                         }, color: 'default',
                     }),
                 ],
+                [   Markup.button({
+                        action: {
+                            type: 'callback',
+                            label: lang.back,
+                            payload: JSON.stringify({cmd: lang.back})
+                        }, color: 'negative',
+                    }),
+                ]
             ])
-            .inline()
         )
     }
 
     async fishingBaikal() {
-        await this.cb.reply('Выбирайте место куда закинуть удочку')
+        if (!this.ctx.user.items.fishingRod) {return this.cb.reply('У вас нет удочки 🎣')}
+        if (this.ctx.user.items.bait === 0) {return this.cb.reply('У вас нет наживки 🐛')}
+        if (this.ctx.user.energy < this.jobs.fishing.energy) {return this.cb.reply('Недостаточно энергии')}
+        await this.ctx.user.dec('energy', this.jobs.fishing.energy)
+        await this.cb.reply(`Вы закинули удочку у вас еще ${this.ctx.user.energy} энергии.`)
         let massFish = []
         let buttonMass = []
         for (let i = 0; i < 10; i++) {
@@ -214,7 +230,7 @@ class Job {
                             }, color: 'default',
                         })
         }
-        await this.ctx.reply(`Рыбалка на байкале:`, null, Markup
+        await this.ctx.reply(`На рыбалку дается 3 секунды вылови сколько успеешь\nРыбалка на байкале:`, null, Markup
             .keyboard([
                 [
                     buttonMass[0],
@@ -233,7 +249,6 @@ class Job {
             ])
             .inline()
         )
-
         // await this.ctx.user.dec('energy', this.jobs.fishing.energy)
 
         //const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
@@ -243,31 +258,79 @@ class Job {
         // await ctx.user.save()
 
         // await cb.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${ctx.user.energy} энергии.`)
-        //await this.cb.reply(lang.inDev)
     }
 
     async collectBaikalX() {
-        await this.ctx.user.dec('energy', this.jobs.fishing.energy)
-        const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
-        await this.cb.reply(`Эххх ну так себе вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
+        try {
+            if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
+            await this.ctx.user.dec('items', 1, 'bait')
+            await this.ctx.user.dec('energy', this.jobs.fishing.energyX)
+            const earn = Math.round(randCurr(1, 5))
+            const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
+                peer_id: this.ctx.message.user_id,
+                conversation_message_ids: this.ctx.message.conversation_message_id,
+            })
+            await this.bot.execute('messages.edit', {
+                peer_id: this.ctx.message.user_id,
+                message: 'Рыбалка Завершена',
+                message_id: NeedMessage.items[0].id,
+            })
+            await this.ctx.user.inc('inv', earn, 'fish')
+            await this.cb.reply(`Эххх ну так себе вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
+        } catch (e) {'Что-то пошло не так'}
     }
 
     async collectBaikalY() {
-        await this.ctx.user.dec('energy', this.jobs.fishing.energy)
-        const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
-        await this.cb.reply(`Неплохо неплохо вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
+        try {
+            if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
+            await this.ctx.user.dec('items', 1, 'bait')
+            await this.ctx.user.dec('energy', this.jobs.fishing.energyX)
+            const earn = Math.round(randCurr(4, 10))
+            const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
+                peer_id: this.ctx.message.user_id,
+                conversation_message_ids: this.ctx.message.conversation_message_id,
+            })
+            await this.bot.execute('messages.edit', {
+                peer_id: this.ctx.message.user_id,
+                message: 'Рыбалка Завершена',
+                message_id: NeedMessage.items[0].id,
+            })
+            await this.ctx.user.inc('inv', earn, 'fish')
+            await this.cb.reply(`Неплохо неплохо вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
+        } catch (e) {'Что-то пошло не так'}
     }
 
     async collectBaikalZ() {
-        await this.ctx.user.dec('energy', this.jobs.fishing.energy)
-        const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
-        await this.cb.reply(`Уххх удачный улов вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
+        try {
+            if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
+            await this.ctx.user.dec('items', 1, 'bait')
+            await this.ctx.user.dec('energy', this.jobs.fishing.energyX)
+            const earn = Math.round(randCurr(10, 24))
+            const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
+                peer_id: this.ctx.message.user_id,
+                conversation_message_ids: this.ctx.message.conversation_message_id,
+            })
+            await this.bot.execute('messages.edit', {
+                peer_id: this.ctx.message.user_id,
+                message: 'Рыбалка Завершена',
+                message_id: NeedMessage.items[0].id,
+            })
+            const rare = randCurr(0, 6)
+            let rFish = 0
+            rare === 3 ? rFish = 1 : rFish = 0
+            await this.ctx.user.inc('inv', earn, 'fish')
+            await this.ctx.user.inc('inv', rFish, 'rareFish')
+            await this.cb.reply(`Уххх удачный улов вы поймали ${earn} 🐟 ${rare === 3 ? `и ${rFish} 🐡` : ''}у вас еще ${this.ctx.user.energy} энергии.`)
+        } catch (e) {
+         this.ctx.reply('Что-то пошло не так.')
+        }
     }
 
     async collectHafen() {
         await this.ctx.user.dec('energy', this.jobs.fishing.energy)
         const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
-        await this.cb.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
+        // await this.cb.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${this.ctx.user.energy} энергии.`)
+        await this.cb.reply(`${lang.inDev}`)
     }
 
     async workhard() {

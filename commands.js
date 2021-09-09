@@ -5,7 +5,7 @@ const { Job } = require('./scenes/job')
 module.exports = async(bot, lang, userdb, bp) => {
     const Markup = require('node-vk-bot-api/lib/markup')
 
-    bot.command([lang.start,'Начать','Меню','menu'], async (ctx) => {
+    bot.command([lang.start,lang.back,'Начать','Меню','menu'], async (ctx) => {
         if (ctx.user.acclvl >= 4) {
             return await ctx.reply(lang.navm, null, Markup
                 .keyboard([
@@ -104,6 +104,12 @@ module.exports = async(bot, lang, userdb, bp) => {
                 timer : fn
             })
         }
+    })
+
+    await bot.event('message_reply', async (ctx, next) => {
+        // console.log(ctx)
+
+        return next()
     })
 
     bot.on(async (ctx) => {
@@ -217,6 +223,11 @@ module.exports = async(bot, lang, userdb, bp) => {
                 inv += `${lang.wood}: ${ctx.user.inv.wood}\n`
                 inv += `${ctx.user.inv.rareHerbs === 0 ? '' : `🍀 Редкие Травы: ${ctx.user.inv.rareHerbs}\n`}`
                 inv += `${ctx.user.inv.rareOre === 0 ? '' : `💎 Редкая Руда: ${ctx.user.inv.rareOre}\n`}`
+                inv += `🐟 Рыба: ${ctx.user.inv.fish}\n`
+                inv += `${ctx.user.inv.rareFish === 0 ? '' : `🐡 Редкая Рыба: ${ctx.user.inv.rareFish}\n`}`
+                inv += `\n${!ctx.user.items.fishingRod ? '' : `🎣 Удочка: Есть\n`}`
+                inv += `${ctx.user.items.bait === 0 ? '' : `🐛 Наживка: ${ctx.user.items.bait}\n`}`
+                inv += `${ctx.user.items.energyPotion === 0 ? '' : `🧪 Зелье ОЭ: ${ctx.user.items.energyPotion}\n`}`
                 inv += `\n👜 Вес Инвентаря: ${ctx.user.currWeight}/${ctx.user.invWeight}\n`
 
                 return await ctx.reply(`Инвентарь\n ${inv}`)
@@ -283,17 +294,104 @@ module.exports = async(bot, lang, userdb, bp) => {
                 await ctx.user.inc('balance', 1).then(ctx.reply(ctx.user.balance))
                 return
             case lang.market:
-                ctx.reply(`Что вы хотели-бы продать?`, null, Markup
+                ctx.reply(`Куда вы направляетесь?`, null, Markup
                     .keyboard([
                         [
                             Markup.button('Продать материалы', 'primary', 'market.sell.ore'),
-                            Markup.button(lang.inDev, 'primary', 'menu'),
+                            Markup.button('Купить', 'primary', 'market.buy.items'),
                         ],
                         [
                             Markup.button(lang.back, 'negative', 'menu'),
                         ]
                     ])
                 )
+                return
+            case 'market.buy.items':
+                ctx.reply(`Что вы хотели-бы купить?`, null, Markup
+                    .keyboard([
+                        [
+                            Markup.button('Удочка', 'primary', 'fishingRod'),
+                            Markup.button('Наживка', 'primary', 'bait'),
+                        ],
+                        [
+                            Markup.button('Банка ОЭ', 'primary', 'energyPotion'),
+                            Markup.button(lang.inDev, 'primary'),
+                        ],
+                        [
+                            Markup.button(lang.back, 'negative', lang.market),
+                        ]
+                    ])
+                )
+                return
+            case 'energyPotion':
+                ctx.reply(`Зелье Энергии 6 500 ${lang.curr} восстанавливает 25 ОЭ.`, null, Markup
+                    .keyboard(
+                        [
+                            Markup.button('Купить', 'default', `${ctx.cmd}.buy`),
+                            Markup.button('Отмена', 'default', `menu`),
+                        ],
+                    )
+                    .inline()
+                )
+                return
+            case 'energyPotion.buy':
+                if (ctx.user.balance < 6500) {return ctx.reply('Недостаточно средств')}
+                await ctx.user.dec('balance', 6500)
+                await ctx.bank.inc('balance', 6500)
+                await ctx.user.inc('items', 1, 'energyPotion')
+                await ctx.reply('Вы успешно приобрели 🧪')
+                return
+            case 'fishingRod':
+                ctx.reply(`Удочка стоит 5 000 ${lang.curr}.`, null, Markup
+                    .keyboard(
+                        [
+                            Markup.button('Купить', 'default', `${ctx.cmd}.buy`),
+                            Markup.button('Отмена', 'default', `menu`),
+                        ],
+                    )
+                    .inline()
+                )
+                return
+            case 'fishingRod.buy':
+                if (ctx.user.balance < 5000) {return ctx.reply('Недостаточно средств')}
+                if (ctx.user.items.fishingRod) {return ctx.reply('У вас уже есть удочка 🎣')}
+                await ctx.user.dec('balance', 5000)
+                await ctx.bank.inc('balance', 5000)
+                await ctx.user.set('items', true, 'fishingRod')
+                await ctx.reply('Вы успешно приобрели 🎣')
+                return
+            case 'bait':
+                ctx.reply(`Текущий курс 1 Наживка 🐛 = 20 ${lang.curr}\nСколько вы хотите купить?.`, null, Markup
+                    .keyboard(
+                        [
+                            Markup.button(10, 'default', `${ctx.cmd}.buy.10`),
+                            Markup.button(50, 'default', `${ctx.cmd}.buy.50`),
+                            Markup.button(100, 'default', `${ctx.cmd}.buy.100`),
+                        ],
+                    )
+                    .inline()
+                )
+                return
+            case 'bait.buy.10':
+                if (ctx.user.balance < 20*10) {return ctx.reply('Недостаточно средств')}
+                await ctx.user.dec('balance', 20*10)
+                await ctx.bank.inc('balance', 20*10)
+                await ctx.user.inc('items', 10, 'bait')
+                await ctx.reply('Вы успешно приобрели 10 🐛') 
+                return
+            case 'bait.buy.50':
+                if (ctx.user.balance < 20*50) {return ctx.reply('Недостаточно средств')}
+                await ctx.user.dec('balance', 20*50)
+                await ctx.bank.inc('balance', 20*50)
+                await ctx.user.inc('items', 50, 'bait')
+                await ctx.reply('Вы успешно приобрели 50 🐛')
+                return
+            case 'bait.buy.100':
+                if (ctx.user.balance < 20*100) {return ctx.reply('Недостаточно средств')}
+                await ctx.user.dec('balance', 20*100)
+                await ctx.bank.inc('balance', 20*100)
+                await ctx.user.inc('items', 100, 'bait')
+                await ctx.reply('Вы успешно приобрели 100 🐛')
                 return
             case 'market.sell.ore':
                 ctx.reply(`Что вы хотели-бы продать?`, null, Markup
@@ -307,7 +405,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                             Markup.button(lang.wood, 'primary', 'wood'),
                         ],
                         [
-                            Markup.button(lang.back, 'negative', 'menu'),
+                            Markup.button(lang.back, 'negative', lang.market),
                         ]
                     ])
                 )

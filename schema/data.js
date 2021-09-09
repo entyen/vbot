@@ -21,6 +21,13 @@ const userSchem = new mongoose.Schema({
         ore: Number,
         rareOre: Number,
         wood: Number,
+        fish: Number,
+        rareFish: Number,
+    },
+    items: {
+        fishingRod: Boolean,
+        bait: Number,
+        energyPotion: Number,
     },
     plot: {
         own: Boolean,

@@ -10,6 +10,7 @@ let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 
 //vk api connect
 const VkBot = require('node-vk-bot-api')
+const api = require('node-vk-bot-api/lib/api')
 const Markup = require('node-vk-bot-api/lib/markup')
 const bot = new VkBot({
     token: tea.TOKEN,
@@ -75,17 +76,10 @@ console.loge = (log) => console.log('\x1b[96m%s\x1b[0m', log)
 bot.use(async (ctx, next) => {
     ctx.timestamp = new Date().getTime()
     const date = new Date(new Date().toLocaleString('en-US', {timeZone: 'Etc/GMT-6'}))
-    // const storageSet = await bot.execute('storage.set', {
-    //     user_id: ctx.message.peer_id,
-    //     key: 'waitTime',
-    //     value: ctx.timestamp,
-    // })
     // const storageGet = await bot.execute('storage.get', {
     //     user_id: ctx.message.peer_id,
     //     key: 'waitTime',
     // })
-    // console.log(storageSet, storageGet, ctx.timestamp)
-    // if (storageGet === ctx.timestamp) {return ctx.reply('gkd')}
 
 
     if (ctx.message.from_id > 0 && ctx.message.id == 0) {
@@ -150,6 +144,13 @@ bot.use(async (ctx, next) => {
                     ore: 0,
                     rareOre: 0,
                     wood: 0,
+                    fish: 0,
+                    rareFish: 0,
+                },
+                items: {
+                    fishingRod: false,
+                    bait: 0,
+                    energyPotion: 0,
                 },
                 plot: {
                     own: false,
@@ -214,6 +215,13 @@ bot.use(async (ctx, next) => {
                     ore: 0,
                     rareOre: 0,
                     wood: 0,
+                    fish: 0,
+                    rareFish: 0,
+                },
+                items: {
+                    fishingRod: false,
+                    bait: 0,
+                    energyPotion: 0,
                 },
                 plot: {
                     own: false,
@@ -246,12 +254,8 @@ bot.use(async (ctx, next) => {
             await ctx.user.inc('level', 1)
             await ctx.reply(`Поздравляю вы повысили уровень до ${ctx.user.level} 🎉`)
         }
-
     }
-    else {
-        return
-    }
-
+    else return
 
     return await next()
 })
