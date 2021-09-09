@@ -172,9 +172,15 @@ bot.use(async (ctx, next) => {
         }
         ctx.cmd = ctx.message.payload ? ctx.message.payload.replace(/["{}:]/g, '').replace('button', '') : ctx.message.payload
         const weightMath = async () => {
-            let wi = JSON.stringify(ctx.user.inv).replace(/["{}:]/g, '').replace(/[a-zA-Z]/g, '').split(',')
+            const massItems = [
+            { count: ctx.user.inv.herbs*0.5 },
+            { count: ctx.user.inv.sand*2 },
+            { count: ctx.user.inv.ore*3 },
+            { count: ctx.user.inv.wood*1 },
+            { count: ctx.user.inv.fish*10 },
+            ] 
             let sum = 0
-            wi.forEach(x => sum += (+x))
+            massItems.forEach((x,y,z) => sum += +massItems[y].count)
             return sum
         }
         ctx.user.currWeight = await weightMath()
@@ -248,11 +254,18 @@ bot.use(async (ctx, next) => {
 
         ctx.cmd = ctx.message.payload.cmd
         const weightMath = async () => {
-            let wi = JSON.stringify(ctx.user.inv).replace(/["{}:]/g, '').replace(/[a-zA-Z]/g, '').split(',')
+            const massItems = [
+            { count: ctx.user.inv.herbs*0.5 },
+            { count: ctx.user.inv.sand*2 },
+            { count: ctx.user.inv.ore*3 },
+            { count: ctx.user.inv.wood*1 },
+            { count: ctx.user.inv.fish*10 },
+            ] 
             let sum = 0
-            wi.forEach(x => sum += (+x))
+            massItems.forEach((x,y,z) => sum += +massItems[y].count)
             return sum
         }
+
         ctx.user.currWeight = await weightMath()
         ctx.user._acclvl = ctx.user.acclvl == 0 ? lang.user : ctx.user.acclvl == 1 ? lang.vip : ctx.user.acclvl == 2 ? lang.plat :
             ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
@@ -342,6 +355,47 @@ cron.addCallback(async () => {
     await bank.set('dpi', wood.price.toFixed(1), 'wood')
     await bank.set('dpi', ore.price.toFixed(1), 'ore')
     await bank.set('dpi', herbs.price.toFixed(1), 'herbs')
+
+    const user = await userdb.find({})
+    let rate = [{}]
+    let result = `Рейтинг Игроков: \n`
+    for (i = 0; i < user.length; i++) {
+        if (user[i].balance > 0) {
+            rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
+        }
+    }
+    rate.sort((a, b) => {
+        return b.b - a.b
+    })
+    for (i = 0; i < 5; i++) {
+        if (rate[i] !== undefined) {
+            result += `${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang.curr}\n`
+        }
+    }
+
+    const widget = {
+      title: "Top:",
+      title_url: "https://vk.com/vinmt",
+      title_counter: 5,
+      more: "Информация",
+      more_url: "https://vk.com/vinmt",
+      text: `${result}`,
+      descr: 
+        `Цены на ресурсы:
+        ${lang.sand}: ${sand.price.toFixed(1)}
+        ${lang.ore}: ${ore.price.toFixed(1)}
+        ${lang.wood}: ${wood.price.toFixed(1)}
+        ${lang.herbs}: ${herbs.price.toFixed(1)}
+        `,
+    }
+    try {
+        api('appWidgets.update', {
+            access_token: tea.WIGETTOKEN,
+            code: `return ${JSON.stringify(widget)};`,
+            type: 'text',
+        })
+    } catch (e) {console.errore(e)}
+
 })
 cron.start()
 
