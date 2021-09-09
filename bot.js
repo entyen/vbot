@@ -369,7 +369,7 @@ cron.addCallback(async () => {
     })
     for (i = 0; i < 5; i++) {
         if (rate[i] !== undefined) {
-            result += `${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang.curr}\n`
+            result += `${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'} ${rate[i].n} = ${rate[i].b} ${lang.curr}\n`
         }
     }
 
