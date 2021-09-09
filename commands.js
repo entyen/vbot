@@ -7,8 +7,8 @@ module.exports = async(bot, lang, userdb, bp) => {
 
     const usersMap = new Map()
     const LIMIT = 5
-    const DIFF = 105
-    const TIME = 100
+    const DIFF = 205
+    const TIME = 200
     bot.event('message_event', async (ctx) => {
         const cb = (message) => {
             bot.execute('messages.sendMessageEventAnswer', {
@@ -37,6 +37,7 @@ module.exports = async(bot, lang, userdb, bp) => {
             userData.timer = setTimeout(() => {
                 usersMap.delete(ctx.message.peer_id)
                 console.log('Removed from map.')
+                cb(`Подождите немного`)
             }, TIME)
             usersMap.set(ctx.message.peer_id, userData)
         }
@@ -44,7 +45,7 @@ module.exports = async(bot, lang, userdb, bp) => {
             ++msgCount
             if(parseInt(msgCount) === LIMIT) {
 
-               ctx.reply("Warning: Spamming forbidden.")
+               cb(`Warning: Spamming forbidden.`)
                
             } else {
                 userData.msgCount = msgCount;

@@ -252,7 +252,7 @@ bot.use(async (ctx, next) => {
             await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
         }
 
-        ctx.cmd = ctx.message.payload.cmd
+        ctx.message.payload ? ctx.cmd = ctx.message.payload.cmd : ctx.message.payload
         const weightMath = async () => {
             const massItems = [
             { count: ctx.user.inv.herbs*0.5 },
@@ -306,8 +306,8 @@ const randCurr = (min, max) => {
 }
 
 
-const cron = new CronJob('*/5 * * * *', null, false, 'Europe/Moscow')
-cron.addCallback(async () => {
+const energy = new CronJob('*/3 * * * *', null, false, 'Europe/Moscow')
+energy.addCallback(async () => {
     user = await userdb.find({})
     for (i = 0; i < user.length; i++) {
         if (user[i].energy === 100) {
@@ -326,7 +326,8 @@ cron.addCallback(async () => {
     }
 })
 
-cron.addCallback(async () => {
+const updater = new CronJob('*/10 * * * *', null, false, 'Europe/Moscow')
+updater.addCallback(async () => {
     const bank = await bankdb.findOne({id: 0})
     const massItems = [
     { n: 'herbs', count: bank.inv.herbs },
@@ -350,7 +351,7 @@ cron.addCallback(async () => {
     const wood = await price('name', 'wood')
     const ore = await price('name', 'ore')
     const herbs = await price('name', 'herbs')
-    const fish = await randCurr(8,15)
+    const fish = await randCurr(8,20)
 
     await bank.set('dpi', sand.price.toFixed(1), 'sand')
     await bank.set('dpi', wood.price.toFixed(1), 'wood')
@@ -360,7 +361,7 @@ cron.addCallback(async () => {
 
     const user = await userdb.find({})
     let rate = [{}]
-    let result = `Рейтинг Игроков: \n`
+    let result = ``
     for (i = 0; i < user.length; i++) {
         if (user[i].balance > 0) {
             rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
@@ -371,9 +372,10 @@ cron.addCallback(async () => {
     })
     for (i = 0; i < 5; i++) {
         if (rate[i] !== undefined) {
-            result += `${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'} ${rate[i].n} = ${rate[i].b} ${lang.curr}\n`
+            result += `${rate[i].vid} ${rate[i].n} ${rate[i].b} `
         }
     }
+    const resultMass = result.split(' ') 
 
     const widget = {
       title: "Top:",
@@ -391,16 +393,91 @@ cron.addCallback(async () => {
         ${lang.fish}: ${Math.round(fish)}
         `,
     }
+
+    const tableWiget = {
+        title: "TOP",
+        title_url: "https://vk.com/vinmt",
+        title_counter: 5,
+        head: [{
+            text: "Рейтинг Игроков:"
+        }, 
+        {
+            text: "Цены ресурсов:",
+            align: "center"
+        }],
+        body: 
+        [
+            [
+            {
+                // icon_id: "🥇",
+                text: `🥇 ${resultMass[1]} ${resultMass[2]}${lang.curr}`,
+                url: `https://vk.com/id${resultMass[0]}`
+            },
+            {
+                text: `${lang.sand}: ${sand.price.toFixed(1)}`,
+            }
+            ],
+            [
+            {
+                text: `🥈 ${resultMass[4]} ${resultMass[5]}${lang.curr}`,
+                url: `https://vk.com/id${resultMass[3]}`
+            },
+            {
+                text: `${lang.ore}: ${ore.price.toFixed(1)}`,
+            }
+            ],
+            [
+            {
+                // icon_id: "3484735_23434324"
+                text: `🥉 ${resultMass[7]} ${resultMass[8]}${lang.curr}`,
+                url: `https://vk.com/id${resultMass[6]}`
+            },
+            {
+                text: `${lang.wood}: ${wood.price.toFixed(1)}`,
+            }
+            ],
+            [
+            {
+                // icon_id: "3484735_23434324"
+                text: `🏅 ${resultMass[10]} ${resultMass[11]}${lang.curr}`,
+                url: `https://vk.com/id${resultMass[9]}`
+            },
+            {
+                text: `${lang.herbs}: ${herbs.price.toFixed(1)}`,
+            }
+            ],
+            [
+            {
+                // icon_id: "3484735_23434324"
+                text: `🏅 ${resultMass[13]} ${resultMass[14]}${lang.curr}`,
+                url: `https://vk.com/id${resultMass[12]}`
+            },
+            {
+                text: `${lang.fish}: ${Math.round(fish)}`,
+            }
+            ]
+        ],
+    }
+
     try {
         api('appWidgets.update', {
             access_token: tea.WIGETTOKEN,
-            code: `return ${JSON.stringify(widget)};`,
-            type: 'text',
+            code: `return ${JSON.stringify(tableWiget)};`,
+            type: 'table',
         })
     } catch (e) {console.errore(e)}
 
 })
-cron.start()
+
+// api('appWidgets.getAppImages', {
+//     access_token: tea.WIGETTOKEN,
+//     offset: 0,
+//     count: 100,
+//     image_type: '24x24',
+// }).then(console.log)
+
+energy.start()
+updater.start()
 
 userdb.prototype.inc = function (field, value, field2) {
   if (field2) {
