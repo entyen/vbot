@@ -13,6 +13,7 @@ const userSchem = new mongoose.Schema({
         hasWorked: Boolean,
         bonus: Boolean,
         eFullAlert: Boolean,
+        buffNewByAlert: Boolean,
     },
     inv: {
         herbs: Number,
@@ -28,6 +29,14 @@ const userSchem = new mongoose.Schema({
         fishingRod: Boolean,
         bait: Number,
         energyPotion: Number,
+    },
+    boosters: {
+        energyCount: Number,
+        energyRegen: Number,
+        harvest: Number,
+    },
+    buffs: {
+        newby: Number,
     },
     plot: {
         own: Boolean,

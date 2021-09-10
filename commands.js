@@ -75,7 +75,7 @@ module.exports = async(bot, lang, userdb, bp) => {
     })
 
     bot.on(async (ctx) => {
-        const cmba = ctx.message.text.split(' ')
+        const cmba = ctx.message.text.toLowerCase().split(' ')
 
         const marketSell = async (count, item, eachPrice) => {
             count === 'all' ? count = +ctx.user.inv[item] : count = +ctx.cmd.split('.')[2]
@@ -123,7 +123,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 console.log(e)
             }
         } else
-        if (cmba[0] === 'Рейтинг' || cmba[0] === 'rate' || cmba[0] === 'top') {
+        if (cmba[0] === 'рейтинг' || cmba[0] === 'rate' || cmba[0] === 'top') {
             user = await userdb.find({})
             let rate = [{}]
             let result = `Рейтинг: \n`
@@ -142,6 +142,28 @@ module.exports = async(bot, lang, userdb, bp) => {
         } else
         if (cmba[0] === 'report') {
                 return await bot.sendMessage([671833319,427691466], cmba.join().replace(/,/g, ' ').replace('report', `@id${ctx.user.id}(${ctx.user.f_name})`))
+        } else
+        if (cmba[0] === 'buffs') {
+                let time = {}
+                time.newby = ((ctx.user.buffs.newby - ctx.timestamp)/60/60/1000).toFixed(0)
+                let buffs = `Баффы:\n`
+                buffs += `${time.newby <= 0 ? '🧠 Эффект Новичка: Истек' : `🧠 Эффект Новичка: ${time.newby} часов\n`}`
+                return await bot.sendMessage(ctx.user.id, cmba.join().replace(/,/g, ' ').replace('buffs',  buffs))
+        } else
+        if (cmba[0] === 'admbuff') {
+            try{
+                let locUser = await userdb.findOne({ uid: cmba[1] })
+                if (cmba[1] && cmba[2] && cmba[3] && ctx.user.acclvl >= 7) {
+                    let buffInfo = {}
+                    const hour = ctx.timestamp + +cmba[3]*60*60*1000
+                    cmba[2] === '0' ? buffInfo.newby = '🧠 Эффект Новичка' : buffInfo.newby = null
+                    await ctx.reply(`Вы наложили положительный эффект ${cmba[1]} на игрока @id${locUser.id}(${locUser.f_name}) на ${cmba[3]} часов`)
+                    await locUser.set('buffs', hour, 'newby')
+                    await bot.sendMessage(locUser.id, `Вы получили положительный ${buffInfo.newby} на ${cmba[3]} часа \nПроверить положительные эффекты на себе можно командой \'buffs\'`)
+                } else {
+                    await ctx.reply('Нет прав использовать данную команду')
+                }
+            } catch (e) {ctx.reply('Что-то не верно проверте значения')}
         } else
         if (cmba[0] === 'ansv') {
                 if (ctx.user.acclvl < 7) return lang.noPerm
@@ -208,7 +230,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 text += ` 👤 Статус Аккаунта: ${ctx.user._acclvl}\n`
                 text += `🌟 Уровень: ${ctx.user.level} [${ctx.user.exp}/${100*(ctx.user.level+1)}]\n`
                 text += `🧤 Расса: ${ctx.user.race === 0 && 'Без Рассы'}\n`
-                text += `⚡ Очки Энергии: ${ctx.user.energy}\n`
+                text += `⚡ Очки Энергии: ${ctx.user.energy} из ${100 * ctx.user.boosters.energyCount}\n`
                 text += `🔔 Уведомления: ${ctx.user.alert ? 'Включены' : 'Выключены'}\n`
                 text += `\n📗 Дата регистрации: ${ctx.user.regDate}`
 

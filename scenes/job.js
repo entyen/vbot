@@ -268,7 +268,6 @@ class Job {
         try {
             if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
             await this.ctx.user.dec('items', 1, 'bait')
-            await this.ctx.user.inc('exp', this.jobs.fishing.energyX)
             const earn = Math.round(randCurr(1, 5))
             const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
                 peer_id: this.ctx.message.user_id,
@@ -288,7 +287,6 @@ class Job {
         try {
             if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
             await this.ctx.user.dec('items', 1, 'bait')
-            await this.ctx.user.inc('exp', this.jobs.fishing.energyX)
             const earn = Math.round(randCurr(4, 10))
             const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
                 peer_id: this.ctx.message.user_id,
@@ -308,7 +306,6 @@ class Job {
         try {
             if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
             await this.ctx.user.dec('items', 1, 'bait')
-            await this.ctx.user.inc('exp', this.jobs.fishing.energyX)
             const earn = Math.round(randCurr(10, 24))
             const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
                 peer_id: this.ctx.message.user_id,
