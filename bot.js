@@ -212,7 +212,7 @@ bot.use(async (ctx, next) => {
         if (ctx.user.buffs.newby <= ctx.timestamp) {
             if (ctx.user.timers.buffNewByAlert) {
                 await ctx.user.set('timers', false, 'buffNewByAlert')
-                await ctx.user.dec('boosters', 2, 'energyCount')
+                await ctx.user.dec('boosters', 1, 'energyCount')
                 await ctx.user.dec('boosters', 1, 'energyRegen')
                 await ctx.reply(`Действие баффа 🧠 Эффект Новичка закончилось.`)
             }
@@ -220,7 +220,7 @@ bot.use(async (ctx, next) => {
         if (ctx.user.buffs.newby >= ctx.timestamp) {
             if (!ctx.user.timers.buffNewByAlert) {
                 await ctx.user.set('timers', true, 'buffNewByAlert')
-                await ctx.user.inc('boosters', 2, 'energyCount')
+                await ctx.user.inc('boosters', 1, 'energyCount')
                 await ctx.user.inc('boosters', 1, 'energyRegen')
             }
         }
