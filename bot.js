@@ -183,7 +183,7 @@ bot.use(async (ctx, next) => {
             })
             ctx.user = await userdb.findOne({id: ctx.message.from_id})
             await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
-            await bot.sendMessage(ctx.message.from_id, `Вы получили положительный 🧠 Эффект Новичка на 7 Дней \nПроверить положительные эффекты на себе можно командой \'buffs\'`)
+            await bot.sendMessage(ctx.message.from_id, `Вы получили 🧠 Эффект Новичка на 7 Дней \nПроверить эффекты на себе можно командой \'buffs\'`)
         }
         ctx.cmd = ctx.message.payload ? ctx.message.payload.replace(/["{}:]/g, '').replace('button', '') : ctx.message.payload
         const weightMath = async () => {
@@ -293,7 +293,7 @@ bot.use(async (ctx, next) => {
             })
             ctx.user = await userdb.findOne({id: ctx.message.user_id})
             await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
-            await bot.sendMessage(ctx.message.user_id, `Вы получили положительный 🧠 Эффект Новичка на 7 Дней \nПроверить положительные эффекты на себе можно командой \'buffs\'`)
+            await bot.sendMessage(ctx.message.user_id, `Вы получили 🧠 Эффект Новичка на 7 Дней \nПроверить эффекты на себе можно командой \'buffs\'`)
         }
 
         ctx.message.payload ? ctx.cmd = ctx.message.payload.cmd : ctx.message.payload

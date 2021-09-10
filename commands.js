@@ -143,6 +143,13 @@ module.exports = async(bot, lang, userdb, bp) => {
         if (cmba[0] === 'report') {
                 return await bot.sendMessage([671833319,427691466], cmba.join().replace(/,/g, ' ').replace('report', `@id${ctx.user.id}(${ctx.user.f_name})`))
         } else
+        if (cmba[0] === 'use') {
+            if (cmba[1] === 'банка' && cmba[2] === 'оэ' && ctx.user.items.energyPotion > 0) {
+                await ctx.user.inc('energy', 25)
+                await ctx.user.dec('items', 1, 'energyPotion')
+                await ctx.reply(`Вы использвали банку на ОЭ теперь у вас ${ctx.user.energy} ⚡ осталось еще ${ctx.user.items.energyPotion} Банок ОЭ`)
+            } else {ctx.reply('Неверный предмет или у вас закончились банки')}
+        } else
         if (cmba[0] === 'buffs') {
                 let time = {}
                 time.newby = ((ctx.user.buffs.newby - ctx.timestamp)/60/60/1000).toFixed(0)
@@ -157,9 +164,9 @@ module.exports = async(bot, lang, userdb, bp) => {
                     let buffInfo = {}
                     const hour = ctx.timestamp + +cmba[3]*60*60*1000
                     cmba[2] === '0' ? buffInfo.newby = '🧠 Эффект Новичка' : buffInfo.newby = null
-                    await ctx.reply(`Вы наложили положительный эффект ${cmba[1]} на игрока @id${locUser.id}(${locUser.f_name}) на ${cmba[3]} часов`)
+                    await ctx.reply(`Вы наложили ${cmba[2]} на игрока @id${locUser.id}(${locUser.f_name}) на ${cmba[3]} часов`)
                     await locUser.set('buffs', hour, 'newby')
-                    await bot.sendMessage(locUser.id, `Вы получили положительный ${buffInfo.newby} на ${cmba[3]} часа \nПроверить положительные эффекты на себе можно командой \'buffs\'`)
+                    await bot.sendMessage(locUser.id, `Вы получили ${buffInfo.newby} на ${cmba[3]} часа \nПроверить эффекты на себе можно командой \'buffs\'`)
                 } else {
                     await ctx.reply('Нет прав использовать данную команду')
                 }
@@ -359,7 +366,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 await ctx.user.dec('balance', 6500)
                 await ctx.bank.inc('balance', 6500)
                 await ctx.user.inc('items', 1, 'energyPotion')
-                await ctx.reply('Вы успешно приобрели 🧪')
+                await ctx.reply('Вы успешно приобрели 🧪\nВы можете использовать ее командой \'use Банка ОЭ\'')
                 return
             case 'fishingRod':
                 ctx.reply(`Удочка стоит 5 000 ${lang.curr}.`, null, Markup
