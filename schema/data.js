@@ -14,6 +14,7 @@ const userSchem = new mongoose.Schema({
         bonus: Boolean,
         eFullAlert: Boolean,
         buffNewByAlert: Boolean,
+        buffVipAlert: Boolean,
     },
     inv: {
         herbs: Number,
@@ -37,6 +38,7 @@ const userSchem = new mongoose.Schema({
     },
     buffs: {
         newby: Number,
+        vip: Number,
     },
     plot: {
         own: Boolean,

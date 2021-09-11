@@ -49,7 +49,9 @@ const bankSchem = require('./schema/bank.js')
 const userdb = mongoose.model('users', userSchem)
 const bankdb = mongoose.model('bank', bankSchem)
 
+//modules
 const commands = require('./commands.js')
+const buff = require('./scenes/buff.js')
 
 app.post('/post', function(request, response){
     response.send('ok');    // echo the result back
@@ -64,6 +66,7 @@ app.get('/users', async (req, res) => {
     user = await userdb.find({})
     res.send(`${JSON.stringify(user)}`)
 })
+
 app.get('/bank', async (req, res) => {
     bank = await bankdb.find({})
     res.send(`${JSON.stringify(bank)}`)
@@ -142,6 +145,7 @@ bot.use(async (ctx, next) => {
                     bonus: false,
                     eFullAlert: true,
                     buffNewByAlert: false,
+                    buffVipAlert: false,
                 },
                 inv: {
                     herbs: 0,
@@ -165,6 +169,7 @@ bot.use(async (ctx, next) => {
                 },
                 buffs: {
                     newby: ctx.timestamp + (10080*60*1000),
+                    vip: null,
                 },
                 plot: {
                     own: false,
@@ -179,11 +184,11 @@ bot.use(async (ctx, next) => {
                 level: 0,
                 energy: 100,
                 race: 0,
-                alert: true
+                alert: false
             })
             ctx.user = await userdb.findOne({id: ctx.message.from_id})
             await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
-            await bot.sendMessage(ctx.message.from_id, `Вы получили 🧠 Эффект Новичка на 7 Дней \nПроверить эффекты на себе можно командой \'buffs\'`)
+            await ctx.reply(`Вы получили 🧠 Эффект Новичка на 7 Дней \nПроверить эффекты на себе можно командой \'buffs\'`)
         }
         ctx.cmd = ctx.message.payload ? ctx.message.payload.replace(/["{}:]/g, '').replace('button', '') : ctx.message.payload
         const weightMath = async () => {
@@ -202,27 +207,10 @@ bot.use(async (ctx, next) => {
         ctx.user._acclvl = ctx.user.acclvl == 0 ? lang.user : ctx.user.acclvl == 1 ? lang.vip : ctx.user.acclvl == 2 ? lang.plat :
             ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
 
-
         if (ctx.user.exp >= 100 * (ctx.user.level + 1)) {
             await ctx.user.set('exp', 0)
             await ctx.user.inc('level', 1)
             await ctx.reply(`Поздравляю вы повысили уровень до ${ctx.user.level} 🎉`)
-        }
-
-        if (ctx.user.buffs.newby <= ctx.timestamp) {
-            if (ctx.user.timers.buffNewByAlert) {
-                await ctx.user.set('timers', false, 'buffNewByAlert')
-                await ctx.user.dec('boosters', 1, 'energyCount')
-                await ctx.user.dec('boosters', 1, 'energyRegen')
-                await ctx.reply(`Действие баффа 🧠 Эффект Новичка закончилось.`)
-            }
-        } else 
-        if (ctx.user.buffs.newby >= ctx.timestamp) {
-            if (!ctx.user.timers.buffNewByAlert) {
-                await ctx.user.set('timers', true, 'buffNewByAlert')
-                await ctx.user.inc('boosters', 1, 'energyCount')
-                await ctx.user.inc('boosters', 1, 'energyRegen')
-            }
         }
 
         } catch (e) {console.log(e)}
@@ -252,6 +240,7 @@ bot.use(async (ctx, next) => {
                     bonus: false,
                     eFullAlert: true,
                     buffNewByAlert: false,
+                    buffVipAlert: true,
                 },
                 inv: {
                     herbs: 0,
@@ -275,6 +264,7 @@ bot.use(async (ctx, next) => {
                 },
                 buffs: {
                     newby: +ctx.timestamp + (10080*60*1000),
+                    vip: null,
                 },
                 plot: {
                     own: false,
@@ -289,11 +279,11 @@ bot.use(async (ctx, next) => {
                 level: 0,
                 energy: 100,
                 race: 0,
-                alert: true
+                alert: false
             })
             ctx.user = await userdb.findOne({id: ctx.message.user_id})
             await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
-            await bot.sendMessage(ctx.message.user_id, `Вы получили 🧠 Эффект Новичка на 7 Дней \nПроверить эффекты на себе можно командой \'buffs\'`)
+            await ctx.reply(`Вы получили 🧠 Эффект Новичка на 7 Дней \nПроверить эффекты на себе можно командой \'buffs\'`)
         }
 
         ctx.message.payload ? ctx.cmd = ctx.message.payload.cmd : ctx.message.payload
@@ -318,22 +308,6 @@ bot.use(async (ctx, next) => {
             await ctx.user.set('exp', 0)
             await ctx.user.inc('level', 1)
             await ctx.reply(`Поздравляю вы повысили уровень до ${ctx.user.level} 🎉`)
-        }
-
-        if (ctx.user.buffs.newby <= ctx.timestamp) {
-            if (ctx.user.timers.buffNewByAlert) {
-                await ctx.user.set('timers', false, 'buffNewByAlert')
-                await ctx.user.dec('boosters', 2, 'energyCount')
-                await ctx.user.dec('boosters', 1, 'energyRegen')
-                await ctx.reply(`Действие баффа 🧠 Эффект Новичка закончилось.`)
-            }
-        } else 
-        if (ctx.user.buffs.newby >= ctx.timestamp) {
-            if (!ctx.user.timers.buffNewByAlert) {
-                await ctx.user.set('timers', true, 'buffNewByAlert')
-                await ctx.user.inc('boosters', 2, 'energyCount')
-                await ctx.user.inc('boosters', 1, 'energyRegen')
-            }
         }
 
         } catch (e) {
@@ -371,23 +345,32 @@ const randCurr = (min, max) => {
 }
 
 
-const energy = new CronJob('*/3 * * * *', null, false, 'Europe/Moscow')
-energy.addCallback(async () => {
-    user = await userdb.find({})
-    for (i = 0; i < user.length; i++) {
-        if (user[i].energy === 100 * user[i].boosters.energyCount) {
-            if (user[i].alert) {
-                if (!user[i].timers.eFullAlert) {
-                    await user[i].set('timers', true, 'eFullAlert')
-                    await bot.sendMessage(user[i].id, `Энергия полная, вперед тратить.`)
+//enegry regen check
+setInterval(async () => {
+    userEn = await userdb.find({})
+    for (i = 0; i < userEn.length; i++) {
+        if (userEn[i].energy >= (100 * userEn[i].boosters.energyCount)) {
+            if (userEn[i].alert) {
+                if (!userEn[i].timers.eFullAlert) {
+                    await userEn[i].set('timers', true, 'eFullAlert')
+                    await bot.sendMessage(userEn[i].id, `Энергия полная, вперед тратить.`)
                 }
             }
         } else {
-            await user[i].set('timers', false, 'eFullAlert')
-            await user[i].inc('energy', user[i].boosters.energyRegen)
+            userEn[i].timers.eFullAlert = false
+            userEn[i].energy = userEn[i].energy + userEn[i].boosters.energyRegen
+            await userEn[i].save()
         }
     }
-})
+}, 60000)
+
+//buff check
+setInterval(async () => {
+    user = await userdb.find({})
+    for (i = 0; i < user.length; i++) {
+        await buff(bot, user, lang)
+    }
+}, 1000)
 
 const updater = new CronJob('*/30 * * * *', null, false, 'Europe/Moscow')
 updater.addCallback(async () => {
@@ -400,8 +383,8 @@ updater.addCallback(async () => {
     ] 
     massItems.sort((a,b) => {return b.count - a.count})
     let itemPrice = []
-    const randX = randCurr(0.3,0.9)
-    massItems.forEach( (x, y) => {return itemPrice[y] = {price: 0.4+y*randX , name: x.n}})
+    const randX = randCurr(0.2,0.7)
+    massItems.forEach( (x, y) => {return itemPrice[y] = {price: (y+1)*randX , name: x.n}})
     const price = (prop, val) => {
         for (i=0; i < itemPrice.length; i++) {
             if (itemPrice[i][prop] === val){
@@ -478,7 +461,7 @@ updater.addCallback(async () => {
                 text: ` ${resultMass[5]} ${lang.curr}`,
             },
             {
-                text: `${lang.ore}: ${ore.price.toFixed(1)}`,
+                text: ` `,
             }
             ],
             [
@@ -491,7 +474,7 @@ updater.addCallback(async () => {
                 text: `${resultMass[8]} ${lang.curr}`,
             },
             {
-                text: `${lang.wood}: ${wood.price.toFixed(1)}`,
+                text: `${lang.ore}: ${ore.price.toFixed(1)}`,
             }
             ],
             [
@@ -504,7 +487,7 @@ updater.addCallback(async () => {
                 text: `${resultMass[11]} ${lang.curr}`,
             },
             {
-                text: `${lang.herbs}: ${herbs.price.toFixed(1)}`,
+                text: ` `,
             }
             ],
             [
@@ -517,7 +500,59 @@ updater.addCallback(async () => {
                 text: `${resultMass[14]} ${lang.curr}`,
             },
             {
-                text: `${lang.fish}: ${Math.round(fish)}`,
+                text: `${lang.wood}: ${wood.price.toFixed(1)}`,
+            }
+            ],
+            [
+            {
+                icon_id: "205234117_774067",
+                text: resultMass[16],
+                url: `https://vk.com/id${resultMass[15]}`
+            },
+            {
+                text: `${resultMass[17]} ${lang.curr}`,
+            },
+            {
+                text: ` `,
+            }
+            ],
+            [
+            {
+                icon_id: "205234117_774067",
+                text: resultMass[19],
+                url: `https://vk.com/id${resultMass[18]}`
+            },
+            {
+                text: `${resultMass[20]} ${lang.curr}`,
+            },
+            {
+                text: `${lang.herbs}: ${herbs.price.toFixed(1)}`,
+            }
+            ],
+            [
+            {
+                icon_id: "205234117_774067",
+                text: resultMass[22],
+                url: `https://vk.com/id${resultMass[21]}`
+            },
+            {
+                text: `${resultMass[23]} ${lang.curr}`,
+            },
+            {
+                text: ` `,
+            }
+            ],
+            [
+            {
+                icon_id: "205234117_774067",
+                text: resultMass[25],
+                url: `https://vk.com/id${resultMass[24]}`
+            },
+            {
+                text: `${resultMass[26]} ${lang.curr}`,
+            },
+            {
+                text: `${lang.fish}: ${Math.round(fish) === 20 ? `${Math.round(fish)} MAX`: Math.round(fish)}`,
             }
             ],
         ],
@@ -533,6 +568,7 @@ updater.addCallback(async () => {
 
 })
 
+updater.start()
 // const upload = require('./uploadMiddleware')
 class photoGroupWiget {
     
@@ -568,23 +604,20 @@ class photoGroupWiget {
 const photoWiget = new photoGroupWiget()
 // photoWiget.testJob('24x24', './stN.png')
 
-energy.start()
-updater.start()
-
 userdb.prototype.inc = function (field, value, field2) {
   if (field2) {
-    this[field][field2] += value
+    this[field][field2] += +value
   } else {
-    this[field] += value
+    this[field] += +value
   }
   return this.save()
 }
 
 userdb.prototype.dec = function (field, value, field2) {
   if (field2) {
-    this[field][field2] -= value
+    this[field][field2] -= +value
   } else {
-    this[field] -= value
+    this[field] -= +value
   }
   return this.save()
 }
@@ -600,18 +633,18 @@ userdb.prototype.set = function (field, value, field2) {
 
 bankdb.prototype.inc = function (field, value, field2) {
   if (field2) {
-    this[field][field2] += value
+    this[field][field2] += +value
   } else {
-    this[field] += value
+    this[field] += +value
   }
   return this.save()
 }
 
 bankdb.prototype.dec = function (field, value, field2) {
   if (field2) {
-    this[field][field2] -= value
+    this[field][field2] -= +value
   } else {
-    this[field] -= value
+    this[field] -= +value
   }
   return this.save()
 }

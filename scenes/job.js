@@ -273,10 +273,10 @@ class Job {
                 peer_id: this.ctx.message.user_id,
                 conversation_message_ids: this.ctx.message.conversation_message_id,
             })
-            await this.bot.execute('messages.edit', {
+            await this.bot.execute('messages.delete', {
                 peer_id: this.ctx.message.user_id,
-                message: 'Рыбалка Завершена',
                 message_id: NeedMessage.items[0].id,
+                delete_for_all: 1,
             })
             await this.ctx.user.inc('inv', earn, 'fish')
             await this.cb.reply(`Эххх ну так себе вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.items.bait} наживки.`)
@@ -292,10 +292,10 @@ class Job {
                 peer_id: this.ctx.message.user_id,
                 conversation_message_ids: this.ctx.message.conversation_message_id,
             })
-            await this.bot.execute('messages.edit', {
+            await this.bot.execute('messages.delete', {
                 peer_id: this.ctx.message.user_id,
-                message: 'Рыбалка Завершена',
                 message_id: NeedMessage.items[0].id,
+                delete_for_all: 1,
             })
             await this.ctx.user.inc('inv', earn, 'fish')
             await this.cb.reply(`Неплохо неплохо вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.items.bait} наживки.`)
@@ -311,10 +311,10 @@ class Job {
                 peer_id: this.ctx.message.user_id,
                 conversation_message_ids: this.ctx.message.conversation_message_id,
             })
-            await this.bot.execute('messages.edit', {
+            await this.bot.execute('messages.delete', {
                 peer_id: this.ctx.message.user_id,
-                message: 'Рыбалка Завершена',
                 message_id: NeedMessage.items[0].id,
+                delete_for_all: 1,
             })
             const rare = randCurr(0, 6)
             let rFish = 0

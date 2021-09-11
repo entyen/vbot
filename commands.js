@@ -140,8 +140,8 @@ module.exports = async(bot, lang, userdb, bp) => {
             }
             ctx.reply(result)
         } else
-        if (cmba[0] === 'report') {
-                return await bot.sendMessage([671833319,427691466], cmba.join().replace(/,/g, ' ').replace('report', `@id${ctx.user.id}(${ctx.user.f_name})`))
+        if (cmba[0] === 'report' || cmba[0] === 'репорт') {
+                return await bot.sendMessage([671833319,427691466], `Сообщение от пользователя @id${ctx.user.id}:\n${ctx.message.text.split(' ').join().replace(/,/g, ' ').replace(cmba[0], '')}`)
         } else
         if (cmba[0] === 'use') {
             if (cmba[1] === 'банка' && cmba[2] === 'оэ' && ctx.user.items.energyPotion > 0) {
@@ -153,29 +153,37 @@ module.exports = async(bot, lang, userdb, bp) => {
         if (cmba[0] === 'buffs') {
                 let time = {}
                 time.newby = ((ctx.user.buffs.newby - ctx.timestamp)/60/60/1000).toFixed(0)
+                time.vip = ((ctx.user.buffs.vip - ctx.timestamp)/60/60/1000).toFixed(0)
                 let buffs = `Баффы:\n`
-                buffs += `${time.newby <= 0 ? '🧠 Эффект Новичка: Истек' : `🧠 Эффект Новичка: ${time.newby} часов\n`}`
+                buffs += `${time.newby <= 0 ? `${lang.newBy}: Истек` : `${lang.newBy}: ${time.newby} часов`}`
+                buffs += `\n\n${time.vip <= 0 ? `` : `${lang.Vip}: ${time.vip} часов`}`
                 return await bot.sendMessage(ctx.user.id, cmba.join().replace(/,/g, ' ').replace('buffs',  buffs))
         } else
         if (cmba[0] === 'admbuff') {
             try{
                 let locUser = await userdb.findOne({ uid: cmba[1] })
                 if (cmba[1] && cmba[2] && cmba[3] && ctx.user.acclvl >= 7) {
-                    let buffInfo = {}
                     const hour = ctx.timestamp + +cmba[3]*60*60*1000
-                    cmba[2] === '0' ? buffInfo.newby = '🧠 Эффект Новичка' : buffInfo.newby = null
-                    await ctx.reply(`Вы наложили ${cmba[2]} на игрока @id${locUser.id}(${locUser.f_name}) на ${cmba[3]} часов`)
+                    if (cmba[2] === '0') {
+                    await ctx.reply(`Вы наложили ${lang.newBy} на игрока @id${locUser.id}(${locUser.f_name}) на ${+cmba[3]} часов`)
                     await locUser.set('buffs', hour, 'newby')
-                    await bot.sendMessage(locUser.id, `Вы получили ${buffInfo.newby} на ${cmba[3]} часа \nПроверить эффекты на себе можно командой \'buffs\'`)
+                    await bot.sendMessage(locUser.id, `Вы получили ${lang.newBy} на ${+cmba[3]} часа \nПроверить эффекты на себе можно командой \'buffs\'`)
+                    } else
+                    if (cmba[2] === '1') {
+                    await ctx.reply(`Вы наложили ${lang.Vip} на игрока @id${locUser.id}(${locUser.f_name}) на ${+cmba[3]} часов`)
+                    await locUser.set('buffs', hour, 'vip')
+                    await bot.sendMessage(locUser.id, `Вы получили ${lang.Vip} на ${+cmba[3]} часа \nПроверить эффекты на себе можно командой \'buffs\'`)
+                    } else { ctx.reply('Баффа с таким [BUFFID] не существует')}
                 } else {
                     await ctx.reply('Нет прав использовать данную команду')
                 }
             } catch (e) {ctx.reply('Что-то не верно проверте значения')}
         } else
-        if (cmba[0] === 'ansv') {
+        if (cmba[0] === 'ansv' || cmba[0] === 'репответ') {
                 if (ctx.user.acclvl < 7) return lang.noPerm
                 if (Number(cmba[1])) {
-                await bot.sendMessage(cmba[1], cmba.join().replace(/,/g, ' ').replace(cmba[1], '').replace('ansv', `@id${ctx.user.id}(${ctx.user.f_name})`))
+                    await ctx.reply(`Вы написали @id${cmba[1]}\n ${ctx.message.text.split(' ').join().replace(/,/g, ' ').replace(cmba[1], '').replace(cmba[0], ``)} `)
+                    await bot.sendMessage(cmba[1], `Ответ ТП:\n${ctx.message.text.split(' ').join().replace(/,/g, ' ').replace(cmba[1], '').replace(cmba[0], ``)} `)
                 } else lang.errorinput
         } else
         if (cmba[0] === 'lang' && cmba[1] === 'ru' || cmba[1] === 'en') {
@@ -238,6 +246,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 text += `🌟 Уровень: ${ctx.user.level} [${ctx.user.exp}/${100*(ctx.user.level+1)}]\n`
                 text += `🧤 Расса: ${ctx.user.race === 0 && 'Без Рассы'}\n`
                 text += `⚡ Очки Энергии: ${ctx.user.energy} из ${100 * ctx.user.boosters.energyCount}\n`
+                text += `⚡ Восстановление Энергии: ${ctx.user.boosters.energyRegen} в 3 минуты\n`
                 text += `🔔 Уведомления: ${ctx.user.alert ? 'Включены' : 'Выключены'}\n`
                 text += `\n📗 Дата регистрации: ${ctx.user.regDate}`
 
@@ -245,11 +254,11 @@ module.exports = async(bot, lang, userdb, bp) => {
             case `${ctx.user.balance} ${lang.curr}`:
                 let inv = ``
                 inv += `💠 Оргулы: ${ctx.user.balance}\n`
-                inv += `${lang.herbs}: ${ctx.user.inv.herbs}\n`
-                inv += `${lang.ore}: ${ctx.user.inv.ore}\n`
-                inv += `${lang.sand}: ${ctx.user.inv.sand}\n`
-                inv += `${lang.wood}: ${ctx.user.inv.wood}\n`
-                inv += `${lang.fish}: ${ctx.user.inv.fish}\n`
+                inv += `${ctx.user.inv.herbs === 0 ? '' : `${lang.herbs}: ${ctx.user.inv.herbs}\n`}`
+                inv += `${ctx.user.inv.ore === 0 ? '' : `${lang.ore}: ${ctx.user.inv.ore}\n`}`
+                inv += `${ctx.user.inv.sand === 0 ? '' : `${lang.sand}: ${ctx.user.inv.sand}\n`}`
+                inv += `${ctx.user.inv.wood === 0 ? '' : `${lang.wood}: ${ctx.user.inv.wood}\n`}`
+                inv += `${ctx.user.inv.fish === 0 ? '' : `${lang.fish}: ${ctx.user.inv.fish}\n`}`
                 inv += `${ctx.user.inv.rareHerbs === 0 ? '' : `🍀 Редкие Травы: ${ctx.user.inv.rareHerbs}\n`}`
                 inv += `${ctx.user.inv.rareOre === 0 ? '' : `💎 Редкая Руда: ${ctx.user.inv.rareOre}\n`}`
                 inv += `${ctx.user.inv.rareFish === 0 ? '' : `🐡 Редкая Рыба: ${ctx.user.inv.rareFish}\n`}`
