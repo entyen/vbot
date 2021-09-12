@@ -123,7 +123,7 @@ module.exports = async(bot, lang, userdb, bp) => {
                 console.log(e)
             }
         } else
-        if (cmba[0] === 'рейтинг' || cmba[0] === 'rate' || cmba[0] === 'top') {
+        if (cmba[0] === 'рейтинг' || cmba[0] === 'rate' || cmba[0] === 'топ') {
             user = await userdb.find({})
             let rate = [{}]
             let result = `Рейтинг: \n`
@@ -141,6 +141,7 @@ module.exports = async(bot, lang, userdb, bp) => {
             ctx.reply(result)
         } else
         if (cmba[0] === 'report' || cmba[0] === 'репорт') {
+                if (ctx.cmd = 'report') return ctx.reply('Введите команду:\n репорт \'Текст вашего сообщения\'')
                 return await bot.sendMessage([671833319,427691466], `Сообщение от пользователя @id${ctx.user.id}:\n${ctx.message.text.split(' ').join().replace(/,/g, ' ').replace(cmba[0], '')}`)
         } else
         if (cmba[0] === 'use') {
@@ -150,14 +151,14 @@ module.exports = async(bot, lang, userdb, bp) => {
                 await ctx.reply(`Вы использвали банку на ОЭ теперь у вас ${ctx.user.energy} ⚡ осталось еще ${ctx.user.items.energyPotion} Банок ОЭ`)
             } else {ctx.reply('Неверный предмет или у вас закончились банки')}
         } else
-        if (cmba[0] === 'buffs') {
+        if (cmba[0] === 'buffs' || ctx.cmd === 'buffs') {
                 let time = {}
                 time.newby = ((ctx.user.buffs.newby - ctx.timestamp)/60/60/1000).toFixed(0)
                 time.vip = ((ctx.user.buffs.vip - ctx.timestamp)/60/60/1000).toFixed(0)
                 let buffs = `Баффы:\n`
                 buffs += `${time.newby <= 0 ? `${lang.newBy}: Истек` : `${lang.newBy}: ${time.newby} часов`}`
                 buffs += `\n\n${time.vip <= 0 ? `` : `${lang.Vip}: ${time.vip} часов`}`
-                return await bot.sendMessage(ctx.user.id, cmba.join().replace(/,/g, ' ').replace('buffs',  buffs))
+                return await bot.sendMessage(ctx.user.id, `${cmba.join().replace(/,/g, ' ').replace(cmba[0], '')} ${buffs}`)
         } else
         if (cmba[0] === 'admbuff') {
             try{
@@ -167,12 +168,12 @@ module.exports = async(bot, lang, userdb, bp) => {
                     if (cmba[2] === '0') {
                     await ctx.reply(`Вы наложили ${lang.newBy} на игрока @id${locUser.id}(${locUser.f_name}) на ${+cmba[3]} часов`)
                     await locUser.set('buffs', hour, 'newby')
-                    await bot.sendMessage(locUser.id, `Вы получили ${lang.newBy} на ${+cmba[3]} часа \nПроверить эффекты на себе можно командой \'buffs\'`)
+                    await bot.sendMessage(locUser.id, `Вы получили ${lang.newBy} на ${+cmba[3]} часа \nПроверить эффекты на себе можно в Настройках`)
                     } else
                     if (cmba[2] === '1') {
                     await ctx.reply(`Вы наложили ${lang.Vip} на игрока @id${locUser.id}(${locUser.f_name}) на ${+cmba[3]} часов`)
                     await locUser.set('buffs', hour, 'vip')
-                    await bot.sendMessage(locUser.id, `Вы получили ${lang.Vip} на ${+cmba[3]} часа \nПроверить эффекты на себе можно командой \'buffs\'`)
+                    await bot.sendMessage(locUser.id, `Вы получили ${lang.Vip} на ${+cmba[3]} часа \nПроверить эффекты на себе можно в Настройках`)
                     } else { ctx.reply('Баффа с таким [BUFFID] не существует')}
                 } else {
                     await ctx.reply('Нет прав использовать данную команду')
@@ -190,7 +191,17 @@ module.exports = async(bot, lang, userdb, bp) => {
             ctx.user.lang = cmba[1]
             await ctx.user.save()
             await ctx.reply(`Язык изменен на ${cmba[1]}`)
-        } else
+        }
+        if (ctx.cmd === lang.dev || ctx.cmd === lang.adm || ctx.cmd === lang.moder || ctx.cmd === lang.user || ctx.cmd === lang.vip || ctx.cmd === lang.plat) {
+            ctx.user.acclvl >= 7 ? ctx.reply(`${lang.userGrpCmd} ${lang.dev} ${lang.rate} ${lang.devCmd}`)
+             : ctx.user.acclvl == 6 ? ctx.reply(`${lang.userGrpCmd} ${lang.adm} ${lang.rate}`)
+              : ctx.user.acclvl == 5 ? ctx.reply(`${lang.userGrpCmd} ${lang.moder} ${lang.rate}`)
+               : ctx.user.acclvl == 2 ? ctx.reply(`${lang.userGrpCmd} ${lang.plat} ${lang.rate}`)
+                 : ctx.user.acclvl == 1 ? ctx.reply(`${lang.userGrpCmd} ${lang.vip} ${lang.rate}`)
+                  : ctx.user.acclvl == 0 ? ctx.reply(`${lang.userGrpCmd} ${lang.user} ${lang.rate}`)
+                   : ctx.reply(lang.noPerm)
+            return
+        }
         if (!ctx.user) {
             await ctx.reply(`${ctx.mesage.text} ${lang.notcmd}`, null, Markup
                 .keyboard([
@@ -268,8 +279,6 @@ module.exports = async(bot, lang, userdb, bp) => {
                 inv += `\n👜 Вес Инвентаря: ${ctx.user.currWeight}/${ctx.user.invWeight}\n`
 
                 return await ctx.reply(`Инвентарь\n ${inv}`)
-            case lang.start:
-                return await ctx.scene.enter('menu')
             case 'menu':
                 if (ctx.user.acclvl >= 4) {
                     return await ctx.reply(lang.navm, null, Markup
@@ -307,7 +316,36 @@ module.exports = async(bot, lang, userdb, bp) => {
                         ])
                     )
             case lang.setting:
-                return await ctx.scene.enter('setting')
+                const alertState = ctx.user.alert ? 'positive' : 'negative'
+                const acclvl = ctx.user.acclvl > 5 ? 'negative' : ctx.user.acclvl > 0 ? 'primary' : 'secondary'
+                await ctx.reply('Настройки', null, Markup
+                    .keyboard([
+                        [
+                            Markup.button(`${ctx.user._acclvl}`, acclvl),
+                        ],
+                        [
+                            Markup.button(lang.alert, alertState),
+                            Markup.button(lang.nick, 'default'),
+                            Markup.button(lang.back, 'negative', 'menu'),
+                        ],
+                        [
+                            Markup.button('Бафы', 'default', 'buffs'),
+                            Markup.button('Репорт', 'default', 'report'),
+                        ],
+                    ])
+                )
+                return
+            case lang.alert:
+                if (ctx.user.alert) {
+                    ctx.user.alert = false
+                    await ctx.user.save()
+                    await ctx.reply(`${lang.alert} ${ctx.user.alert ? 'Включены' : 'Выключены'}`)
+                } else {
+                    ctx.user.alert = true
+                    await ctx.user.save()
+                    await ctx.reply(`${lang.alert} ${ctx.user.alert ? 'Включены' : 'Выключены'}`)
+                }
+                return
             case lang.crafts:
                 return await ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Job.getKeyboard())
             case 'jobs':

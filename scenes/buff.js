@@ -1,4 +1,4 @@
-module.exports = async(bot, user, lang) => {
+module.exports = async(bot, i, user, lang) => {
         const timestamp = new Date().getTime()
         //NEWBY BUFF
         if (user[i].buffs.newby <= timestamp) {

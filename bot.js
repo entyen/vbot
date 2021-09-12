@@ -188,7 +188,7 @@ bot.use(async (ctx, next) => {
             })
             ctx.user = await userdb.findOne({id: ctx.message.from_id})
             await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
-            await ctx.reply(`Вы получили 🧠 Эффект Новичка на 7 Дней \nПроверить эффекты на себе можно командой \'buffs\'`)
+            await ctx.reply(`Вы получили 🧠 Эффект Новичка на 7 Дней \nПроверить эффекты на себе можно в Настройках`)
         }
         ctx.cmd = ctx.message.payload ? ctx.message.payload.replace(/["{}:]/g, '').replace('button', '') : ctx.message.payload
         const weightMath = async () => {
@@ -283,7 +283,7 @@ bot.use(async (ctx, next) => {
             })
             ctx.user = await userdb.findOne({id: ctx.message.user_id})
             await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
-            await ctx.reply(`Вы получили 🧠 Эффект Новичка на 7 Дней \nПроверить эффекты на себе можно командой \'buffs\'`)
+            await ctx.reply(`Вы получили 🧠 Эффект Новичка на 7 Дней \nПроверить эффекты на себе можно в Настройках`)
         }
 
         ctx.message.payload ? ctx.cmd = ctx.message.payload.cmd : ctx.message.payload
@@ -348,7 +348,9 @@ const randCurr = (min, max) => {
 //enegry regen check
 setInterval(async () => {
     userEn = await userdb.find({})
-    for (i = 0; i < userEn.length; i++) {
+    userEn.forEach( async (x,i,z) => {
+     try {
+        if(!userEn[i]) return
         if (userEn[i].energy >= (100 * userEn[i].boosters.energyCount)) {
             if (userEn[i].alert) {
                 if (!userEn[i].timers.eFullAlert) {
@@ -357,22 +359,25 @@ setInterval(async () => {
                 }
             }
         } else {
-            userEn[i].timers.eFullAlert = false
-            userEn[i].energy = userEn[i].energy + userEn[i].boosters.energyRegen
-            await userEn[i].save()
+            await userEn[i].set('timers', false, 'eFullAlert')
+            await userEn[i].inc('energy', userEn[i].boosters.energyRegen)
         }
-    }
-}, 60000)
+     } catch(e) {
+         bot.sendMessage(tea.OWNER, 'error in energy regen')
+     }
+    })
+}, 180000)
 
 //buff check
 setInterval(async () => {
     user = await userdb.find({})
-    for (i = 0; i < user.length; i++) {
-        await buff(bot, user, lang)
-    }
-}, 1000)
+    user.forEach(async(x,i,z)=>{
+        if(!user[i]) return
+        await buff(bot, i, user, lang)
+    })
+}, 4000)
 
-const updater = new CronJob('*/30 * * * *', null, false, 'Europe/Moscow')
+const updater = new CronJob('*/30 * * * *', null, true, 'Europe/Moscow')
 updater.addCallback(async () => {
     const bank = await bankdb.findOne({id: 0})
     const massItems = [
@@ -568,7 +573,6 @@ updater.addCallback(async () => {
 
 })
 
-updater.start()
 // const upload = require('./uploadMiddleware')
 class photoGroupWiget {
     
@@ -659,8 +663,8 @@ bankdb.prototype.set = function (field, value, field2) {
 }
 
 process.on('uncaughtException', function (err) {
-  console.error(err);
-  console.log("Node NOT Exiting...");
+  console.errore(err);
+  console.loge("Node NOT Exiting...");
 })
 
 //Connect of DataBse
