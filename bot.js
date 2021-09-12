@@ -78,6 +78,15 @@ console.errore = (err) => console.error('\x1b[91m%s\x1b[0m', err)
 console.warne = (warn) => console.warn('\x1b[33m%s\x1b[0m', warn)
 console.loge = (log) => console.log('\x1b[96m%s\x1b[0m', log)
 
+const utils = () => {}
+utils.smChat = async (chat, msg) => {
+    await bot.execute('messages.send', {
+        random_id: 0,
+        peer_id: chat,
+        message: msg
+    })
+}
+
 //middlewere for bot chek user in database or not create user
 bot.use(async (ctx, next) => {
     ctx.timestamp = new Date().getTime()
@@ -87,7 +96,12 @@ bot.use(async (ctx, next) => {
     //     key: 'waitTime',
     // })
 
-
+    if (ctx.message.peer_id === tea.REPORTCHAT) { 
+        if (!ctx.message.reply_message) return
+        const ansUsrId = ctx.message.reply_message.text.split('id')[1].split('|')[0]
+        await ctx.reply(`Вы написали @id${ansUsrId}\n ${ctx.message.text}`)
+        await bot.sendMessage(ansUsrId, `Ответ ТП:\n${ctx.message.text}`)
+    }
     if (ctx.message.from_id > 0 && ctx.message.id == 0) {
         try {
             if (ctx.message.text.split(' ')[0] === '[club206762312|@vinmt]') {
@@ -111,7 +125,7 @@ bot.use(async (ctx, next) => {
                     }
                     ctx.reply(result)
                 } else {
-                    await ctx.reply('Простите в публичных чатах не работаю я не такая!')
+                    await ctx.reply('Простите но в публичных чатах доступна только команда \'Рейтинг\'')
                 }
             }
         } catch (e) {
@@ -184,7 +198,7 @@ bot.use(async (ctx, next) => {
                 level: 0,
                 energy: 100,
                 race: 0,
-                alert: false
+                alert: true,
             })
             ctx.user = await userdb.findOne({id: ctx.message.from_id})
             await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
@@ -279,7 +293,7 @@ bot.use(async (ctx, next) => {
                 level: 0,
                 energy: 100,
                 race: 0,
-                alert: false
+                alert: true,
             })
             ctx.user = await userdb.findOne({id: ctx.message.user_id})
             await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
@@ -332,7 +346,7 @@ const stage = new Stage(menu, setting)
 bot.use(session.middleware())
 bot.use(stage.middleware())
 
-commands(bot, lang, userdb, bp)
+commands(bot, utils, lang, userdb, bp)
 
 //Start polling messages
 bot.startPolling((err) => {
@@ -363,6 +377,7 @@ setInterval(async () => {
             await userEn[i].inc('energy', userEn[i].boosters.energyRegen)
         }
      } catch(e) {
+         console.errore(e)
          bot.sendMessage(tea.OWNER, 'error in energy regen')
      }
     })

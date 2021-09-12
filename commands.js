@@ -2,7 +2,7 @@ const { timeout } = require('cron')
 
 const { Job } = require('./scenes/job')
 
-module.exports = async(bot, lang, userdb, bp) => {
+module.exports = async(bot, utils, lang, userdb, bp) => {
     const Markup = require('node-vk-bot-api/lib/markup')
 
     const usersMap = new Map()
@@ -141,8 +141,9 @@ module.exports = async(bot, lang, userdb, bp) => {
             ctx.reply(result)
         } else
         if (cmba[0] === 'report' || cmba[0] === 'репорт') {
-                if (ctx.cmd = 'report') return ctx.reply('Введите команду:\n репорт \'Текст вашего сообщения\'')
-                return await bot.sendMessage([671833319,427691466], `Сообщение от пользователя @id${ctx.user.id}:\n${ctx.message.text.split(' ').join().replace(/,/g, ' ').replace(cmba[0], '')}`)
+                await ctx.reply(`Сообщение отправленно ожидайте ответа Администратора`)
+                await utils.smChat(2000000005, `Сообщение от пользователя @id${ctx.user.id}(${ctx.user.f_name})\n${ctx.message.text.split(' ').join().replace(/,/g, ' ').replace(cmba[0], '')}`)
+                return
         } else
         if (cmba[0] === 'use') {
             if (cmba[1] === 'банка' && cmba[2] === 'оэ' && ctx.user.items.energyPotion > 0) {
@@ -179,13 +180,6 @@ module.exports = async(bot, lang, userdb, bp) => {
                     await ctx.reply('Нет прав использовать данную команду')
                 }
             } catch (e) {ctx.reply('Что-то не верно проверте значения')}
-        } else
-        if (cmba[0] === 'ansv' || cmba[0] === 'репответ') {
-                if (ctx.user.acclvl < 7) return lang.noPerm
-                if (Number(cmba[1])) {
-                    await ctx.reply(`Вы написали @id${cmba[1]}\n ${ctx.message.text.split(' ').join().replace(/,/g, ' ').replace(cmba[1], '').replace(cmba[0], ``)} `)
-                    await bot.sendMessage(cmba[1], `Ответ ТП:\n${ctx.message.text.split(' ').join().replace(/,/g, ' ').replace(cmba[1], '').replace(cmba[0], ``)} `)
-                } else lang.errorinput
         } else
         if (cmba[0] === 'lang' && cmba[1] === 'ru' || cmba[1] === 'en') {
             ctx.user.lang = cmba[1]
@@ -330,11 +324,13 @@ module.exports = async(bot, lang, userdb, bp) => {
                         ],
                         [
                             Markup.button('Бафы', 'default', 'buffs'),
-                            Markup.button('Репорт', 'default', 'report'),
+                            Markup.button('Репoрт', 'default', 'report'),
                         ],
                     ])
                 )
                 return
+            case 'report':
+                return ctx.reply('Введите команду:\n репорт \'Текст вашего сообщения\'')
             case lang.alert:
                 if (ctx.user.alert) {
                     ctx.user.alert = false

@@ -14,7 +14,7 @@
     "currBal": "текущий баланс",
     "errorinput": "Не верные значения поля [USERID] или [NUM] ‼",
     "userGrpCmd": "Команды группы",
-    "devCmd": "\n\n bup [USERID] [NUM] = Пополнить баланс\n alvup [USERID] [NUM] = Изменить уровень аккаунта\n ansv [USERID] = Написать ответ на репорт\n admbuff [USERID] [BUFFID] [TIME] часов",
+    "devCmd": "\n\n bup [USERID] [NUM] = Пополнить баланс\n alvup [USERID] [NUM] = Изменить уровень аккаунта\n admbuff [USERID] [BUFFID] [TIME] часов",
     "rate": "\n\n топ = Узнать топ игроков\n репорт = Репорт администраторам",
     "field": "Поле 1⚡",
     "mine": "Шахта 1⚡",
