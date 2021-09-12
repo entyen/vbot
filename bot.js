@@ -145,7 +145,7 @@ bot.use(async (ctx, next) => {
                     bonus: false,
                     eFullAlert: true,
                     buffNewByAlert: false,
-                    buffVipAlert: false,
+                    buffVipAlert: true,
                 },
                 inv: {
                     herbs: 0,
