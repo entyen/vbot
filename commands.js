@@ -129,13 +129,15 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             let result = `Рейтинг: \n`
             for (i = 0; i < user.length; i++) {
                 if (user[i].balance > 0) {
-                        rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
+                        if (user[i].acclvl < 3) {
+                            rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
+                        }
                 }
             }
             rate.sort((a,b) => {return b.b - a.b })
-            for (i = 0; i < 9; i++) {
+            for (i = 1; i < 9; i++) {
                 if(rate[i] !== undefined) {
-                    result += `${i === 0 ? '🥇': i === 1 ? '🥈': i === 2 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang.curr}\n`
+                    result += `${i === 1 ? '🥇': i === 2 ? '🥈': i === 3 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang.curr}\n`
                 }
             }
             ctx.reply(result)

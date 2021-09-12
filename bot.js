@@ -112,15 +112,17 @@ bot.use(async (ctx, next) => {
                     let result = `Rate: \n`
                     for (i = 0; i < user.length; i++) {
                         if (user[i].balance > 0) {
-                            rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
+                            if (user[i].acclvl < 3) {
+                                rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
+                            }
                         }
                     }
                     rate.sort((a, b) => {
                         return b.b - a.b
                     })
-                    for (i = 0; i < 9; i++) {
+                    for (i = 1; i < 9; i++) {
                         if (rate[i] !== undefined) {
-                            result += `${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang.curr}\n`
+                            result += `${i === 1 ? '🥇' : i === 2 ? '🥈' : i === 3 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang.curr}\n`
                         }
                     }
                     ctx.reply(result)
@@ -392,7 +394,7 @@ setInterval(async () => {
     })
 }, 4000)
 
-const updater = new CronJob('*/30 * * * *', null, true, 'Europe/Moscow')
+const updater = new CronJob('*/1 * * * *', null, true, 'Europe/Moscow')
 updater.addCallback(async () => {
     const bank = await bankdb.findOne({id: 0})
     const massItems = [
@@ -430,13 +432,15 @@ updater.addCallback(async () => {
     let result = ``
     for (i = 0; i < user.length; i++) {
         if (user[i].balance > 0) {
-            rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
+            if (user[i].acclvl < 3) {
+                rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
+            }
         }
     }
     rate.sort((a, b) => {
         return b.b - a.b
     })
-    for (i = 0; i < 9; i++) {
+    for (i = 1; i < 9; i++) {
         if (rate[i] !== undefined) {
             result += `${rate[i].vid} ${rate[i].n} ${rate[i].b} `
         }
