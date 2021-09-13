@@ -57,14 +57,14 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             let fn = setTimeout(async () => {
                 usersMap.delete(ctx.message.peer_id)
                 // console.log('Removed from map.')
-                const job = new Job(bot, ctx)
-                await job.workhard()
             }, TIME);
             usersMap.set(ctx.message.peer_id, {
                 msgCount: 1,
                 lastMessage : ctx.message,
                 timer : fn
             })
+            const job = new Job(bot, ctx)
+            await job.workhard()
         }
     })
 
@@ -75,7 +75,9 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
     })
 
     bot.on(async (ctx) => {
+        if(ctx.user.acclvl < 0) return ctx.reply(`☠️ Ваша душа зепечатанна, печать спадет через ${Math.round((ctx.user.buffs.ban-ctx.timestamp)/1000/60/60)} часов`)
         const cmba = ctx.message.text.toLowerCase().split(' ')
+        // console.log(toString(cmba[0]) === /^(?:рейт|рейтинг)$/i, cmba[0])
 
         const marketSell = async (count, item, eachPrice) => {
             count === 'all' ? count = +ctx.user.inv[item] : count = +ctx.cmd.split('.')[2]
@@ -125,32 +127,30 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
         } else
         if (cmba[0] === 'рейтинг' || cmba[0] === 'rate' || cmba[0] === 'топ') {
             user = await userdb.find({})
-            let rate = [{}]
             let result = `Рейтинг: \n`
-            for (i = 0; i < user.length; i++) {
-                if (user[i].balance > 0) {
-                        if (user[i].acclvl < 3) {
-                            rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
-                        }
-                }
+            user = user.filter(x => x.acclvl < 3)
+            user = user.filter(x => x.balance > 0)
+            user = user.sort((a,b) => {return b.balance - a.balance})
+            for (i = 0; i < 9; i++) {
+                result += `${i === 0 ? '🥇': i === 1 ? '🥈': i === 2 ? '🥉' : '🏅'} @id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
             }
-            rate.sort((a,b) => {return b.b - a.b })
-            for (i = 1; i < 9; i++) {
-                if(rate[i] !== undefined) {
-                    result += `${i === 1 ? '🥇': i === 2 ? '🥈': i === 3 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang.curr}\n`
-                }
-            }
-            ctx.reply(result)
+            ctx.reply(`${result}`)
+            return
         } else
         if (cmba[0] === 'report' || cmba[0] === 'репорт') {
-                await ctx.reply(`Сообщение отправленно ожидайте ответа Администратора`)
-                await utils.smChat(2000000005, `Сообщение от пользователя @id${ctx.user.id}(${ctx.user.f_name})\n${ctx.message.text.split(' ').join().replace(/,/g, ' ').replace(cmba[0], '')}`)
-                return
+            console.log(user.filter(x => x.uid === ctx.user.uid)[0].balance)
+                await utils.smChat(2000000005, `📝 Репорт от пользователя @id${ctx.user.id}(${ctx.user.f_name})\n💬 ${ctx.message.text.split(' ').join().replace(/,/g, ' ').replace(cmba[0], '')}`)
+                .then(() => {
+                    return ctx.reply(`📝 Репорт отправлен ожидайте ответа Тех. Поддержки`)
+                })
+                .catch((err) => { 
+                    return ctx.reply(`Произошла ошибка при отправлении сообщения Тех. Поддержке.`)
+                })
         } else
         if (cmba[0] === 'use') {
             if (cmba[1] === 'банка' && cmba[2] === 'оэ' && ctx.user.items.energyPotion > 0) {
-                await ctx.user.inc('energy', 25)
                 await ctx.user.dec('items', 1, 'energyPotion')
+                await ctx.user.inc('energy', 25)
                 await ctx.reply(`Вы использвали банку на ОЭ теперь у вас ${ctx.user.energy} ⚡ осталось еще ${ctx.user.items.energyPotion} Банок ОЭ`)
             } else {ctx.reply('Неверный предмет или у вас закончились банки')}
         } else
@@ -177,6 +177,11 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                     await ctx.reply(`Вы наложили ${lang.Vip} на игрока @id${locUser.id}(${locUser.f_name}) на ${+cmba[3]} часов`)
                     await locUser.set('buffs', hour, 'vip')
                     await bot.sendMessage(locUser.id, `Вы получили ${lang.Vip} на ${+cmba[3]} часа \nПроверить эффекты на себе можно в Настройках`)
+                    } else
+                    if (cmba[2] === '-1') {
+                    await ctx.reply(`Вы наложили ${lang.ban} на игрока @id${locUser.id}(${locUser.f_name}) на ${+cmba[3]} часов`)
+                    await locUser.set('buffs', hour, 'ban')
+                    await bot.sendMessage(locUser.id, `Вы получили ${lang.ban} на ${+cmba[3]} часа \nПроверить эффекты на себе можно в Настройках`)
                     } else { ctx.reply('Баффа с таким [BUFFID] не существует')}
                 } else {
                     await ctx.reply('Нет прав использовать данную команду')
@@ -222,7 +227,6 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                         ],
                         [
                             Markup.button(`${lang.land}`, 'secondary'),
-                            // Markup.button(`Кнопка`, 'secondary'),
                         ],
                     ])
                 )
@@ -254,7 +258,7 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 text += `🧤 Расса: ${ctx.user.race === 0 && 'Без Рассы'}\n`
                 text += `⚡ Очки Энергии: ${ctx.user.energy} из ${100 * ctx.user.boosters.energyCount}\n`
                 text += `⚡ Восстановление Энергии: ${ctx.user.boosters.energyRegen} в 3 минуты\n`
-                text += `🔔 Уведомления: ${ctx.user.alert ? 'Включены' : 'Выключены'}\n`
+                text += `${ctx.user.alert ? '🔔' : '🔕'} Уведомления: ${ctx.user.alert ? 'Включены' : 'Выключены'}\n`
                 text += `\n📗 Дата регистрации: ${ctx.user.regDate}`
 
                 return await ctx.reply(`Профиль\n ${text}`)
@@ -624,6 +628,7 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 plot += `🏚 Склад: ${ctx.user.plot.wh === 0 ? 'Нет' : 'Есть'}\n`
                 plot += `⛪️ Храм: ${ctx.user.plot.temple === 0 ? 'Нет' : 'Есть'}\n`
                 plot += `⛰ Рудник: ${ctx.user.plot.mc === 0 ? 'Нет' : 'Есть'}\n`
+                plot += `🕳 Колодец: ${ctx.user.plot.well === 0 ? 'Нет' : 'Есть'}\n`
 
                 plot += `\n\nРазмер участка: ${ctx.user.plot.size === 0 && 'Малый'}`
 

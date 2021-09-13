@@ -58,7 +58,7 @@ app.post('/post', function(request, response){
     app.get('/', async (req, res) => {
         let sloan = []
         sloan = request.body
-        res.send(sloan)
+        res.send('test')
     })
 })
 
@@ -86,11 +86,14 @@ utils.smChat = async (chat, msg) => {
         message: msg
     })
 }
+utils.rand = (min, max) => {
+    const rand = math.random() * (max - min) + min
+    return rand.tofixed(1)
+}
 
 //middlewere for bot chek user in database or not create user
 bot.use(async (ctx, next) => {
     ctx.timestamp = new Date().getTime()
-    const date = new Date(new Date().toLocaleString('en-US', {timeZone: 'Etc/GMT-6'}))
     // const storageGet = await bot.execute('storage.get', {
     //     user_id: ctx.message.peer_id,
     //     key: 'waitTime',
@@ -108,24 +111,15 @@ bot.use(async (ctx, next) => {
                 const command = ctx.message.text.split(' ')[1]
                 if (command === 'rate' || command === 'Рейтинг') {
                     user = await userdb.find({})
-                    let rate = [{}]
-                    let result = `Rate: \n`
-                    for (i = 0; i < user.length; i++) {
-                        if (user[i].balance > 0) {
-                            if (user[i].acclvl < 3) {
-                                rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
-                            }
-                        }
+                    let result = `Рейтинг: \n`
+                    user = user.filter(x => x.acclvl < 3)
+                    user = user.filter(x => x.balance > 0)
+                    user = user.sort((a,b) => {return b.balance - a.balance})
+                    for (i = 0; i < 9; i++) {
+                        result += `${i === 0 ? '🥇': i === 1 ? '🥈': i === 2 ? '🥉' : '🏅'} @id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
                     }
-                    rate.sort((a, b) => {
-                        return b.b - a.b
-                    })
-                    for (i = 1; i < 9; i++) {
-                        if (rate[i] !== undefined) {
-                            result += `${i === 1 ? '🥇' : i === 2 ? '🥈' : i === 3 ? '🥉' : '🏅'} @id${rate[i].vid}(${rate[i].n}) = ${rate[i].b} ${lang.curr}\n`
-                        }
-                    }
-                    ctx.reply(result)
+                    ctx.reply(`${result}`)
+                    return
                 } else {
                     await ctx.reply('Простите но в публичных чатах доступна только команда \'Рейтинг\'')
                 }
@@ -150,61 +144,12 @@ bot.use(async (ctx, next) => {
             await userdb.create({
                 id: ctx.message.from_id,
                 uid: uidgen,
-                regDate: date,
                 f_name: response[0].first_name,
-                acclvl: 0,
-                balance: 0.00,
-                lang: 'ru',
-                timers: {
-                    mainWork: null,
-                    hasWorked: false,
-                    bonus: false,
-                    eFullAlert: true,
-                    buffNewByAlert: false,
-                    buffVipAlert: true,
-                },
-                inv: {
-                    herbs: 0,
-                    rareHerbs: 0,
-                    sand: 0,
-                    ore: 0,
-                    rareOre: 0,
-                    wood: 0,
-                    fish: 0,
-                    rareFish: 0,
-                },
-                items: {
-                    fishingRod: false,
-                    bait: 0,
-                    energyPotion: 0,
-                },
-                boosters: {
-                    energyCount: 1,
-                    energyRegen: 1,
-                    harvest: 1,
-                },
-                buffs: {
-                    newby: ctx.timestamp + (10080*60*1000),
-                    vip: null,
-                },
-                plot: {
-                    own: false,
-                    size: 0,
-                    house: 0,
-                    wh: 0,
-                    temple: 0,
-                    mc: 0,
-                },
-                invWeight: 50000,
-                exp: 0,
-                level: 0,
-                energy: 100,
-                race: 0,
-                alert: true,
             })
             ctx.user = await userdb.findOne({id: ctx.message.from_id})
+            const newByBuffTime = +(ctx.user.buffs.newby-ctx.timestamp)/1000/60/60/24
             await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
-            await ctx.reply(`Вы получили 🧠 Эффект Новичка на 7 Дней \nПроверить эффекты на себе можно в Настройках`)
+            await ctx.reply(`Вы получили ${lang.newBy} на ${Math.round(newByBuffTime)} Дней \nПроверить эффекты на себе можно в Настройках`, null, Markup.keyboard([[Markup.button('Меню', 'default', 'menu')]]))
         }
         ctx.cmd = ctx.message.payload ? ctx.message.payload.replace(/["{}:]/g, '').replace('button', '') : ctx.message.payload
         const weightMath = async () => {
@@ -245,61 +190,12 @@ bot.use(async (ctx, next) => {
             await userdb.create({
                 id: ctx.message.user_id,
                 uid: uidgen,
-                regDate: date,
                 f_name: response[0].first_name,
-                acclvl: 0,
-                balance: 0.00,
-                lang: 'ru',
-                timers: {
-                    mainWork: null,
-                    hasWorked: false,
-                    bonus: false,
-                    eFullAlert: true,
-                    buffNewByAlert: false,
-                    buffVipAlert: true,
-                },
-                inv: {
-                    herbs: 0,
-                    rareHerbs: 0,
-                    sand: 0,
-                    ore: 0,
-                    rareOre: 0,
-                    wood: 0,
-                    fish: 0,
-                    rareFish: 0,
-                },
-                items: {
-                    fishingRod: false,
-                    bait: 0,
-                    energyPotion: 0,
-                },
-                boosters: {
-                    energyCount: 1,
-                    energyRegen: 1,
-                    harvest: 1,
-                },
-                buffs: {
-                    newby: +ctx.timestamp + (10080*60*1000),
-                    vip: null,
-                },
-                plot: {
-                    own: false,
-                    size: 0,
-                    house: 0,
-                    wh: 0,
-                    temple: 0,
-                    mc: 0,
-                },
-                invWeight: 50000,
-                exp: 0,
-                level: 0,
-                energy: 100,
-                race: 0,
-                alert: true,
             })
             ctx.user = await userdb.findOne({id: ctx.message.user_id})
+            const newByBuffTime = +(ctx.user.buffs.newby-ctx.timestamp)/1000/60/60/24
             await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
-            await ctx.reply(`Вы получили 🧠 Эффект Новичка на 7 Дней \nПроверить эффекты на себе можно в Настройках`)
+            await ctx.reply(`Вы получили ${lang.newBy} на ${Math.round(newByBuffTime)} Дней \nПроверить эффекты на себе можно в Настройках`, null, Markup.keyboard([[Markup.button('Меню', 'default', 'menu')]]))
         }
 
         ctx.message.payload ? ctx.cmd = ctx.message.payload.cmd : ctx.message.payload
@@ -328,7 +224,7 @@ bot.use(async (ctx, next) => {
 
         } catch (e) {
             console.log(e)
-            ctx.reply('Что-то пошло не так ошибка')
+            ctx.reply('Что-то пошло не так ошибка, напишите в репорт что случилось report \'Текст сообщения\'')
         }
     }
     else return
@@ -355,14 +251,15 @@ bot.startPolling((err) => {
     !!err ? console.errore(err) : console.loge('Bot Started')
 })
 
-const randCurr = (min, max) => {
-    const rand = Math.random() * (max - min) + min
-    return rand.toFixed(1)
+const randcurr = (min, max) => {
+    const rand = math.random() * (max - min) + min
+    return rand.tofixed(1)
 }
 
 
 //enegry regen check
-setInterval(async () => {
+const energy = new CronJob('*/3 * * * *', null, true, 'Europe/Moscow')
+energy.addCallback(async () => {
     userEn = await userdb.find({})
     userEn.forEach( async (x,i,z) => {
      try {
@@ -371,7 +268,7 @@ setInterval(async () => {
             if (userEn[i].alert) {
                 if (!userEn[i].timers.eFullAlert) {
                     await userEn[i].set('timers', true, 'eFullAlert')
-                    await bot.sendMessage(userEn[i].id, `Энергия полная, вперед тратить.`)
+                    await bot.sendMessage(userEn[i].id, `⚡ Энергия полная, вперед тратить. 🥳\n Если вы не хотите получать это уведомление вы можете отключить его в Настройках => Уведомления`)
                 }
             }
         } else {
@@ -383,7 +280,7 @@ setInterval(async () => {
          bot.sendMessage(tea.OWNER, 'error in energy regen')
      }
     })
-}, 180000)
+})
 
 //buff check
 setInterval(async () => {
@@ -394,7 +291,7 @@ setInterval(async () => {
     })
 }, 4000)
 
-const updater = new CronJob('*/1 * * * *', null, true, 'Europe/Moscow')
+const updater = new CronJob('*/30 * * * *', null, true, 'Europe/Moscow')
 updater.addCallback(async () => {
     const bank = await bankdb.findOne({id: 0})
     const massItems = [
@@ -427,23 +324,13 @@ updater.addCallback(async () => {
     await bank.set('dpi', herbs.price.toFixed(1), 'herbs')
     await bank.set('dpi', Math.round(fish), 'fish')
 
-    const user = await userdb.find({})
-    let rate = [{}]
+    user = await userdb.find({})
     let result = ``
-    for (i = 0; i < user.length; i++) {
-        if (user[i].balance > 0) {
-            if (user[i].acclvl < 3) {
-                rate[i] = {vid: user[i].id, n: user[i].f_name, b: user[i].balance}
-            }
-        }
-    }
-    rate.sort((a, b) => {
-        return b.b - a.b
-    })
-    for (i = 1; i < 9; i++) {
-        if (rate[i] !== undefined) {
-            result += `${rate[i].vid} ${rate[i].n} ${rate[i].b} `
-        }
+    user = user.filter(x => x.acclvl < 3)
+    user = user.filter(x => x.balance > 0)
+    user = user.sort((a,b) => {return b.balance - a.balance})
+    for (i = 0; i < 9; i++) {
+            result += `${user[i].id} ${user[i].f_name} ${user[i].balance} `
     }
     const resultMass = result.split(' ') 
     const date = new Date().toLocaleTimeString('ru-RU', {timeZone: 'Etc/GMT-3'})
