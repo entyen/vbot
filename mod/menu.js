@@ -75,6 +75,8 @@ async function inventory(ctx) {
 async function setting(ctx) {
     const alertState = ctx.user.alert ? 'positive' : 'negative'
     const acclvl = ctx.user.acclvl > 5 ? 'negative' : ctx.user.acclvl > 0 ? 'primary' : 'secondary'
+    ctx.user._acclvl = ctx.user.acclvl == 0 ? lang.user : ctx.user.acclvl == 1 ? lang.vip : ctx.user.acclvl == 2 ? lang.plat :
+        ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
     await ctx.reply('Настройки', null, Markup
         .keyboard([
             [
@@ -93,6 +95,21 @@ async function setting(ctx) {
     )
     return
 }
+
+// const keyboardSetting = Markup.keyboard([
+//             [
+//                 Markup.button(ctx.user._acclvl, acclvl),
+//             ],
+//             [
+//                 Markup.button(lang.alert, alertState),
+//                 // Markup.button(lang.nick, 'default'),
+//                 Markup.button('Репoрт', 'default', 'report'),
+//             ],
+//             [
+//                 Markup.button('Бафы', 'default', 'buffs'),
+//                 Markup.button(lang.back, 'negative', 'menu'),
+//             ],
+// ])
 
 
 

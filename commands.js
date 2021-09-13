@@ -3,6 +3,7 @@ const { timeout } = require('cron')
 const { Job } = require('./scenes/job')
 const { forest } = require('./adv/forest')
 const { menu, profile, inventory, setting } = require('./mod/menu')
+const { plotMenu, well, house, temple, wh } = require('./mod/plot')
 
 module.exports = async(bot, utils, lang, userdb, bp) => {
     const Markup = require('node-vk-bot-api/lib/markup')
@@ -529,16 +530,15 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                     .inline()
                 )
 
-                let plot = ``
-                plot += `🏠 Дом: ${ctx.user.plot.house === 0 ? 'Нет' : 'Есть'}\n`
-                plot += `🏚 Склад: ${ctx.user.plot.wh === 0 ? 'Нет' : 'Есть'}\n`
-                plot += `⛪️ Храм: ${ctx.user.plot.temple === 0 ? 'Нет' : 'Есть'}\n`
-                plot += `⛰ Рудник: ${ctx.user.plot.mc === 0 ? 'Нет' : 'Есть'}\n`
-                plot += `🕳 Колодец: ${ctx.user.plot.well === 0 ? 'Нет' : 'Есть'}\n`
-
-                plot += `\n\nРазмер участка: ${ctx.user.plot.size === 0 && 'Малый'}`
-
-                return await ctx.reply(`Участок:\n ${plot}`)
+                return plotMenu(ctx)
+            case 'plot.well':
+                return well(ctx)
+            case 'plot.wh':
+                return wh(ctx)
+            case 'plot.house':
+                return house(ctx)
+            case 'plot.temple':
+                return temple(ctx)
             case 'plot.align':
                 return await ctx.reply(`Выроврять участок под строительство с вас спишется \n15000 ${lang.sand}`, null, Markup
                     .keyboard(
