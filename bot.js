@@ -252,8 +252,8 @@ bot.startPolling((err) => {
 })
 
 const randCurr = (min, max) => {
-    const rand = math.random() * (max - min) + min
-    return rand.tofixed(1)
+    const rand = Math.random() * (max - min) + min
+    return rand.toFixed(1)
 }
 
 
