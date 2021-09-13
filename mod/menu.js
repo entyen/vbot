@@ -72,8 +72,29 @@ async function inventory(ctx) {
     return await ctx.reply(`Инвентарь\n ${inv}`)
 }
 
+async function setting(ctx) {
+    const alertState = ctx.user.alert ? 'positive' : 'negative'
+    const acclvl = ctx.user.acclvl > 5 ? 'negative' : ctx.user.acclvl > 0 ? 'primary' : 'secondary'
+    await ctx.reply('Настройки', null, Markup
+        .keyboard([
+            [
+                Markup.button(`${ctx.user._acclvl}`, acclvl),
+            ],
+            [
+                Markup.button(lang.alert, alertState),
+                // Markup.button(lang.nick, 'default'),
+                Markup.button('Репoрт', 'default', 'report'),
+            ],
+            [
+                Markup.button('Бафы', 'default', 'buffs'),
+                Markup.button(lang.back, 'negative', 'menu'),
+            ],
+        ])
+    )
+    return
+}
 
 
 
 
-module.exports = { menu, profile, inventory }
+module.exports = { menu, profile, inventory, setting }

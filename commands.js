@@ -2,7 +2,7 @@ const { timeout } = require('cron')
 
 const { Job } = require('./scenes/job')
 const { forest } = require('./adv/forest')
-const { menu, profile, inventory } = require('./mod/menu')
+const { menu, profile, inventory, setting } = require('./mod/menu')
 
 module.exports = async(bot, utils, lang, userdb, bp) => {
     const Markup = require('node-vk-bot-api/lib/markup')
@@ -238,25 +238,7 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             case 'menu':
                 return menu(ctx)
             case lang.setting:
-                const alertState = ctx.user.alert ? 'positive' : 'negative'
-                const acclvl = ctx.user.acclvl > 5 ? 'negative' : ctx.user.acclvl > 0 ? 'primary' : 'secondary'
-                await ctx.reply('Настройки', null, Markup
-                    .keyboard([
-                        [
-                            Markup.button(`${ctx.user._acclvl}`, acclvl),
-                        ],
-                        [
-                            Markup.button(lang.alert, alertState),
-                            Markup.button(lang.nick, 'default'),
-                            Markup.button('Репoрт', 'default', 'report'),
-                        ],
-                        [
-                            Markup.button('Бафы', 'default', 'buffs'),
-                            Markup.button(lang.back, 'negative', 'menu'),
-                        ],
-                    ])
-                )
-                return
+                return setting(ctx)
             case 'report':
                 return ctx.reply('Введите команду:\n репорт \'Текст вашего сообщения\'')
             case lang.alert:
@@ -264,10 +246,12 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                     ctx.user.alert = false
                     await ctx.user.save()
                     await ctx.reply(`${lang.alert} ${ctx.user.alert ? 'Включены' : 'Выключены'}`)
+                    return setting(ctx)
                 } else {
                     ctx.user.alert = true
                     await ctx.user.save()
                     await ctx.reply(`${lang.alert} ${ctx.user.alert ? 'Включены' : 'Выключены'}`)
+                    return setting(ctx)
                 }
                 return
             case lang.crafts:

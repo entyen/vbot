@@ -6,44 +6,6 @@ let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 
 const menu = new Scene('menu',
     async (ctx) => {
-        if (ctx.user.acclvl >= 4) {
-            await ctx.reply(lang.navm, null, Markup
-                .keyboard([
-                    [
-                        Markup.button(lang.crafts, 'primary'),
-                        Markup.button(lang.market, 'primary'),
-                    ],
-                    [
-                        Markup.button(ctx.user.f_name, 'secondary'),
-                        Markup.button(lang.setting, 'positive'),
-                        Markup.button(`${ctx.user.balance} ${lang.curr}`, 'secondary'),
-                    ],
-                    [
-                        Markup.button(`${lang.land}`, 'secondary'),
-                        // Markup.button({ action: { type: 'text', label: 'Hui', payload: JSON.stringify({cmd: 'help'})},color: 'default',}),
-                        // Markup.button('Тест Работ', 'default' , {button: 'jobs'}),
-                    ],
-                ])
-            )
-        } else {
-            await ctx.reply(lang.navm, null, Markup
-                .keyboard([
-                    [
-                        Markup.button(lang.crafts, 'primary'),
-                        Markup.button(lang.market, 'primary'),
-                    ],
-                    [
-                        Markup.button(ctx.user.f_name, 'secondary'),
-                        Markup.button(lang.setting, 'positive'),
-                        Markup.button(`${ctx.user.balance} ${lang.curr}`, 'secondary'),
-                    ],
-                    [
-                        Markup.button(`${lang.land}`, 'secondary'),
-                    ],
-                ])
-            )
-        }
-        await ctx.scene.leave()
     },
 
     async (ctx) => {

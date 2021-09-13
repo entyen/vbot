@@ -565,7 +565,7 @@ bankdb.prototype.set = function (field, value, field2) {
 
 process.on('uncaughtException', function (err) {
   console.errore(err);
-  console.loge("Node NOT Exiting...");
+  bot.sendMessage([tea.OWNER], `В боте ошибка ${err}`)
 })
 
 //Connect of DataBse

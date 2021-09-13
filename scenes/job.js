@@ -410,13 +410,6 @@ class Job {
                         payload: JSON.stringify({cmd: lang.fishing})
                     }, color: 'primary',
                 }),
-                // Markup.button({
-                //     action: {
-                //         type: 'callback',
-                //         label: lang.back,
-                //         payload: JSON.stringify({cmd: lang.back})
-                //     }, color: 'negative',
-                // }),
                 Markup.button(lang.back, 'negative', 'menu'),
             ],
         ])
