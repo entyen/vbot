@@ -251,7 +251,7 @@ bot.startPolling((err) => {
     !!err ? console.errore(err) : console.loge('Bot Started')
 })
 
-const randcurr = (min, max) => {
+const randCurr = (min, max) => {
     const rand = math.random() * (max - min) + min
     return rand.tofixed(1)
 }
