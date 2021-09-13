@@ -128,9 +128,7 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
         if (cmba[0] === 'рейтинг' || cmba[0] === 'rate' || cmba[0] === 'топ') {
             user = await userdb.find({})
             let result = `Рейтинг: \n`
-            user = user.filter(x => x.acclvl < 3)
-            user = user.filter(x => x.balance > 0)
-            user = user.sort((a,b) => {return b.balance - a.balance})
+            user = user.filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
             for (i = 0; i < 9; i++) {
                 result += `${i === 0 ? '🥇': i === 1 ? '🥈': i === 2 ? '🥉' : '🏅'} @id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
             }
@@ -153,6 +151,20 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 await ctx.user.inc('energy', 25)
                 await ctx.reply(`Вы использвали банку на ОЭ теперь у вас ${ctx.user.energy} ⚡ осталось еще ${ctx.user.items.energyPotion} Банок ОЭ`)
             } else {ctx.reply('Неверный предмет или у вас закончились банки')}
+        } else
+        if (cmba[0] === 'send' || cmba[0] === 'передать') {
+            try {
+            let locUser = await userdb.findOne({ uid: cmba[1] })
+            if (Number(cmba[1]) && Number(cmba[2]) && ctx.user.balance > +cmba[2]) {
+                await ctx.user.dec('balance', +cmba[2])
+                await locUser.inc('balance', +cmba[2])
+                await ctx.reply(`Вы передали ${+cmba[2]}${lang.curr} пользователю ${`@id${locUser.id}(${locUser.f_name})`}`)
+                await bot.sendMessage(locUser.id, `Вы получили ${+cmba[2]}${lang.curr} от ${`@id${ctx.user.id}(${ctx.user.f_name})`}`)
+            } else {ctx.reply('Недостаточно средств.')}
+            } catch (e) {
+                console.log(e)
+                ctx.reply('Недостаточно средств или еще что-то не так.')
+            }
         } else
         if (cmba[0] === 'buffs' || ctx.cmd === 'buffs') {
                 let time = {}

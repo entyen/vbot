@@ -112,9 +112,7 @@ bot.use(async (ctx, next) => {
                 if (command === 'rate' || command === 'Рейтинг') {
                     user = await userdb.find({})
                     let result = `Рейтинг: \n`
-                    user = user.filter(x => x.acclvl < 3)
-                    user = user.filter(x => x.balance > 0)
-                    user = user.sort((a,b) => {return b.balance - a.balance})
+                    user = user.filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
                     for (i = 0; i < 9; i++) {
                         result += `${i === 0 ? '🥇': i === 1 ? '🥈': i === 2 ? '🥉' : '🏅'} @id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
                     }
@@ -148,7 +146,7 @@ bot.use(async (ctx, next) => {
             })
             ctx.user = await userdb.findOne({id: ctx.message.from_id})
             const newByBuffTime = +(ctx.user.buffs.newby-ctx.timestamp)/1000/60/60/24
-            await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
+            await bot.sendMessage([tea.OWNER, tea.OWNER1], `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
             await ctx.reply(`Вы получили ${lang.newBy} на ${Math.round(newByBuffTime)} Дней \nПроверить эффекты на себе можно в Настройках`, null, Markup.keyboard([[Markup.button('Меню', 'default', 'menu')]]))
         }
         ctx.cmd = ctx.message.payload ? ctx.message.payload.replace(/["{}:]/g, '').replace('button', '') : ctx.message.payload
@@ -194,7 +192,7 @@ bot.use(async (ctx, next) => {
             })
             ctx.user = await userdb.findOne({id: ctx.message.user_id})
             const newByBuffTime = +(ctx.user.buffs.newby-ctx.timestamp)/1000/60/60/24
-            await bot.sendMessage(tea.OWNER, `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
+            await bot.sendMessage([tea.OWNER, tea.OWNER1], `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
             await ctx.reply(`Вы получили ${lang.newBy} на ${Math.round(newByBuffTime)} Дней \nПроверить эффекты на себе можно в Настройках`, null, Markup.keyboard([[Markup.button('Меню', 'default', 'menu')]]))
         }
 
@@ -263,7 +261,7 @@ energy.addCallback(async () => {
     userEn = await userdb.find({})
     userEn.forEach( async (x,i,z) => {
      try {
-        if(!userEn[i]) return
+        if (!userEn[i]) return
         if (userEn[i].energy >= (100 * userEn[i].boosters.energyCount)) {
             if (userEn[i].alert) {
                 if (!userEn[i].timers.eFullAlert) {
@@ -326,9 +324,7 @@ updater.addCallback(async () => {
 
     user = await userdb.find({})
     let result = ``
-    user = user.filter(x => x.acclvl < 3)
-    user = user.filter(x => x.balance > 0)
-    user = user.sort((a,b) => {return b.balance - a.balance})
+    user = user.filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
     for (i = 0; i < 9; i++) {
             result += `${user[i].id} ${user[i].f_name} ${user[i].balance} `
     }
