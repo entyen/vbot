@@ -51,7 +51,7 @@ const bankdb = mongoose.model('bank', bankSchem)
 
 //modules
 const commands = require('./commands.js')
-const buff = require('./scenes/buff.js')
+const buff = require('./mod/buff.js')
 
 app.post('/post', function(request, response){
     response.send('ok');    // echo the result back
@@ -235,10 +235,9 @@ const Session = require('node-vk-bot-api/lib/session')
 const Stage = require('node-vk-bot-api/lib/stage')
 
 const {menu} = require('./scenes/menu')
-const {setting} = require('./scenes/setting')
 
 const session = new Session()
-const stage = new Stage(menu, setting)
+const stage = new Stage(menu)
 bot.use(session.middleware())
 bot.use(stage.middleware())
 
