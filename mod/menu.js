@@ -11,9 +11,9 @@ async function menu(ctx) {
                     Markup.button(lang.market, 'primary'),
                 ],
                 [
-                    Markup.button(ctx.user.f_name, 'secondary'),
+                    Markup.button(ctx.user.f_name, 'secondary', 'profile'),
                     Markup.button(lang.setting, 'positive'),
-                    Markup.button(`${ctx.user.balance} ${lang.curr}`, 'secondary'),
+                    Markup.button(`${ctx.user.balance} ${lang.curr}`, 'secondary', 'inventory'),
                 ],
                 [
                     Markup.button(`${lang.land}`, 'secondary'),

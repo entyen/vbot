@@ -276,9 +276,9 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
         }
 
         switch (ctx.cmd) {
-            case ctx.user.f_name:
+            case 'profile':
                 return profile(ctx)
-            case `${ctx.user.balance} ${lang.curr}`:
+            case 'inventory':
                 return inventory(ctx)
             case 'menu':
                 return menu(ctx)
@@ -326,7 +326,7 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                     .keyboard([
                         [
                             Markup.button('Продать материалы', 'primary', 'market.sell.ore'),
-                            Markup.button('Купить', 'primary', 'market.buy.items'),
+                            Markup.button('Купить предметы', 'primary', 'market.buy.items'),
                         ],
                         [
                             Markup.button('Аукцион', 'primary', 'market.auction.items'),
@@ -359,10 +359,10 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                     .keyboard([
                         [
                             Markup.button('Редкая Руда', 'primary', 'auction.rareOre'),
+                            Markup.button('Редкие Травы', 'primary', 'auction.rareHerb'),
                         ],
                         [
-                            Markup.button('Редкие Травы', 'primary', 'auction.rareHerb'),
-                            // Markup.button('Редкая Рыба', 'primary', 'auction.rareFish'),
+                            Markup.button('Редкая Рыба', 'primary', 'auction.rareFish'),
                         ],
                         [
                             Markup.button(lang.back, 'negative', lang.market),
@@ -425,7 +425,7 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 await ctx.reply(`Вы успешно продали ${lang.rareHerbs} за 3200`)
                 return
             case 'auction.rareFish':
-                ctx.reply(`${lang.rareFish}\n На складе ${ctx.bank.inv.rareFish}\nЦена покупки 0${lang.curr}\nЦена продажи 0${lang.curr}`, null, Markup
+                ctx.reply(`${lang.rareFish}\n На складе ${ctx.bank.inv.rareFish}\nЦена покупки 100${lang.curr}\nЦена продажи 80${lang.curr}`, null, Markup
                     .keyboard(
                         [
                             Markup.button('Купить', 'default', `${ctx.cmd}.buy`),
@@ -436,22 +436,20 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 )
                 return
             case 'auction.rareFish.buy':
-                if (!ctx.bank.inv.rareFish) {return ctx.reply('В данный момент прием этого ресурса недоступен')}
                 if (ctx.bank.inv.rareFish <= 0) {return ctx.reply('Недостаточно ресурса в Банке')}
-                if (ctx.user.balance < 4000) {return ctx.reply('Недостаточно средств')}
-                // await ctx.user.dec('balance', 1000)
-                // await ctx.user.inc('inv', 1, 'rareFish')
-                // await ctx.bank.dec('inv', 1, 'rareFish')
-                await ctx.reply(`Вы успешно приобрели ${lang.rareFish} за 0`)
+                if (ctx.user.balance < 100) {return ctx.reply('Недостаточно средств')}
+                await ctx.user.dec('balance', 100)
+                await ctx.user.inc('inv', 1, 'rareFish')
+                await ctx.bank.dec('inv', 1, 'rareFish')
+                await ctx.reply(`Вы успешно приобрели ${lang.rareFish} за 100`)
                 return
             case 'auction.rareFish.sell':
-                if (!ctx.bank.inv.rareFish) {return ctx.reply('В данный момент прием этого ресурса недоступен')}
-                if (ctx.bank.inv.rareFish >= 10) {return ctx.reply('Ресурса в банке достаточно')}
+                if (ctx.bank.inv.rareFish >= 100) {return ctx.reply('Ресурса в банке достаточно')}
                 if (ctx.user.inv.rareFish <= 0) {return ctx.reply(`Недостаточно ${lang.rareFish}`)}
-                // await ctx.user.inc('balance', 1000)
-                // await ctx.user.dec('inv', 1, 'rareHerbs')
-                // await ctx.bank.inc('inv', 1, 'rareHerbs')
-                await ctx.reply(`Вы успешно продали ${lang.rareFish} за 0`)
+                await ctx.user.inc('balance', 80)
+                await ctx.user.dec('inv', 1, 'rareFish')
+                await ctx.bank.inc('inv', 1, 'rareFish')
+                await ctx.reply(`Вы успешно продали ${lang.rareFish} за 80`)
                 return
             case 'energyPotion':
                 ctx.reply(`${lang.energyPotion} стоит 6 500 ${lang.curr} восстанавливает 25 ⚡.`, null, Markup
