@@ -95,7 +95,8 @@ async function setting(ctx) {
     )
     return
 }
-async function buffs(ctx) {
+
+function buffs(ctx) {
     const cmba = ctx.message.text.toLowerCase().split(' ')
     let time = {}
     time.newby = ((ctx.user.buffs.newby - ctx.timestamp)/60/60/1000).toFixed(0)
@@ -111,27 +112,9 @@ async function buffs(ctx) {
     buffs += `${time.rate3st <= 0 ? `` : `\n${lang.Rate3St}: ${time.rate3st} минут`}`
     buffs += `${time.rate9st <= 0 ? `` : `\n${lang.Rate9St}: ${time.rate9st} минут`}`
     buffs += `${time.energyWell <= 0 ? `` : `\n${lang.energyWell}: ${time.energyWell} часа`}`
-    buffs += `${time.newby <= 0 ? `\n${lang.newBy}: Истек` : `\n${lang.newBy}: ${time.newby} часов`}`
+    buffs += `${time.newby <= 0 ? `` : `\n${lang.newBy}: ${time.newby} часов`}`
     buffs += `${time.vip <= 0 ? `` : `\n\n${lang.Vip}: ${time.vip} часов`}`
-    return await ctx.reply(`${cmba.join().replace(/,/g, ' ').replace(cmba[0], '')} ${buffs}`)
+    return ctx.reply(`${cmba.join().replace(/,/g, ' ').replace(cmba[0], '')} ${buffs}`)
 }
-
-// const keyboardSetting = Markup.keyboard([
-//             [
-//                 Markup.button(ctx.user._acclvl, acclvl),
-//             ],
-//             [
-//                 Markup.button(lang.alert, alertState),
-//                 // Markup.button(lang.nick, 'default'),
-//                 Markup.button('Репoрт', 'default', 'report'),
-//             ],
-//             [
-//                 Markup.button('Бафы', 'default', 'buffs'),
-//                 Markup.button(lang.back, 'negative', 'menu'),
-//             ],
-// ])
-
-
-
 
 module.exports = { menu, profile, inventory, setting, buffs }

@@ -561,16 +561,14 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], ctx.bank.dpi.wood)
                 return
             case lang.land:
-                if (!ctx.user.plot.own) return await ctx.reply(`У вас есть участок но его поверхность неподходит для строительства необходимо 5000 ${lang.sand} что-бы его выровнять.`, null, Markup
+                if (!ctx.user.plot.own) return await ctx.reply(`У вас есть участок но его поверхность неподходит для строительства необходимо ${lang.sand} 5000 что-бы его выровнять.`, null, Markup
                     .keyboard(
                         [
                             Markup.button('Выровнять участок', 'default', 'plot.align'),
-                            // Markup.button('Купить выравнивание', 'default', ``),
                         ],
                     )
                     .inline()
                 )
-
                 return plotMenu(ctx)
             case 'plot.well':
                 return well(ctx)
@@ -584,15 +582,6 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 return house(ctx)
             case 'plot.temple':
                 return temple(ctx)
-            case 'plot.align':
-                return await ctx.reply(`Выроврять участок под строительство с вас спишется \n5000 ${lang.sand}`, null, Markup
-                    .keyboard(
-                        [
-                            Markup.button('Засыпать неровности песком', 'default', 'plot.align.yes'),
-                        ],
-                    )
-                    .inline()
-                    )
             case 'plot.upgrade.Lv1':
                 return plotUpgradeLv1(ctx)
             case 'plot.build.Lv1':
@@ -609,7 +598,8 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             case 'plot.build.Lv3':
                 //TODO
                 return ctx.reply(lang.inDev)
-            case 'plot.align.yes':
+            case 'plot.align':
+                if (ctx.user.plot.own) return ctx.reply('У вас уже есть участок')
                 if (ctx.user.inv.sand < 5000) return ctx.reply('Недостаточно средств')
                 await ctx.user.dec('inv', 5000, 'sand')
                 await ctx.user.set('plot', true, 'own')
