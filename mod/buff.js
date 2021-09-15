@@ -31,17 +31,79 @@ module.exports = async(bot, i, user, lang) => {
             }
         }
         //BAN DE-BUFF
-        if (user[i].buffs.ban <= timestamp && user[i].acclvl < 10) {
+        if (user[i].buffs.ban <= timestamp && user[i].acclvl < 7) {
             if (!user[i].timers.buffBanAlert) {
                 await user[i].set('timers', true, 'buffBanAlert')
                 await user[i].set('acclvl', 0)
                 await bot.sendMessage(user[i].id, `Действие ${lang.ban} рассеялось.`)
             }
         } else 
-        if (user[i].buffs.ban >= timestamp && user[i].acclvl < 10) {
+        if (user[i].buffs.ban >= timestamp && user[i].acclvl < 7) {
             if (user[i].timers.buffBanAlert) {
                 await user[i].set('timers', false, 'buffBanAlert')
                 await user[i].set('acclvl', -1)
+            }
+        }
+
+        if (user[i].buffs.rate1st <= timestamp) {
+            if (!user[i].timers.buffRate1St) {
+                await user[i].set('timers', true, 'buffRate1St')
+                // await user[i].set('acclvl', 0)
+                await bot.sendMessage(user[i].id, `Действие ${lang.Rate1St} рассеялось.`)
+            }
+        } else 
+        if (user[i].buffs.rate1st >= timestamp) {
+            if (user[i].timers.buffRate1St) {
+                await user[i].set('timers', false, 'buffRate1St')
+                // await user[i].set('acclvl', )
+                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate1St}.`)
+            }
+        }
+
+        if (user[i].buffs.rate2st <= timestamp) {
+            if (!user[i].timers.buffRate2St) {
+                await user[i].set('timers', true, 'buffRate2St')
+                // await user[i].set('acclvl', 0)
+                await bot.sendMessage(user[i].id, `Действие ${lang.Rate2St} рассеялось.`)
+            }
+        } else 
+        if (user[i].buffs.rate2st >= timestamp) {
+            if (user[i].timers.buffRate2St) {
+                await user[i].set('timers', false, 'buffRate2St')
+                // await user[i].set('acclvl', )
+                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate2St}.`)
+            }
+        }
+
+        if (user[i].buffs.rate3st <= timestamp) {
+            if (!user[i].timers.buffRate3St) {
+                await user[i].set('timers', true, 'buffRate3St')
+                // await user[i].set('acclvl', 0)
+                await bot.sendMessage(user[i].id, `Действие ${lang.Rate3St} рассеялось.`)
+            }
+        } else 
+
+        if (user[i].buffs.rate3st >= timestamp) {
+            if (user[i].timers.buffRate3St) {
+                await user[i].set('timers', false, 'buffRate3St')
+                // await user[i].set('acclvl', )
+                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate3St}.`)
+            }
+        }
+
+        if (user[i].buffs.rate9st <= timestamp) {
+            if (!user[i].timers.buffRate9St) {
+                await user[i].set('timers', true, 'buffRate9St')
+                // await user[i].set('acclvl', 0)
+                await bot.sendMessage(user[i].id, `Действие ${lang.Rate9St} рассеялось.`)
+            }
+        } else 
+
+        if (user[i].buffs.rate9st >= timestamp) {
+            if (user[i].timers.buffRate9St) {
+                await user[i].set('timers', false, 'buffRate9St')
+                // await user[i].set('acclvl', )
+                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate9St}.`)
             }
         }
 }

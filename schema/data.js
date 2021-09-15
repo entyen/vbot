@@ -18,6 +18,10 @@ const userSchem = new mongoose.Schema({
         buffNewByAlert: { type: Boolean, default: false },
         buffVipAlert: { type: Boolean, default: true },
         buffBanAlert: { type: Boolean, default: true },
+        buffRate1St: { type: Boolean, default: true },
+        buffRate2St: { type: Boolean, default: true },
+        buffRate3St: { type: Boolean, default: true },
+        buffRate9St: { type: Boolean, default: true },
     },
     inv: {
         herbs: { type: Number, default: 0 },
@@ -43,6 +47,10 @@ const userSchem = new mongoose.Schema({
         newby: { type: Number, default: +timestamp + (10080*60*1000) },
         vip: { type: Number, default: null },
         ban: { type: Number, default: null },
+        rate1st: { type: Number, default: null },
+        rate2st: { type: Number, default: null },
+        rate3st: { type: Number, default: null },
+        rate9st: { type: Number, default: null },
     },
     plot: {
         own: { type: Boolean, default: false },

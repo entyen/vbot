@@ -9,17 +9,30 @@ function plotMenu(ctx) {
     plot += `🏠 Дом: ${ctx.user.plot.house === 0 ? 'Нет' : 'Есть'}\n`
     plot += `🏚 Склад: ${ctx.user.plot.wh === 0 ? 'Нет' : 'Есть'}\n`
     plot += `⛪️ Храм: ${ctx.user.plot.temple === 0 ? 'Нет' : 'Есть'}\n`
-    plot += `🕳 Колодец: ${ctx.user.plot.well === 0 ? 'Нет' : 'Есть'}\n`
-    plot += ctx.user.plot.size === 1 ? `⛰ Рудник: ${ctx.user.plot.mc === 0 ? 'Нет' : 'Есть'}\n` : ``
-    plot += ctx.user.plot.size === 1 ? `🌲 Лес: ${ctx.user.plot.well === 0 ? 'Нет' : 'Есть'}\n` : ``
+    plot += ctx.user.plot.size === 1 ? `🕳 Колодец: ${ctx.user.plot.well === 0 ? 'Нет' : 'Есть'}\n` : ``
+    plot += ctx.user.plot.size === 2 ? `⛰ Рудник: ${ctx.user.plot.mc === 0 ? 'Нет' : 'Есть'}\n` : ``
+    plot += ctx.user.plot.size === 2 ? `🌲 Лес: ${ctx.user.plot.well === 0 ? 'Нет' : 'Есть'}\n` : ``
 
     plot += `\n\nРазмер участка: ${ctx.user.plot.size === 0 ? 'Малый' : 'Средний'}`
 
-    return ctx.reply(`Участок \n${plot}`, null, ctx.user.plot.size === 0 ? keyboardPlotLv0 : ctx.user.plot.size === 1 ? keyboardPlotLv1 : false)
+    return ctx.reply(`Участок \n${plot}`, null, ctx.user.plot.size === 0 ? keyboardPlotLv0 : ctx.user.plot.size === 1 ? keyboardPlotLv1 : ctx.user.plot.size === 2 ? keyboardPlotLv2 : false)
 }
 
 
 const keyboardPlotLv0 = Markup.keyboard([
+        [
+            Markup.button('Дом', 'secondary', 'plot.house'),
+            Markup.button('Храм', 'secondary', 'plot.temple'),
+        ],
+        [
+            Markup.button('Склад', 'secondary', 'plot.wh'),
+        ],
+        [
+            Markup.button(lang.back, 'negative', 'menu'),
+        ],
+])
+
+const keyboardPlotLv1 = Markup.keyboard([
         [
             Markup.button('Дом', 'secondary', 'plot.house'),
             Markup.button('Храм', 'secondary', 'plot.temple'),
@@ -33,7 +46,7 @@ const keyboardPlotLv0 = Markup.keyboard([
         ],
 ])
 
-const keyboardPlotLv1 = Markup.keyboard([
+const keyboardPlotLv2 = Markup.keyboard([
         [
             Markup.button('Дом', 'secondary', 'plot.house'),
             Markup.button('Храм', 'secondary', 'plot.temple'),

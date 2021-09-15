@@ -44,7 +44,7 @@ async function profile(ctx) {
     text += `🔎 UID: ${ctx.user.uid}\n`
     text += ` 👤 Статус Аккаунта: ${ctx.user._acclvl}\n`
     text += `🌟 Уровень: ${ctx.user.level} [${ctx.user.exp}/${100*(ctx.user.level+1)}]\n`
-    text += `🧤 Расса: ${ctx.user.race === 0 && 'Без Рассы'}\n`
+    text += `🧤 Расса: ${ctx.user.race === 0 ? 'Без Рассы': ctx.user.race === 1 ? lang.alv: ctx.user.race === 2 ? lang.elven: ctx.user.race === 3 ? lang.darkElven: ctx.user.race === 4 ? lang.dwarf : null}\n`
     text += `⚡ Очки Энергии: ${ctx.user.energy} из ${100 * ctx.user.boosters.energyCount}\n`
     text += `⚡ Восстановление Энергии: ${ctx.user.boosters.energyRegen} в 3 минуты\n`
     text += `${ctx.user.alert ? '🔔' : '🔕'} Уведомления: ${ctx.user.alert ? 'Включены' : 'Выключены'}\n`
@@ -67,7 +67,7 @@ async function inventory(ctx) {
     inv += `\n${!ctx.user.items.fishingRod ? '' : `🎣 Удочка: Есть\n`}`
     inv += `${ctx.user.items.bait === 0 ? '' : `🐛 Наживка: ${ctx.user.items.bait}\n`}`
     inv += `${ctx.user.items.energyPotion === 0 ? '' : `🧪 Зелье ОЭ: ${ctx.user.items.energyPotion}\n`}`
-    inv += `\n👜 Вес Инвентаря: ${ctx.user.currWeight}/${ctx.user.invWeight}\n`
+    inv += `\n👜 Вес Инвентаря: ${ctx.user.currWeight.toFixed(0)}/${ctx.user.invWeight}\n`
 
     return await ctx.reply(`Инвентарь\n ${inv}`)
 }
@@ -95,6 +95,24 @@ async function setting(ctx) {
     )
     return
 }
+async function buffs(ctx) {
+    const cmba = ctx.message.text.toLowerCase().split(' ')
+    let time = {}
+    time.newby = ((ctx.user.buffs.newby - ctx.timestamp)/60/60/1000).toFixed(0)
+    time.vip = ((ctx.user.buffs.vip - ctx.timestamp)/60/60/1000).toFixed(0)
+    time.rate1st = ((ctx.user.buffs.rate1st - ctx.timestamp)/60/1000).toFixed(0)
+    time.rate2st = ((ctx.user.buffs.rate2st - ctx.timestamp)/60/1000).toFixed(0)
+    time.rate3st = ((ctx.user.buffs.rate3st - ctx.timestamp)/60/1000).toFixed(0)
+    time.rate9st = ((ctx.user.buffs.rate9st - ctx.timestamp)/60/1000).toFixed(0)
+    let buffs = `Баффы:`
+    buffs += `${time.rate1st <= 0 ? `` : `\n${lang.Rate1St}: ${time.rate1st} минут`}`
+    buffs += `${time.rate2st <= 0 ? `` : `\n${lang.Rate2St}: ${time.rate2st} минут`}`
+    buffs += `${time.rate3st <= 0 ? `` : `\n${lang.Rate3St}: ${time.rate3st} минут`}`
+    buffs += `${time.rate9st <= 0 ? `` : `\n${lang.Rate9St}: ${time.rate9st} минут`}`
+    buffs += `${time.newby <= 0 ? `\n${lang.newBy}: Истек` : `\n${lang.newBy}: ${time.newby} часов`}`
+    buffs += `${time.vip <= 0 ? `` : `\n\n${lang.Vip}: ${time.vip} часов`}`
+    return await ctx.reply(`${cmba.join().replace(/,/g, ' ').replace(cmba[0], '')} ${buffs}`)
+}
 
 // const keyboardSetting = Markup.keyboard([
 //             [
@@ -114,4 +132,4 @@ async function setting(ctx) {
 
 
 
-module.exports = { menu, profile, inventory, setting }
+module.exports = { menu, profile, inventory, setting, buffs }

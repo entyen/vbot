@@ -102,8 +102,8 @@ bot.use(async (ctx, next) => {
     if (ctx.message.peer_id === tea.REPORTCHAT) { 
         if (!ctx.message.reply_message) return
         const ansUsrId = ctx.message.reply_message.text.split('id')[1].split('|')[0]
-        await ctx.reply(`Вы написали @id${ansUsrId}\n ${ctx.message.text}`)
-        await bot.sendMessage(ansUsrId, `Ответ ТП:\n${ctx.message.text}`)
+        await ctx.reply(`Вы написали @id${ansUsrId}\n💬 ${ctx.message.text}`)
+        await bot.sendMessage(ansUsrId, `📥 Ответ ТП:\n💬 ${ctx.message.text}`)
     }
     if (ctx.message.from_id > 0 && ctx.message.id == 0) {
         try {
@@ -290,6 +290,7 @@ setInterval(async () => {
 
 const updater = new CronJob('*/30 * * * *', null, true, 'Europe/Moscow')
 updater.addCallback(async () => {
+    const timestamp = new Date().getTime()
     const bank = await bankdb.findOne({id: 0})
     const massItems = [
     { n: 'herbs', count: bank.inv.herbs },
@@ -327,7 +328,28 @@ updater.addCallback(async () => {
     for (i = 0; i < 9; i++) {
             result += `${user[i].id} ${user[i].f_name} ${user[i].balance} `
     }
-    const resultMass = result.split(' ') 
+
+    const resultMass = result.split(' ')
+    try{
+        const userOneSt = await userdb.findOne({ id: resultMass[0] })
+        const userTwoSt = await userdb.findOne({ id: resultMass[3] })
+        const userTreeSt = await userdb.findOne({ id: resultMass[6] })
+        await userOneSt.set('buffs', (+timestamp + (30*60*1000)),'rate1st')
+        await userTwoSt.set('buffs', (+timestamp + (30*60*1000)),'rate2st')
+        await userTreeSt.set('buffs', (+timestamp + (30*60*1000)),'rate3st')
+        const userFourSt = await userdb.findOne({ id: resultMass[9] })
+        const userFiveSt = await userdb.findOne({ id: resultMass[12] })
+        const userSixSt = await userdb.findOne({ id: resultMass[15] })
+        const userSevenSt = await userdb.findOne({ id: resultMass[18] })
+        const userEightSt = await userdb.findOne({ id: resultMass[21] })
+        const userNinetSt = await userdb.findOne({ id: resultMass[24] })
+        await userFourSt.set('buffs', (+timestamp + (30*60*1000)),'rate9st')
+        await userFiveSt.set('buffs', (+timestamp + (30*60*1000)),'rate9st')
+        await userSixSt.set('buffs', (+timestamp + (30*60*1000)),'rate9st')
+        await userSevenSt.set('buffs', (+timestamp + (30*60*1000)),'rate9st')
+        await userEightSt.set('buffs', (+timestamp + (30*60*1000)),'rate9st')
+        await userNinetSt.set('buffs', (+timestamp + (30*60*1000)),'rate9st')
+    } catch (e) { 'Error: ' + console.log(e) }
     const date = new Date().toLocaleTimeString('ru-RU', {timeZone: 'Etc/GMT-3'})
 
     const tableWiget = {

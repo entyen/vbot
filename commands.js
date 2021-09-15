@@ -2,7 +2,7 @@ const { timeout } = require('cron')
 
 const { Job } = require('./scenes/job')
 const { forest } = require('./adv/forest')
-const { menu, profile, inventory, setting } = require('./mod/menu')
+const { menu, profile, inventory, setting, buffs } = require('./mod/menu')
 const { plotMenu, well, house, temple, wh } = require('./mod/plot')
 
 module.exports = async(bot, utils, lang, userdb, bp) => {
@@ -142,10 +142,10 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             console.log(user.filter(x => x.uid === ctx.user.uid)[0].balance)
                 await utils.smChat(2000000005, `📝 Репорт от пользователя @id${ctx.user.id}(${ctx.user.f_name})\n💬 ${ctx.message.text.split(' ').join().replace(/,/g, ' ').replace(cmba[0], '')}`)
                 .then(() => {
-                    return ctx.reply(`📝 Репорт отправлен ожидайте ответа Тех. Поддержки`)
+                    return ctx.reply(`📤 Репорт отправлен ожидайте ответа Тех. Поддержки`)
                 })
                 .catch((err) => { 
-                    return ctx.reply(`Произошла ошибка при отправлении сообщения Тех. Поддержке.`)
+                    return ctx.reply(`‼️ Произошла ошибка при отправлении сообщения Тех. Поддержке.`)
                 })
         } else
         if (cmba[0] === 'use') {
@@ -153,12 +153,12 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 await ctx.user.dec('items', 1, 'energyPotion')
                 await ctx.user.inc('energy', 25)
                 await ctx.reply(`Вы использвали банку на ОЭ теперь у вас ${ctx.user.energy} ⚡ осталось еще ${ctx.user.items.energyPotion} Банок ОЭ`)
-            } else {ctx.reply('Неверный предмет или у вас закончились банки')}
+            } else {ctx.reply('‼️ Неверный предмет или у вас закончились банки')}
         } else
         if (cmba[0] === 'send' || cmba[0] === 'передать') {
             try {
             let locUser = await userdb.findOne({ uid: cmba[1] })
-            if (Number(cmba[1]) && Number(cmba[2]) && ctx.user.balance > +cmba[2]) {
+            if (Number(cmba[1]) && Number(cmba[2]) && ctx.user.balance > +cmba[2] && +cmba[2] > 0) {
                 await ctx.user.dec('balance', +cmba[2])
                 await locUser.inc('balance', +cmba[2])
                 await ctx.reply(`Вы передали ${+cmba[2]}${lang.curr} пользователю ${`@id${locUser.id}(${locUser.f_name})`}`)
@@ -166,17 +166,44 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             } else {ctx.reply('Недостаточно средств.')}
             } catch (e) {
                 console.log(e)
-                ctx.reply('Недостаточно средств или еще что-то не так.')
+                ctx.reply('‼️ Недостаточно средств или еще что-то не так.')
             }
         } else
+        if (cmba[0] === 'race' || cmba[0] === 'расса') {
+            if (cmba[0] && cmba[1] === undefined) {
+                await ctx.reply( `На выбор доступны 4 рассы:\n 1. Альв\n 2. Эльф\n 3. Темный Эльф\n 4. Дфарф\n\n Введите ${cmba[0]} "Цифра"\n ️️‼️ Внимание выбрать можно только 1 раз` )
+            } else
+            if (+cmba[1] && ctx.user.race === 0 && +cmba[1] <= 4 && +cmba[1] > 0) {
+                await ctx.user.set('race', cmba[1])
+                await ctx.reply(`Вы стали ${ctx.user.race === 1 ? lang.alv: ctx.user.race === 2 ? lang.elven: ctx.user.race === 3 ? lang.darkElven: ctx.user.race === 4 ? lang.dwarf : null}`)
+            } else { ctx.reply('️️‼️ Не верные значения или вы уже выбрали рассу.') }
+        } else
+        // if (cmba[0] === 'trade' || cmba[0] === 'обмен') {
+        //     try {
+        //     let locUser = await userdb.findOne({ uid: cmba[1] })
+        //     if (Number(cmba[1]) && Number(cmba[2]) && cmba[3] && ctx.user.balance > +cmba[2]) {
+        //         if (cmba[3] !== 'Редкая Руда' || cmba[3] !== 'rareore') {return ctx.reply('Не верный ресурс')} else cmba[3] = ctx.rareOre
+        //         await bot.sendMessage(locUser.id, `${`@id${ctx.user.id}(${ctx.user.f_name})`} Пользователь предлагает вам купить ${cmba[3]} за ${cmba[2]} ${lang.curr}`, '', 
+        //         Markup.keyboard([
+        //         [
+        //             Markup.button('Да', 'secondary', 'trade'),
+        //             Markup.button('Нет', 'secondary', 'trade'),
+        //         ],
+        //         ]) 
+        //         .inline()
+        //         )
+        //         console.log(ctx)
+        //         // await ctx.user.dec('balance', +cmba[2])
+        //         // await locUser.inc('balance', +cmba[2])
+        //         // await ctx.reply(`Вы передали ${+cmba[2]}${lang.curr} пользователю ${`@id${locUser.id}(${locUser.f_name})`}`)
+        //         } else {ctx.reply('Недостаточно средств.')}
+        //     } catch (e) {
+        //         console.log(e)
+        //         ctx.reply('Недостаточно средств или еще что-то не так.')
+        //     }
+        // } else
         if (cmba[0] === 'buffs' || ctx.cmd === 'buffs') {
-                let time = {}
-                time.newby = ((ctx.user.buffs.newby - ctx.timestamp)/60/60/1000).toFixed(0)
-                time.vip = ((ctx.user.buffs.vip - ctx.timestamp)/60/60/1000).toFixed(0)
-                let buffs = `Баффы:\n`
-                buffs += `${time.newby <= 0 ? `${lang.newBy}: Истек` : `${lang.newBy}: ${time.newby} часов`}`
-                buffs += `\n\n${time.vip <= 0 ? `` : `${lang.Vip}: ${time.vip} часов`}`
-                return await bot.sendMessage(ctx.user.id, `${cmba.join().replace(/,/g, ' ').replace(cmba[0], '')} ${buffs}`)
+                return buffs(ctx)
         } else
         if (cmba[0] === 'admbuff') {
             try{
@@ -199,22 +226,36 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                     await bot.sendMessage(locUser.id, `Вы получили ${lang.ban} на ${+cmba[3]} часа \nПроверить эффекты на себе можно в Настройках`)
                     } else { ctx.reply('Баффа с таким [BUFFID] не существует')}
                 } else {
-                    await ctx.reply('Нет прав использовать данную команду')
+                    await ctx.reply('‼️ Нет прав использовать данную команду')
                 }
-            } catch (e) {ctx.reply('Что-то не верно проверте значения')}
+            } catch (e) {ctx.reply('‼️ Что-то не верно проверте значения')}
         } else
+        // if (cmba[0] === 'dbedit') {
+        //     try{
+        //         let allUser = await userdb.find({})
+        //         if (cmba[1] && +cmba[2] &&ctx.user.acclvl >= 7) {
+        //             if (cmba[1] === '0') {
+        //             allUser.forEach(async (x,y,z) => {
+        //                 await allUser[y].set('invWeight', cmba[2])
+        //             })
+        //             } else { ctx.reply('Что-то не так')}
+        //         } else {
+        //             await ctx.reply('Нет прав использовать данную команду')
+        //         }
+        //     } catch (e) {ctx.reply('Что-то не верно проверте значения')}
+        // } else
         if (cmba[0] === 'lang' && cmba[1] === 'ru' || cmba[1] === 'en') {
             ctx.user.lang = cmba[1]
             await ctx.user.save()
             await ctx.reply(`Язык изменен на ${cmba[1]}`)
         }
         if (ctx.cmd === lang.dev || ctx.cmd === lang.adm || ctx.cmd === lang.moder || ctx.cmd === lang.user || ctx.cmd === lang.vip || ctx.cmd === lang.plat) {
-            ctx.user.acclvl >= 7 ? ctx.reply(`${lang.userGrpCmd} ${lang.dev} ${lang.rate} ${lang.devCmd}`)
-             : ctx.user.acclvl == 6 ? ctx.reply(`${lang.userGrpCmd} ${lang.adm} ${lang.rate}`)
-              : ctx.user.acclvl == 5 ? ctx.reply(`${lang.userGrpCmd} ${lang.moder} ${lang.rate}`)
-               : ctx.user.acclvl == 2 ? ctx.reply(`${lang.userGrpCmd} ${lang.plat} ${lang.rate}`)
-                 : ctx.user.acclvl == 1 ? ctx.reply(`${lang.userGrpCmd} ${lang.vip} ${lang.rate}`)
-                  : ctx.user.acclvl == 0 ? ctx.reply(`${lang.userGrpCmd} ${lang.user} ${lang.rate}`)
+            ctx.user.acclvl >= 7 ? ctx.reply(`${lang.userGrpCmd} ${lang.dev} ${lang.help} ${lang.devCmd}`)
+             : ctx.user.acclvl == 6 ? ctx.reply(`${lang.userGrpCmd} ${lang.adm} ${lang.help}`)
+              : ctx.user.acclvl == 5 ? ctx.reply(`${lang.userGrpCmd} ${lang.moder} ${lang.help}`)
+               : ctx.user.acclvl == 2 ? ctx.reply(`${lang.userGrpCmd} ${lang.plat} ${lang.help}`)
+                 : ctx.user.acclvl == 1 ? ctx.reply(`${lang.userGrpCmd} ${lang.vip} ${lang.help}`)
+                  : ctx.user.acclvl == 0 ? ctx.reply(`${lang.userGrpCmd} ${lang.user} ${lang.help}`)
                    : ctx.reply(lang.noPerm)
             return
         }
@@ -520,7 +561,7 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], ctx.bank.dpi.wood)
                 return
             case lang.land:
-                if (!ctx.user.plot.own) return await ctx.reply(`У вас есть участок но его поверхность неподходит для строительства необходимо 15000 ${lang.sand} что-бы его выровнять.`, null, Markup
+                if (!ctx.user.plot.own) return await ctx.reply(`У вас есть участок но его поверхность неподходит для строительства необходимо 5000 ${lang.sand} что-бы его выровнять.`, null, Markup
                     .keyboard(
                         [
                             Markup.button('Выровнять участок', 'default', 'plot.align'),
@@ -540,7 +581,7 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             case 'plot.temple':
                 return temple(ctx)
             case 'plot.align':
-                return await ctx.reply(`Выроврять участок под строительство с вас спишется \n15000 ${lang.sand}`, null, Markup
+                return await ctx.reply(`Выроврять участок под строительство с вас спишется \n5000 ${lang.sand}`, null, Markup
                     .keyboard(
                         [
                             Markup.button('Да', 'default', 'plot.align.yes'),
@@ -550,8 +591,8 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                     .inline()
                     )
             case 'plot.align.yes':
-                if (ctx.user.inv.sand < 15000) return ctx.reply('Недостаточно средств')
-                await ctx.user.dec('inv', 15000, 'sand')
+                if (ctx.user.inv.sand < 5000) return ctx.reply('Недостаточно средств')
+                await ctx.user.dec('inv', 5000, 'sand')
                 await ctx.user.set('plot', true, 'own')
                 await ctx.reply('Теперь на вашем участке можно строить')
                 return
