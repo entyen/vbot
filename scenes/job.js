@@ -27,7 +27,7 @@ class Job {
         }
         this.cb = eventAnswer
 
-        const lvlx = this.ctx.user.level <= 0 ? 1 : 1 + (this.ctx.user.level * 0.2)
+        const lvlx = this.ctx.user.level <= 0 ? 1 : 1 + (this.ctx.user.boosters.harvest * 0.2)
 
         this.jobs = {
             herb: {

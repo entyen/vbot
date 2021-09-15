@@ -41,7 +41,7 @@ async function menu(ctx) {
 
 async function profile(ctx) {
     let text = ``
-    text += `🔎 UID: ${ctx.user.uid}\n`
+    text += `🆔 ${ctx.user.uid}\n`
     text += ` 👤 Статус Аккаунта: ${ctx.user._acclvl}\n`
     text += `🌟 Уровень: ${ctx.user.level} [${ctx.user.exp}/${100*(ctx.user.level+1)}]\n`
     text += `🧤 Раса: ${ctx.user.race === 0 ? 'Без Расы': ctx.user.race === 1 ? lang.alv: ctx.user.race === 2 ? lang.elven: ctx.user.race === 3 ? lang.darkElven: ctx.user.race === 4 ? lang.dwarf : null}\n`
@@ -66,7 +66,7 @@ async function inventory(ctx) {
     inv += `${ctx.user.inv.rareFish === 0 ? '' : `🐡 Редкая Рыба: ${ctx.user.inv.rareFish}\n`}`
     inv += `\n${!ctx.user.items.fishingRod ? '' : `🎣 Удочка: Есть\n`}`
     inv += `${ctx.user.items.bait === 0 ? '' : `🐛 Наживка: ${ctx.user.items.bait}\n`}`
-    inv += `${ctx.user.items.energyPotion === 0 ? '' : `🧪 Зелье ОЭ: ${ctx.user.items.energyPotion}\n`}`
+    inv += `${ctx.user.items.energyPotion === 0 ? '' : `${lang.energyPotion}: ${ctx.user.items.energyPotion}\n`}`
     inv += `\n👜 Вес Инвентаря: ${ctx.user.currWeight.toFixed(0)}/${ctx.user.invWeight}\n`
 
     return await ctx.reply(`Инвентарь\n ${inv}`)
@@ -114,6 +114,7 @@ function buffs(ctx) {
     buffs += `${time.energyWell <= 0 ? `` : `\n${lang.energyWell}: ${time.energyWell} часа`}`
     buffs += `${time.newby <= 0 ? `` : `\n${lang.newBy}: ${time.newby} часов`}`
     buffs += `${time.vip <= 0 ? `` : `\n\n${lang.Vip}: ${time.vip} часов`}`
+
     return ctx.reply(`${cmba.join().replace(/,/g, ' ').replace(cmba[0], '')} ${buffs}`)
 }
 

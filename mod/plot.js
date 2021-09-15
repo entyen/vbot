@@ -68,13 +68,15 @@ keyboardPlot.Lv2 = Markup.keyboard([
 
 
 function plotUpgradeLv1(ctx) {
+    if (ctx.user.plot.size >= 1) return ctx.reply('Участок уже Средний')
     if (ctx.user.plot.size === 0) {
-        ctx.reply(`Улучшить учаток до Среднего\n⚒ На а его строительство требуется:\n${lang.sand} 10000`, null, build.plotLv1)
+        ctx.reply(`Улучшить учаток до Среднего\n⚒ На а его строительство требуется:\n${resCheck(ctx, 'sand', 10000)}`, null, build.plotLv1)
     }
     return 
 }
 
 async function buildWell(ctx) {
+    if (ctx.user.plot.well >= 1) return ctx.reply('Уже есть колодец')
     if (ctx.user.inv.ore < 5000 && ctx.user.inv.rareOre < 2) return ctx.reply('Недостаточно средств')
         await ctx.user.dec('inv', 3000, 'ore')
         await ctx.user.dec('inv', 2, 'rareOre')
@@ -101,6 +103,10 @@ async function trowPotion(ctx) {
     return
 }
 
+const resCheck = (ctx, x, y) => {
+    return `${ctx.user.inv[x] > y ? '✔️' : '❌'} ${lang[x]} ${y}`
+}
+
 function house(ctx) {
     if (ctx.user.plot.house === 0) {
         ctx.reply(`🏠 Дом позволит вам заниматся созданием предметов\n⚒ На его строительство требуется:\n${lang.wood} \n${lang.sand} `)
@@ -110,26 +116,26 @@ function house(ctx) {
 
 function temple(ctx) {
     if (ctx.user.plot.temple === 0) {
-        ctx.reply(`⛪️ Храм позволит вам получать Эффекты за подношения богам\n⚒ На его строительство требуется:\n${lang.wood} \n${lang.sand} \n${lang.rareOre} `)
+        ctx.reply(`⛪️ Храм позволит вам получать Эффекты за подношения богам\n⚒ На его строительство требуется:\n${lang.wood} \n${lang.sand} \n${lang.ore} `)
     }
     return 
 }
 
 function wh(ctx) {
     if (ctx.user.plot.wh === 0) {
-        ctx.reply(`🏚 Склад позволит вам увеличить место в хранилище\n⚒ На его строительство требуется:\n️${lang.ore} 4000\n${lang.sand} 7000\n️${lang.wood} 10000`)
+        ctx.reply(`🏚 Склад позволит вам увеличить место в хранилище\n⚒ На его строительство требуется:\n${resCheck(ctx, 'ore', 4000)}\n︎${resCheck(ctx, 'sand', 7000)}\n︎${resCheck(ctx, 'wood', 10000)}`)
     }
     return 
 }
 
 function well(ctx) {
     if (ctx.user.plot.well === 0) {
-        ctx.reply(`🕳 Колодец позволит вам\n получать Эффект Восстановление Энергии\n⚒ На а его строительство требуется:\n${lang.ore} 3000\n${lang.rareOre} 2`, null, build.well)
+        ctx.reply(`🕳 Колодец позволит вам\n получать Эффект Восстановление Энергии\n⚒ На а его строительство требуется:\n${resCheck(ctx, 'ore', 3000)}\n${resCheck(ctx, 'rareOre', 2)}`, null, build.well)
     }else 
     if (ctx.user.buffs.energyWell >= ctx.timestamp) {
         ctx.reply(`🕳 Колодец: \n Заряжен и вы получаете +1 к регенерации Энергии ⚡`)
     } else {
-        ctx.reply(`🕳 Колодец: \n Для получения ${lang.energyWell} вам нужно бросить в колодец Зелье ОЭ`, null, trowPotionWell)
+        ctx.reply(`🕳 Колодец: \n Для получения ${lang.energyWell} вам нужно бросить в колодец ${lang.energyPotion}`, null, trowPotionWell)
     }
     return 
 }
