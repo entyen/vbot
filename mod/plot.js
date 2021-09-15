@@ -15,11 +15,12 @@ function plotMenu(ctx) {
 
     plot += `\n\nРазмер участка: ${ctx.user.plot.size === 0 ? 'Малый' : 'Средний'}`
 
-    return ctx.reply(`Участок \n${plot}`, null, ctx.user.plot.size === 0 ? keyboardPlotLv0 : ctx.user.plot.size === 1 ? keyboardPlotLv1 : ctx.user.plot.size === 2 ? keyboardPlotLv2 : false)
+    return ctx.reply(`Участок \n${plot}`, null, ctx.user.plot.size === 0 ? keyboardPlot.Lv0 : ctx.user.plot.size === 1 ? keyboardPlot.Lv1 : ctx.user.plot.size === 2 ? keyboardPlot.Lv2 : false)
 }
 
+const keyboardPlot = {}
 
-const keyboardPlotLv0 = Markup.keyboard([
+keyboardPlot.Lv0 = Markup.keyboard([
         [
             Markup.button('Дом', 'secondary', 'plot.house'),
             Markup.button('Храм', 'secondary', 'plot.temple'),
@@ -28,11 +29,12 @@ const keyboardPlotLv0 = Markup.keyboard([
             Markup.button('Склад', 'secondary', 'plot.wh'),
         ],
         [
+            Markup.button('Улучшить', 'positive', 'plot.upgrade.Lv1'),
             Markup.button(lang.back, 'negative', 'menu'),
         ],
 ])
 
-const keyboardPlotLv1 = Markup.keyboard([
+keyboardPlot.Lv1 = Markup.keyboard([
         [
             Markup.button('Дом', 'secondary', 'plot.house'),
             Markup.button('Храм', 'secondary', 'plot.temple'),
@@ -42,11 +44,12 @@ const keyboardPlotLv1 = Markup.keyboard([
             Markup.button('Колодец', 'secondary', 'plot.well'),
         ],
         [
+            Markup.button('Улучшить', 'positive', 'plot.upgrade.Lv2'),
             Markup.button(lang.back, 'negative', 'menu'),
         ],
 ])
 
-const keyboardPlotLv2 = Markup.keyboard([
+keyboardPlot.Lv2 = Markup.keyboard([
         [
             Markup.button('Дом', 'secondary', 'plot.house'),
             Markup.button('Храм', 'secondary', 'plot.temple'),
@@ -58,12 +61,57 @@ const keyboardPlotLv2 = Markup.keyboard([
             Markup.button('Лес', 'secondary', 'plot.forest'),
         ],
         [
+            Markup.button('Улучшить', 'positive', 'plot.upgrade.Lv3'),
             Markup.button(lang.back, 'negative', 'menu'),
         ],
 ])
 
 function well(ctx) {
-    return ctx.reply(`🕳 Колодец позволит вам\n получать Эффект Восстановление Энергии\n⚒ На а его строительство требуется 3000 ${lang.ore} 1 ${lang.rareOre}`)
+    if (ctx.user.plot.well === 0) {
+        ctx.reply(`🕳 Колодец позволит вам\n получать Эффект Восстановление Энергии\n⚒ На а его строительство требуется 3000 ${lang.ore} 2 ${lang.rareOre}`, null, build.well)
+    }else 
+    if (ctx.user.buffs.energyWell >= ctx.timestamp) {
+        ctx.reply(`🕳 Колодец: \n Заряжен и вы получаете +1 к регенерации Энергии ⚡`)
+    } else {
+        ctx.reply(`🕳 Колодец: \n Для получения ${lang.energyWell} вам нужно бросить в колодец Зелье ОЭ`, null, trowPotionWell)
+    }
+    return 
+}
+
+function plotUpgradeLv1(ctx) {
+    if (ctx.user.plot.size === 0) {
+        ctx.reply(`Улучшить учаток до Среднего\n⚒ На а его строительство требуется 10000 ${lang.sand}`, null, build.plotLv1)
+    } else {
+        ctx.reply(`null`)
+    }
+    return 
+}
+
+async function buildWell(ctx) {
+    if (ctx.user.inv.ore < 5000 && ctx.user.inv.rareOre < 2) return ctx.reply('Недостаточно средств')
+        await ctx.user.dec('inv', 3000, 'ore')
+        await ctx.user.dec('inv', 2, 'rareOre')
+        await ctx.user.set('plot', 1, 'well')
+        await ctx.reply('Теперь у вас есть колодец')
+    return
+}
+
+async function plotBuildLv1(ctx) {
+    if (ctx.user.plot.size >= 1) return ctx.reply('Ваш участок уже Средний')
+    if (ctx.user.inv.sand < 10000) return ctx.reply('Недостаточно средств')
+        await ctx.user.dec('inv', 10000, 'sand')
+        await ctx.user.set('plot', 1, 'size')
+        await ctx.reply('Теперь ваш участок Средний')
+    return
+}
+
+async function trowPotion(ctx) {
+    if (ctx.user.buffs.energyWell >= ctx.timestamp) { return ctx.reply( '⚡ Колодец уже активен' ) }
+    if (ctx.user.items.energyPotion < 1) return ctx.reply('Недостаточно Зелий')
+        await ctx.user.dec('items', 1, 'energyPotion')
+        await ctx.user.set('buffs', (+ctx.timestamp + (4*60*60*1000)), 'energyWell')
+        await ctx.reply('⚡ Колодец заряжен')
+    return
 }
 
 function house(ctx) {
@@ -78,4 +126,24 @@ function wh(ctx) {
     return ctx.reply(`🏚 Склад позволит вам увеличить место в хранилище\n⚒ На его строительство требуется`)
 }
 
-module.exports = { plotMenu, well, house, temple, wh }
+const build = {}
+
+build.well = Markup.keyboard(
+        [
+            Markup.button('Построить', 'secondary', 'build.well'),
+        ],
+).inline()
+
+build.plotLv1 = Markup.keyboard(
+        [
+            Markup.button('Улучшить участок до Среднего', 'default', 'plot.build.Lv1'),
+        ]
+).inline()
+
+const trowPotionWell = Markup.keyboard([
+        [
+            Markup.button('Бросить', 'secondary', 'trow.potion.well'),
+        ],
+]).inline()
+
+module.exports = { plotMenu, well, house, temple, wh, buildWell, trowPotion, plotUpgradeLv1, plotBuildLv1 }

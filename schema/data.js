@@ -22,6 +22,7 @@ const userSchem = new mongoose.Schema({
         buffRate2St: { type: Boolean, default: true },
         buffRate3St: { type: Boolean, default: true },
         buffRate9St: { type: Boolean, default: true },
+        buffEnergyWell: { type: Boolean, default: true },
     },
     inv: {
         herbs: { type: Number, default: 0 },
@@ -51,6 +52,7 @@ const userSchem = new mongoose.Schema({
         rate2st: { type: Number, default: null },
         rate3st: { type: Number, default: null },
         rate9st: { type: Number, default: null },
+        energyWell: { type: Number, default: null },
     },
     plot: {
         own: { type: Boolean, default: false },

@@ -3,7 +3,7 @@ const { timeout } = require('cron')
 const { Job } = require('./scenes/job')
 const { forest } = require('./adv/forest')
 const { menu, profile, inventory, setting, buffs } = require('./mod/menu')
-const { plotMenu, well, house, temple, wh } = require('./mod/plot')
+const { plotMenu, well, house, temple, wh, buildWell, trowPotion, plotUpgradeLv1, plotBuildLv1 } = require('./mod/plot')
 
 module.exports = async(bot, utils, lang, userdb, bp) => {
     const Markup = require('node-vk-bot-api/lib/markup')
@@ -169,9 +169,9 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 ctx.reply('‼️ Недостаточно средств или еще что-то не так.')
             }
         } else
-        if (cmba[0] === 'race' || cmba[0] === 'расса') {
+        if (cmba[0] === 'race' || cmba[0] === 'раса') {
             if (cmba[0] && cmba[1] === undefined) {
-                await ctx.reply( `На выбор доступны 4 рассы:\n 1. Альв\n 2. Эльф\n 3. Темный Эльф\n 4. Дфарф\n\n Введите ${cmba[0]} "Цифра"\n ️️‼️ Внимание выбрать можно только 1 раз` )
+                await ctx.reply( `На выбор доступны 4 расы:\n 1. Альв\n 2. Эльф\n 3. Темный Эльф\n 4. Дфарф\n\n Введите ${cmba[0]} "Цифра"\n ️️‼️ Внимание выбрать можно только 1 раз` )
             } else
             if (+cmba[1] && ctx.user.race === 0 && +cmba[1] <= 4 && +cmba[1] > 0) {
                 await ctx.user.set('race', cmba[1])
@@ -574,6 +574,10 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 return plotMenu(ctx)
             case 'plot.well':
                 return well(ctx)
+            case 'build.well':
+                return buildWell(ctx)
+            case 'trow.potion.well':
+                return trowPotion(ctx)
             case 'plot.wh':
                 return wh(ctx)
             case 'plot.house':
@@ -584,18 +588,35 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 return await ctx.reply(`Выроврять участок под строительство с вас спишется \n5000 ${lang.sand}`, null, Markup
                     .keyboard(
                         [
-                            Markup.button('Да', 'default', 'plot.align.yes'),
-                            Markup.button('Нет', 'default', 'menu'),
+                            Markup.button('Засыпать неровности песком', 'default', 'plot.align.yes'),
                         ],
                     )
                     .inline()
                     )
+            case 'plot.upgrade.Lv1':
+                return plotUpgradeLv1(ctx)
+            case 'plot.build.Lv1':
+                return plotBuildLv1(ctx)
+            case 'plot.upgrade.Lv2':
+                //TODO
+                return ctx.reply(lang.inDev)
+            case 'plot.build.Lv2':
+                //TODO
+                return ctx.reply(lang.inDev)
+            case 'plot.upgrade.Lv3':
+                //TODO
+                return ctx.reply(lang.inDev)
+            case 'plot.build.Lv3':
+                //TODO
+                return ctx.reply(lang.inDev)
             case 'plot.align.yes':
                 if (ctx.user.inv.sand < 5000) return ctx.reply('Недостаточно средств')
                 await ctx.user.dec('inv', 5000, 'sand')
                 await ctx.user.set('plot', true, 'own')
                 await ctx.reply('Теперь на вашем участке можно строить')
                 return
+            case 'inDev':
+                return ctx.reply(lang.inDev)
             case lang.nick:
                     return await ctx.scene.enter('menu', [1])
             default:

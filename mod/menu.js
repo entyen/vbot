@@ -44,7 +44,7 @@ async function profile(ctx) {
     text += `🔎 UID: ${ctx.user.uid}\n`
     text += ` 👤 Статус Аккаунта: ${ctx.user._acclvl}\n`
     text += `🌟 Уровень: ${ctx.user.level} [${ctx.user.exp}/${100*(ctx.user.level+1)}]\n`
-    text += `🧤 Расса: ${ctx.user.race === 0 ? 'Без Рассы': ctx.user.race === 1 ? lang.alv: ctx.user.race === 2 ? lang.elven: ctx.user.race === 3 ? lang.darkElven: ctx.user.race === 4 ? lang.dwarf : null}\n`
+    text += `🧤 Раса: ${ctx.user.race === 0 ? 'Без Расы': ctx.user.race === 1 ? lang.alv: ctx.user.race === 2 ? lang.elven: ctx.user.race === 3 ? lang.darkElven: ctx.user.race === 4 ? lang.dwarf : null}\n`
     text += `⚡ Очки Энергии: ${ctx.user.energy} из ${100 * ctx.user.boosters.energyCount}\n`
     text += `⚡ Восстановление Энергии: ${ctx.user.boosters.energyRegen} в 3 минуты\n`
     text += `${ctx.user.alert ? '🔔' : '🔕'} Уведомления: ${ctx.user.alert ? 'Включены' : 'Выключены'}\n`
@@ -104,11 +104,13 @@ async function buffs(ctx) {
     time.rate2st = ((ctx.user.buffs.rate2st - ctx.timestamp)/60/1000).toFixed(0)
     time.rate3st = ((ctx.user.buffs.rate3st - ctx.timestamp)/60/1000).toFixed(0)
     time.rate9st = ((ctx.user.buffs.rate9st - ctx.timestamp)/60/1000).toFixed(0)
+    time.energyWell = ((ctx.user.buffs.energyWell - ctx.timestamp)/60/60/1000).toFixed(0)
     let buffs = `Баффы:`
     buffs += `${time.rate1st <= 0 ? `` : `\n${lang.Rate1St}: ${time.rate1st} минут`}`
     buffs += `${time.rate2st <= 0 ? `` : `\n${lang.Rate2St}: ${time.rate2st} минут`}`
     buffs += `${time.rate3st <= 0 ? `` : `\n${lang.Rate3St}: ${time.rate3st} минут`}`
     buffs += `${time.rate9st <= 0 ? `` : `\n${lang.Rate9St}: ${time.rate9st} минут`}`
+    buffs += `${time.energyWell <= 0 ? `` : `\n${lang.energyWell}: ${time.energyWell} часа`}`
     buffs += `${time.newby <= 0 ? `\n${lang.newBy}: Истек` : `\n${lang.newBy}: ${time.newby} часов`}`
     buffs += `${time.vip <= 0 ? `` : `\n\n${lang.Vip}: ${time.vip} часов`}`
     return await ctx.reply(`${cmba.join().replace(/,/g, ' ').replace(cmba[0], '')} ${buffs}`)

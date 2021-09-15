@@ -28,6 +28,7 @@ module.exports = async(bot, i, user, lang) => {
             if (user[i].timers.buffVipAlert) {
                 await user[i].set('timers', false, 'buffVipAlert')
                 await user[i].set('acclvl', 1)
+                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Vip}.`)
             }
         }
         //BAN DE-BUFF
@@ -48,14 +49,14 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate1st <= timestamp) {
             if (!user[i].timers.buffRate1St) {
                 await user[i].set('timers', true, 'buffRate1St')
-                // await user[i].set('acclvl', 0)
+                // await user[i].inc('boosters', 1, 'energyCount')
                 await bot.sendMessage(user[i].id, `Действие ${lang.Rate1St} рассеялось.`)
             }
         } else 
         if (user[i].buffs.rate1st >= timestamp) {
             if (user[i].timers.buffRate1St) {
                 await user[i].set('timers', false, 'buffRate1St')
-                // await user[i].set('acclvl', )
+                // await user[i].dec('boosters', 1, 'energyCount')
                 await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate1St}.`)
             }
         }
@@ -103,7 +104,24 @@ module.exports = async(bot, i, user, lang) => {
             if (user[i].timers.buffRate9St) {
                 await user[i].set('timers', false, 'buffRate9St')
                 // await user[i].set('acclvl', )
-                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate9St}.`)
+                await user[i].inc('boosters', 1, 'energyRegen')
+                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.energyWell}.`)
+            }
+        }
+
+        if (user[i].buffs.energyWell <= timestamp) {
+            if (!user[i].timers.buffEnergyWell) {
+                await user[i].set('timers', true, 'buffEnergyWell')
+                await user[i].dec('boosters', 1, 'energyRegen')
+                await bot.sendMessage(user[i].id, `Действие ${lang.energyWell} рассеялось.`)
+            }
+        } else 
+
+        if (user[i].buffs.energyWell >= timestamp) {
+            if (user[i].timers.buffEnergyWell) {
+                await user[i].set('timers', false, 'buffEnergyWell')
+                await user[i].inc('boosters', 1, 'energyRegen')
+                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.energyWell} восстановление Энергии ускоренно.`)
             }
         }
 }
