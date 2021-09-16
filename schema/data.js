@@ -31,6 +31,7 @@ const userSchem = new mongoose.Schema({
         ore: { type: Number, default: 0 },
         rareOre: { type: Number, default: 0 },
         wood: { type: Number, default: 0 },
+        rareWood: { type: Number, default: 0 },
         fish: { type: Number, default: 0 },
         rareFish: { type: Number, default: 0 },
     },

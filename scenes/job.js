@@ -77,6 +77,10 @@ class Job {
                         id: 'fishZ',
                         label: '🐡',
                     },
+                    event: {
+                        id: 'event',
+                        label: '💥',
+                    },
                     hafen: {
                         id: 'hafen',
                         label: 'Морской порт',
@@ -84,6 +88,18 @@ class Job {
                 }
             }
         }
+    }
+
+    async deleteMesage() {
+        const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
+            peer_id: this.ctx.message.user_id,
+            conversation_message_ids: this.ctx.message.conversation_message_id,
+        })
+        await this.bot.execute('messages.delete', {
+            peer_id: this.ctx.message.user_id,
+            message_id: NeedMessage.items[0].id,
+            delete_for_all: 1,
+        })
     }
 
     async canStartJob() {
@@ -220,21 +236,21 @@ class Job {
                 if (randFish < 30) {
                     massFish[i] = this.jobs.fishing.places.fishY
                 } else
-                if (randFish > 50 && randFish < 55) {
+                if (randFish > 30 && randFish < 35) {
                     massFish[i] = this.jobs.fishing.places.fishZ
                 } else {
                     massFish[i] = this.jobs.fishing.places.fishX
                 }
-            buttonMass[i] = 
-                        Markup.button({
-                            action: {
-                                type: 'callback',
-                                label: massFish[i].label,
-                                payload: JSON.stringify({cmd: massFish[i].id})
-                            }, color: 'default',
-                        })
+            buttonMass[i] = Markup
+                .button({
+                    action: {
+                        type: 'callback',
+                        label: massFish[i].label,
+                        payload: JSON.stringify({cmd: massFish[i].id})
+                    }, color: 'default',
+                })
         }
-        await this.ctx.reply(`На рыбалку дается 1 вытягивание остальное будет перезаписывать думай на что нажать.\nРыбалка на байкале:`, null, Markup
+        await this.ctx.reply(`На рыбалку дается 1 вытягивание думай на что нажать.\nРыбалка на байкале:`, null, Markup
             .keyboard([
                 [
                     buttonMass[0],
@@ -269,15 +285,7 @@ class Job {
             if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
             await this.ctx.user.dec('items', 1, 'bait')
             const earn = Math.round(randCurr(1, 5))
-            const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
-                peer_id: this.ctx.message.user_id,
-                conversation_message_ids: this.ctx.message.conversation_message_id,
-            })
-            await this.bot.execute('messages.delete', {
-                peer_id: this.ctx.message.user_id,
-                message_id: NeedMessage.items[0].id,
-                delete_for_all: 1,
-            })
+            this.deleteMesage()
             await this.ctx.user.inc('inv', earn, 'fish')
             await this.cb.reply(`Эххх ну так себе вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.items.bait} наживки.`)
         } catch (e) {'Что-то пошло не так'}
@@ -288,15 +296,7 @@ class Job {
             if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
             await this.ctx.user.dec('items', 1, 'bait')
             const earn = Math.round(randCurr(4, 10))
-            const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
-                peer_id: this.ctx.message.user_id,
-                conversation_message_ids: this.ctx.message.conversation_message_id,
-            })
-            await this.bot.execute('messages.delete', {
-                peer_id: this.ctx.message.user_id,
-                message_id: NeedMessage.items[0].id,
-                delete_for_all: 1,
-            })
+            this.deleteMesage()
             await this.ctx.user.inc('inv', earn, 'fish')
             await this.cb.reply(`Неплохо неплохо вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.items.bait} наживки.`)
         } catch (e) {'Что-то пошло не так'}
@@ -307,16 +307,8 @@ class Job {
             if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
             await this.ctx.user.dec('items', 1, 'bait')
             const earn = Math.round(randCurr(10, 24))
-            const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
-                peer_id: this.ctx.message.user_id,
-                conversation_message_ids: this.ctx.message.conversation_message_id,
-            })
-            await this.bot.execute('messages.delete', {
-                peer_id: this.ctx.message.user_id,
-                message_id: NeedMessage.items[0].id,
-                delete_for_all: 1,
-            })
-            const rare = randCurr(0, 6)
+            this.deleteMesage()
+            const rare = randCurr(0, 30)
             let rFish = 0
             rare === 3 ? rFish = 1 : rFish = 0
             await this.ctx.user.inc('inv', earn, 'fish')

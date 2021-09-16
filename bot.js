@@ -174,7 +174,7 @@ bot.use(async (ctx, next) => {
 
         } catch (e) {console.log(e)}
     } else
-    if (ctx.message.user_id) {
+    if (ctx.message.user_id && ctx.message.join_type !== 'join' && ctx.message.type !== 'group_leave') {
         try {
 
         ctx.user = await userdb.findOne({id: ctx.message.user_id})
