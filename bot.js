@@ -99,6 +99,49 @@ bot.use(async (ctx, next) => {
     //     key: 'waitTime',
     // })
 
+    const acc = async (ctx, user_id) => {
+        ctx.user = await userdb.findOne({id: user_id})
+        ctx.bank = await bankdb.findOne({id: 0})
+
+        if (!ctx.user) {
+            const response = await bot.execute('users.get', {
+                user_ids: user_id,
+            })
+            const uidgen = await userdb.countDocuments()
+            await userdb.create({
+                id: user_id,
+                uid: uidgen,
+                f_name: response[0].first_name,
+            })
+            ctx.user = await userdb.findOne({id: user_id})
+            const newByBuffTime = +(ctx.user.buffs.newby-ctx.timestamp)/1000/60/60/24
+            await bot.sendMessage([tea.OWNER, tea.OWNER1], `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
+            await ctx.reply(`Вы получили ${lang.newBy} на ${Math.round(newByBuffTime)} Дней \nПроверить эффекты на себе можно в Настройках`, null, Markup.keyboard([[Markup.button('Меню', 'default', 'menu')]]))
+        }
+        const weightMath = async () => {
+            const massItems = [
+            { count: ctx.user.inv.herbs*0.5 },
+            { count: ctx.user.inv.sand*2 },
+            { count: ctx.user.inv.ore*3 },
+            { count: ctx.user.inv.wood*1 },
+            { count: ctx.user.inv.fish*10 },
+            ] 
+            let sum = 0
+            massItems.forEach((x,y,z) => sum += +massItems[y].count)
+            return sum
+        }
+        ctx.user.currWeight = await weightMath()
+        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang.user : ctx.user.acclvl == 1 ? lang.vip : ctx.user.acclvl == 2 ? lang.plat :
+            ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
+
+        if (ctx.user.exp >= 100 * (ctx.user.level + 1)) {
+            await ctx.user.set('exp', 0)
+            await ctx.user.inc('level', 1)
+            await ctx.reply(`Поздравляю вы повысили уровень до ${ctx.user.level} 🎉`)
+        }
+
+    }
+
     if (ctx.message.peer_id === tea.REPORTCHAT) { 
         if (!ctx.message.reply_message) return
         const ansUsrId = ctx.message.reply_message.text.split('id')[1].split('|')[0]
@@ -130,96 +173,17 @@ bot.use(async (ctx, next) => {
     } else
     if (ctx.message.from_id > 0 && ctx.message.id > 0) {
         try {
-
-        ctx.user = await userdb.findOne({id: ctx.message.from_id})
-        ctx.bank = await bankdb.findOne({id: 0})
-
-        if (!ctx.user) {
-            const response = await bot.execute('users.get', {
-                user_ids: ctx.message.from_id,
-            })
-            const uidgen = await userdb.countDocuments()
-            await userdb.create({
-                id: ctx.message.from_id,
-                uid: uidgen,
-                f_name: response[0].first_name,
-            })
-            ctx.user = await userdb.findOne({id: ctx.message.from_id})
-            const newByBuffTime = +(ctx.user.buffs.newby-ctx.timestamp)/1000/60/60/24
-            await bot.sendMessage([tea.OWNER, tea.OWNER1], `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
-            await ctx.reply(`Вы получили ${lang.newBy} на ${Math.round(newByBuffTime)} Дней \nПроверить эффекты на себе можно в Настройках`, null, Markup.keyboard([[Markup.button('Меню', 'default', 'menu')]]))
+            await acc(ctx, ctx.message.from_id)
+            ctx.cmd = ctx.message.payload ? ctx.message.payload.replace(/["{}:]/g, '').replace('button', '') : ctx.message.payload
+        } catch (e) {
+            console.log(e)
+            ctx.reply('Что-то пошло не так ошибка, напишите в репорт что случилось report \'Текст сообщения\'')
         }
-        ctx.cmd = ctx.message.payload ? ctx.message.payload.replace(/["{}:]/g, '').replace('button', '') : ctx.message.payload
-        const weightMath = async () => {
-            const massItems = [
-            { count: ctx.user.inv.herbs*0.5 },
-            { count: ctx.user.inv.sand*2 },
-            { count: ctx.user.inv.ore*3 },
-            { count: ctx.user.inv.wood*1 },
-            { count: ctx.user.inv.fish*10 },
-            ] 
-            let sum = 0
-            massItems.forEach((x,y,z) => sum += +massItems[y].count)
-            return sum
-        }
-        ctx.user.currWeight = await weightMath()
-        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang.user : ctx.user.acclvl == 1 ? lang.vip : ctx.user.acclvl == 2 ? lang.plat :
-            ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
-
-        if (ctx.user.exp >= 100 * (ctx.user.level + 1)) {
-            await ctx.user.set('exp', 0)
-            await ctx.user.inc('level', 1)
-            await ctx.reply(`Поздравляю вы повысили уровень до ${ctx.user.level} 🎉`)
-        }
-
-        } catch (e) {console.log(e)}
     } else
     if (ctx.message.user_id && ctx.message.join_type !== 'join' && ctx.message.type !== 'group_leave') {
         try {
-
-        ctx.user = await userdb.findOne({id: ctx.message.user_id})
-        ctx.bank = await bankdb.findOne({id: 0})
-
-        if (!ctx.user) {
-            const response = await bot.execute('users.get', {
-                user_ids: ctx.message.user_id,
-            })
-            const uidgen = await userdb.countDocuments()
-            await userdb.create({
-                id: ctx.message.user_id,
-                uid: uidgen,
-                f_name: response[0].first_name,
-            })
-            ctx.user = await userdb.findOne({id: ctx.message.user_id})
-            const newByBuffTime = +(ctx.user.buffs.newby-ctx.timestamp)/1000/60/60/24
-            await bot.sendMessage([tea.OWNER, tea.OWNER1], `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
-            await ctx.reply(`Вы получили ${lang.newBy} на ${Math.round(newByBuffTime)} Дней \nПроверить эффекты на себе можно в Настройках`, null, Markup.keyboard([[Markup.button('Меню', 'default', 'menu')]]))
-        }
-
-        ctx.message.payload ? ctx.cmd = ctx.message.payload.cmd : ctx.message.payload
-        const weightMath = async () => {
-            const massItems = [
-            { count: ctx.user.inv.herbs*0.5 },
-            { count: ctx.user.inv.sand*2 },
-            { count: ctx.user.inv.ore*3 },
-            { count: ctx.user.inv.wood*1 },
-            { count: ctx.user.inv.fish*10 },
-            ] 
-            let sum = 0
-            massItems.forEach((x,y,z) => sum += +massItems[y].count)
-            return sum
-        }
-
-        ctx.user.currWeight = await weightMath()
-        ctx.user._acclvl = ctx.user.acclvl == 0 ? lang.user : ctx.user.acclvl == 1 ? lang.vip : ctx.user.acclvl == 2 ? lang.plat :
-            ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
-
-        if (ctx.user.exp >= 100 * (ctx.user.level + 1)) {
-            await ctx.user.set('exp', 0)
-            await ctx.user.inc('level', 1)
-            await ctx.reply(`Поздравляю вы повысили уровень до ${ctx.user.level} 🎉`)
-        }
-
+            await acc(ctx, ctx.message.user_id)
+            ctx.message.payload ? ctx.cmd = ctx.message.payload.cmd : ctx.message.payload
         } catch (e) {
             console.log(e)
             ctx.reply('Что-то пошло не так ошибка, напишите в репорт что случилось report \'Текст сообщения\'')
@@ -234,7 +198,7 @@ bot.use(async (ctx, next) => {
 const Session = require('node-vk-bot-api/lib/session')
 const Stage = require('node-vk-bot-api/lib/stage')
 
-const {menu} = require('./scenes/menu')
+const { menu } = require('./scenes/menu')
 
 const session = new Session()
 const stage = new Stage(menu)

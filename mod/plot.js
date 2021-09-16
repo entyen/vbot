@@ -4,7 +4,9 @@ const fs = require('fs')
 const { keyboard } = require('node-vk-bot-api/lib/markup')
 let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 
-function plotMenu(ctx) {
+const plot = {}
+
+plot.plotMenu = (ctx) => {
     let plot = ``
     plot += `🏠 Дом: ${ctx.user.plot.house === 0 ? 'Нет' : 'Есть'}\n`
     plot += `🏚 Склад: ${ctx.user.plot.wh === 0 ? 'Нет' : 'Есть'}\n`
@@ -67,7 +69,7 @@ keyboardPlot.Lv2 = Markup.keyboard([
 ])
 
 
-function plotUpgradeLv1(ctx) {
+plot.plotUpgradeLv1 = (ctx) => {
     if (ctx.user.plot.size >= 1) return ctx.reply('Участок уже Средний')
     if (ctx.user.plot.size === 0) {
         ctx.reply(`Улучшить учаток до Среднего\n⚒ На а его строительство требуется:\n${resCheck(ctx, 'sand', 10000)}`, null, build.plotLv1)
@@ -75,7 +77,7 @@ function plotUpgradeLv1(ctx) {
     return 
 }
 
-async function buildWell(ctx) {
+plot.buildWell = async (ctx) => {
     if (ctx.user.plot.well >= 1) return ctx.reply('Уже есть колодец')
     if (ctx.user.inv.ore < 5000 && ctx.user.inv.rareOre < 2) return ctx.reply('Недостаточно средств')
         await ctx.user.dec('inv', 3000, 'ore')
@@ -85,7 +87,7 @@ async function buildWell(ctx) {
     return
 }
 
-async function plotBuildLv1(ctx) {
+plot.plotBuildLv1 = async (ctx) => {
     if (ctx.user.plot.size >= 1) return ctx.reply('Ваш участок уже Средний')
     if (ctx.user.inv.sand < 10000) return ctx.reply('Недостаточно средств')
         await ctx.user.dec('inv', 10000, 'sand')
@@ -94,7 +96,7 @@ async function plotBuildLv1(ctx) {
     return
 }
 
-async function trowPotion(ctx) {
+plot.trowPotion = async (ctx) => {
     if (ctx.user.buffs.energyWell >= ctx.timestamp) { return ctx.reply( '⚡ Колодец уже активен' ) }
     if (ctx.user.items.energyPotion < 1) return ctx.reply('Недостаточно Зелий')
         await ctx.user.dec('items', 1, 'energyPotion')
@@ -107,28 +109,28 @@ const resCheck = (ctx, x, y) => {
     return `${ctx.user.inv[x] > y ? '✔️' : '❌'} ${lang[x]} ${y}`
 }
 
-function house(ctx) {
+plot.house = (ctx) => {
     if (ctx.user.plot.house === 0) {
         ctx.reply(`🏠 Дом позволит вам заниматся созданием предметов\n⚒ На его строительство требуется:\n${lang.wood} \n${lang.sand} `)
     }
     return 
 }
 
-function temple(ctx) {
+plot.temple = (ctx) => {
     if (ctx.user.plot.temple === 0) {
         ctx.reply(`⛪️ Храм позволит вам получать Эффекты за подношения богам\n⚒ На его строительство требуется:\n${lang.wood} \n${lang.sand} \n${lang.ore} `)
     }
     return 
 }
 
-function wh(ctx) {
+plot.wh = (ctx) => {
     if (ctx.user.plot.wh === 0) {
         ctx.reply(`🏚 Склад позволит вам увеличить место в хранилище\n⚒ На его строительство требуется:\n${resCheck(ctx, 'ore', 4000)}\n︎${resCheck(ctx, 'sand', 7000)}\n︎${resCheck(ctx, 'wood', 10000)}`)
     }
     return 
 }
 
-function well(ctx) {
+plot.well = (ctx) => {
     if (ctx.user.plot.well === 0) {
         ctx.reply(`🕳 Колодец позволит вам\n получать Эффект Восстановление Энергии\n⚒ На а его строительство требуется:\n${resCheck(ctx, 'ore', 3000)}\n${resCheck(ctx, 'rareOre', 2)}`, null, build.well)
     }else 
@@ -160,4 +162,4 @@ const trowPotionWell = Markup.keyboard([
         ],
 ]).inline()
 
-module.exports = { plotMenu, well, house, temple, wh, buildWell, trowPotion, plotUpgradeLv1, plotBuildLv1 }
+module.exports = { plot }

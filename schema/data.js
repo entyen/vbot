@@ -56,6 +56,26 @@ const userSchem = new mongoose.Schema({
         rate9st: { type: Number, default: null },
         energyWell: { type: Number, default: null },
     },
+    char: {
+        hp: { type: Number, default: 100, min: 0 },
+        mp: { type: Number, default: 100, min: 0 },
+        f_atk: { type: Number, default: 1, min: 0 },
+        m_atk: { type: Number, default: 1, min: 0 },
+        f_def: { type: Number, default: 1, min: 0 },
+        m_def: { type: Number, default: 1, min: 0 },
+    },
+    equip: {
+        armor: { type: Number, default: 0, min: 0 },
+        weap: { type: Number, default: 0, min: 0 },
+        ring: { type: Number, default: 0, min: 0 },
+    },
+    stat: {
+        str: { type: Number, default: 1 },
+        int: { type: Number, default: 1 },
+        con: { type: Number, default: 1 },
+        luc: { type: Number, default: 1 },
+        chr: { type: Number, default: 1 },
+    },
     plot: {
         own: { type: Boolean, default: false },
         size: { type: Number, default: 0 },

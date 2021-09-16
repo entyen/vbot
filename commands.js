@@ -1,9 +1,8 @@
-const { timeout } = require('cron')
-
 const { Job } = require('./scenes/job')
 const { forest } = require('./adv/forest')
 const { menu, profile, inventory, setting, buffs } = require('./mod/menu')
-const { plotMenu, well, house, temple, wh, buildWell, trowPotion, plotUpgradeLv1, plotBuildLv1 } = require('./mod/plot')
+const { plot } = require('./mod/plot')
+const fs = require('fs')
 
 module.exports = async(bot, utils, lang, userdb, bp) => {
     const Markup = require('node-vk-bot-api/lib/markup')
@@ -205,6 +204,33 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
         //         ctx.reply('Недостаточно средств или еще что-то не так.')
         //     }
         // } else
+        if (cmba[0] === 'change_name' || cmba[0] === 'смена_имени') {
+            let badwords = JSON.parse(fs.readFileSync(`./lang/badwords.json`, 'utf-8'))
+            let tek = ctx.message.text.split(' ')[1].replace(/[\[\]]/g, '')
+            for (i = 0; i < badwords.length; i++){
+                if (tek === badwords[i]) {
+                    tek = undefined
+                }
+            }
+            let regex1 = /^[a-zA-Zа-яА-Я ]+$/
+            if (!regex1.test(tek) || tek === undefined || tek.length >= 14) { 
+                await ctx.reply('Некорректный ник нейм') 
+                return
+            }
+            if (ctx.user.balance < 10000) {
+                await ctx.reply('Недостаточно средств')
+                return
+            }
+
+            ctx.reply(`Ник Изменен на ${tek} с вас снято 10000 ${lang.curr}`)
+            await ctx.user.set('f_name', tek)
+            await ctx.user.dec('balance', 10000)
+            await ctx.bank.inc('balance', 10000)
+
+            menu(ctx)
+
+            return
+        } else
         if (cmba[0] === 'buffs' || ctx.cmd === 'buffs') {
                 return buffs(ctx)
         } else
@@ -673,23 +699,23 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                     )
                     .inline()
                 )
-                return plotMenu(ctx)
+                return plot.plotMenu(ctx)
             case 'plot.well':
-                return well(ctx)
+                return plot.well(ctx)
             case 'build.well':
-                return buildWell(ctx)
+                return plot.buildWell(ctx)
             case 'trow.potion.well':
-                return trowPotion(ctx)
+                return plot.trowPotion(ctx)
             case 'plot.wh':
-                return wh(ctx)
+                return plot.wh(ctx)
             case 'plot.house':
-                return house(ctx)
+                return plot.house(ctx)
             case 'plot.temple':
-                return temple(ctx)
+                return plot.temple(ctx)
             case 'plot.upgrade.Lv1':
-                return plotUpgradeLv1(ctx)
+                return plot.plotUpgradeLv1(ctx)
             case 'plot.build.Lv1':
-                return plotBuildLv1(ctx)
+                return plot.plotBuildLv1(ctx)
             case 'plot.upgrade.Lv2':
                 //TODO
                 return ctx.reply(lang.inDev)
@@ -712,7 +738,7 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             case 'inDev':
                 return ctx.reply(lang.inDev)
             case lang.nick:
-                    return await ctx.scene.enter('menu', [1])
+                    return await ctx.reply(`Смена имени производится Командой:\n📑 Смена_Имени [Имя]\n❗️ Цена 10000 ${lang.curr}`)
             default:
                 if (ctx.message.id === 0) return
                 // await ctx.reply(`${ctx.message.text} ${lang.notcmd}`)

@@ -17,14 +17,14 @@ module.exports = async(bot, i, user, lang) => {
             }
         }
         //VIP BUFF
-        if (user[i].buffs.vip <= timestamp && user[i].acclvl < 5) {
+        if (user[i].buffs.vip <= timestamp && user[i].acclvl < 4) {
             if (!user[i].timers.buffVipAlert) {
                 await user[i].set('timers', true, 'buffVipAlert')
                 await user[i].set('acclvl', 0)
                 await bot.sendMessage(user[i].id, `Действие баффа ${lang.Vip} рассеялось.`)
             }
         } else 
-        if (user[i].buffs.vip >= timestamp && user[i].acclvl < 5) {
+        if (user[i].buffs.vip >= timestamp && user[i].acclvl < 4) {
             if (user[i].timers.buffVipAlert) {
                 await user[i].set('timers', false, 'buffVipAlert')
                 await user[i].set('acclvl', 1)

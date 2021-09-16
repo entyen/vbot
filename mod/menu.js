@@ -8,6 +8,7 @@ async function menu(ctx) {
             .keyboard([
                 [
                     Markup.button(lang.crafts, 'primary'),
+                    Markup.button('Приключения', 'primary', 'adventure'),
                     Markup.button(lang.market, 'primary'),
                 ],
                 [
@@ -86,7 +87,7 @@ async function setting(ctx) {
             ],
             [
                 Markup.button(lang.alert, alertState),
-                // Markup.button(lang.nick, 'default'),
+                Markup.button(lang.nick, 'default'),
                 Markup.button('Репoрт', 'default', 'report'),
             ],
             [
