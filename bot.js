@@ -194,17 +194,6 @@ bot.use(async (ctx, next) => {
     return await next()
 })
 
-
-const Session = require('node-vk-bot-api/lib/session')
-const Stage = require('node-vk-bot-api/lib/stage')
-
-const { menu } = require('./scenes/menu')
-
-const session = new Session()
-const stage = new Stage(menu)
-bot.use(session.middleware())
-bot.use(stage.middleware())
-
 commands(bot, utils, lang, userdb, bp)
 
 //Start polling messages

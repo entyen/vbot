@@ -1,4 +1,4 @@
-const { Job } = require('./scenes/job')
+const { Job } = require('./mod/job')
 const { forest } = require('./adv/forest')
 const { menu } = require('./mod/menu')
 const { plot } = require('./mod/plot')
@@ -579,7 +579,6 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             default:
                 if (ctx.message.id === 0) return
                 // await ctx.reply(`${ctx.message.text} ${lang.notcmd}`)
-                // await ctx.scene.enter('menu')
 
                 return
         }

@@ -88,4 +88,22 @@ market.auctionSell = async(ctx, type, max) => {
         return
 }
 
+
+const marketSell = async (count, item, eachPrice) => {
+    count === 'all' ? count = +ctx.user.inv[item] : count = +ctx.cmd.split('.')[2]
+    item = ctx.cmd.split('.')[0]
+    if (ctx.user.inv[item] < count || count === 0) {
+        await ctx.reply(`Недостаточно ${lang[item]}`)
+    } else {
+        let summ = 0
+        eachPrice ? summ = count * eachPrice : summ = count
+        summ = Math.round(summ)
+        await ctx.bank.inc('inv', count , item)
+        await ctx.bank.dec('balance', summ)
+        await ctx.user.dec('inv', count , item)
+        await ctx.user.inc('balance', summ)
+        await ctx.reply(`Вы продали ${count} ${lang[item]} и выручили ${summ} ${lang.curr}`)
+    }
+}
+
 module.exports = { market }
