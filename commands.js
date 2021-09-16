@@ -1,7 +1,8 @@
 const { Job } = require('./scenes/job')
 const { forest } = require('./adv/forest')
-const { menu, profile, inventory, setting, buffs } = require('./mod/menu')
+const { menu } = require('./mod/menu')
 const { plot } = require('./mod/plot')
+const { market } = require('./mod/market')
 const fs = require('fs')
 
 module.exports = async(bot, utils, lang, userdb, bp) => {
@@ -80,9 +81,6 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
         if(ctx.user.acclvl < 0) return ctx.reply(`☠️ Ваша душа зепечатанна, печать спадет через ${Math.round((ctx.user.buffs.ban-ctx.timestamp)/1000/60/60)} часов`)
         const cmba = ctx.message.text.toLowerCase().split(' ')
         // console.log(toString(cmba[0]) === /^(?:рейт|рейтинг)$/i, cmba[0])
-        const resCheck = (ctx, x, y) => {
-            return `${ctx.user.inv[x] > y ? '✔️' : '❌'} ${lang[x]} ${y}`
-        }
 
         const marketSell = async (count, item, eachPrice) => {
             count === 'all' ? count = +ctx.user.inv[item] : count = +ctx.cmd.split('.')[2]
@@ -180,30 +178,6 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 await ctx.reply(`Вы стали ${ctx.user.race === 1 ? lang.alv: ctx.user.race === 2 ? lang.elven: ctx.user.race === 3 ? lang.darkElven: ctx.user.race === 4 ? lang.dwarf : null}`)
             } else { ctx.reply('️️‼️ Не верные значения или вы уже выбрали рассу.') }
         } else
-        // if (cmba[0] === 'trade' || cmba[0] === 'обмен') {
-        //     try {
-        //     let locUser = await userdb.findOne({ uid: cmba[1] })
-        //     if (Number(cmba[1]) && Number(cmba[2]) && cmba[3] && ctx.user.balance > +cmba[2]) {
-        //         if (cmba[3] === 'редкаяруда' || cmba[3] === 'rareore') { const res = ctx.rareOre } else {ctx.reply('Не верный ресурс')}
-        //         await bot.sendMessage(locUser.id, `${`@id${ctx.user.id}(${ctx.user.f_name})`} Пользователь предлагает вам купить ${cmba[3]} за ${cmba[2]} ${lang.curr}`, '', 
-        //         Markup.keyboard([
-        //         [
-        //             Markup.button('Да', 'secondary', 'trade'),
-        //             Markup.button('Нет', 'secondary', 'trade'),
-        //         ],
-        //         ]) 
-        //         .inline()
-        //         )
-        //         console.log(ctx)
-        //         // await ctx.user.dec('balance', +cmba[2])
-        //         // await locUser.inc('balance', +cmba[2])
-        //         // await ctx.reply(`Вы передали ${+cmba[2]}${lang.curr} пользователю ${`@id${locUser.id}(${locUser.f_name})`}`)
-        //         } else {ctx.reply('Недостаточно средств.')}
-        //     } catch (e) {
-        //         console.log(e)
-        //         ctx.reply('Недостаточно средств или еще что-то не так.')
-        //     }
-        // } else
         if (cmba[0] === 'change_name' || cmba[0] === 'смена_имени') {
             let badwords = JSON.parse(fs.readFileSync(`./lang/badwords.json`, 'utf-8'))
             let tek = ctx.message.text.split(' ')[1].replace(/[\[\]]/g, '')
@@ -227,12 +201,12 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             await ctx.user.dec('balance', 10000)
             await ctx.bank.inc('balance', 10000)
 
-            menu(ctx)
+            menu.main(ctx)
 
             return
         } else
         if (cmba[0] === 'buffs' || ctx.cmd === 'buffs') {
-                return buffs(ctx)
+                return menu.buffs(ctx)
         } else
         if (cmba[0] === 'admbuff') {
             try{
@@ -259,20 +233,17 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 }
             } catch (e) {ctx.reply('‼️ Что-то не верно проверте значения')}
         } else
-        // if (cmba[0] === 'dbedit') {
-        //     try{
-        //         let allUser = await userdb.find({})
-        //         if (cmba[1] && +cmba[2] &&ctx.user.acclvl >= 7) {
-        //             if (cmba[1] === '0') {
-        //             allUser.forEach(async (x,y,z) => {
-        //                 await allUser[y].set('invWeight', cmba[2])
-        //             })
-        //             } else { ctx.reply('Что-то не так')}
-        //         } else {
-        //             await ctx.reply('Нет прав использовать данную команду')
-        //         }
-        //     } catch (e) {ctx.reply('Что-то не верно проверте значения')}
-        // } else
+        if (cmba[0] === 'update_db') {
+            let allUser = await userdb.find({})
+            if (ctx.user.acclvl >= 7) {
+                allUser.forEach( async (x,y,z) => {
+                    await allUser[y].set('__v', 0)
+                })
+                ctx.reply(`Обновлено ${allUser.length} пользователей`)
+            } else {
+                await ctx.reply('Нет прав использовать данную команду')
+            }
+        } else
         if (cmba[0] === 'lang' && cmba[1] === 'ru' || cmba[1] === 'en') {
             ctx.user.lang = cmba[1]
             await ctx.user.save()
@@ -298,18 +269,18 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             )
         } else
         if (!ctx.cmd) { 
-            return menu(ctx)
+            return menu.main(ctx)
         }
 
         switch (ctx.cmd) {
             case 'profile':
-                return profile(ctx)
+                return menu.profile(ctx)
             case 'inventory':
-                return inventory(ctx)
+                return menu.inventory(ctx)
             case 'menu':
-                return menu(ctx)
+                return menu.main(ctx)
             case lang.setting:
-                return setting(ctx)
+                return menu.setting(ctx)
             case 'report':
                 return ctx.reply('Введите команду:\n репорт \'Текст вашего сообщения\'')
             case lang.alert:
@@ -317,166 +288,40 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                     ctx.user.alert = false
                     await ctx.user.save()
                     await ctx.reply(`${lang.alert} ${ctx.user.alert ? 'Включены' : 'Выключены'}`)
-                    return setting(ctx)
+                    return menu.setting(ctx)
                 } else {
                     ctx.user.alert = true
                     await ctx.user.save()
                     await ctx.reply(`${lang.alert} ${ctx.user.alert ? 'Включены' : 'Выключены'}`)
-                    return setting(ctx)
+                    return menu.setting(ctx)
                 }
                 return
             case lang.crafts:
                 return await ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Job.getKeyboard())
-            case 'jobs':
-                return await ctx.reply('Где будем работать?', null, Markup
-                .keyboard(
-                    [
-                    Markup.button('Травы', 'default', 'herbjob')
-                    ]
-                )
-                .inline()
-                )
-            case 'herbjob':
-                await ctx.reply('Поработали бум дальше?', null, Markup
-                .keyboard(
-                    [
-                    Markup.button('Повторить', 'default', 'herbjob')
-                    ]
-                )
-                .inline()
-                )
-                await ctx.user.inc('balance', 1).then(ctx.reply(ctx.user.balance))
-                return
             case lang.market:
-                ctx.reply(`Куда вы направляетесь?`, null, Markup
-                    .keyboard([
-                        [
-                            Markup.button('Продать материалы', 'primary', 'market.sell.ore'),
-                            Markup.button('Купить предметы', 'primary', 'market.buy.items'),
-                        ],
-                        [
-                            Markup.button('Аукцион', 'primary', 'market.auction.items'),
-
-                        ],
-                        [
-                            Markup.button(lang.back, 'negative', 'menu'),
-                        ]
-                    ])
-                )
-                return
+                return market.main(ctx)
             case 'market.buy.items':
-                ctx.reply(`Что вы хотели-бы купить?`, null, Markup
-                    .keyboard([
-                        [
-                            Markup.button('Удочка', 'primary', 'fishingRod'),
-                            Markup.button('Наживка', 'primary', 'bait'),
-                        ],
-                        [
-                            Markup.button('Зелье Энергии', 'primary', 'energyPotion'),
-                        ],
-                        [
-                            Markup.button(lang.back, 'negative', lang.market),
-                        ]
-                    ])
-                )
-                return
+                return market.buyItems(ctx)
             case 'market.auction.items':
-                ctx.reply(`Что вы хотели-бы купить?`, null, Markup
-                    .keyboard([
-                        [
-                            Markup.button('Редкая Руда', 'primary', 'auction.rareOre'),
-                            Markup.button('Редкие Травы', 'primary', 'auction.rareHerb'),
-                        ],
-                        [
-                            Markup.button('Редкая Рыба', 'primary', 'auction.rareFish'),
-                        ],
-                        [
-                            Markup.button(lang.back, 'negative', lang.market),
-                        ]
-                    ])
-                )
-                return
+                return market.auction(ctx)
             case 'auction.rareOre':
-                ctx.reply(`${lang.rareOre}\n На складе ${ctx.bank.inv.rareOre}\nЦена покупки ${ctx.bank.dpi.rareOre}${lang.curr}\nЦена продажи ${ctx.bank.dpi.rareOre*0.8}${lang.curr}.`, null, Markup
-                    .keyboard(
-                        [
-                            Markup.button('Купить', 'default', `${ctx.cmd}.buy`),
-                            Markup.button('Продать', 'default', `${ctx.cmd}.sell`),
-                        ],
-                    )
-                    .inline()
-                )
-                return
+                return market.auctionMsg(ctx, 'rareOre')
             case 'auction.rareOre.buy':
-                if (ctx.bank.inv.rareOre <= 0) {return ctx.reply('Недостаточно ресурса в Банке')}
-                if (ctx.user.balance < ctx.bank.dpi.rareOre) {return ctx.reply('Недостаточно средств')}
-                await ctx.user.dec('balance', ctx.bank.dpi.rareOre)
-                await ctx.user.inc('inv', 1, 'rareOre')
-                await ctx.bank.dec('inv', 1, 'rareOre')
-                await ctx.reply(`Вы успешно приобрели ${lang.rareOre} за ${ctx.bank.dpi.rareOre}`)
-                return
+                return market.auctionBuy(ctx, 'rareOre')
             case 'auction.rareOre.sell':
-                if (ctx.bank.inv.rareOre >= 10) {return ctx.reply('Ресурса в банке достаточно')}
-                if (ctx.user.inv.rareOre <= 0) {return ctx.reply(`Недостаточно ${lang.rareOre}`)}
-                await ctx.user.inc('balance', ctx.bank.dpi.rareOre*0.8)
-                await ctx.user.dec('inv', 1, 'rareOre')
-                await ctx.bank.inc('inv', 1, 'rareOre')
-                await ctx.reply(`Вы успешно продали ${lang.rareOre} за ${ctx.bank.dpi.rareOre*0.8}`)
-                return
+                return market.auctionSell(ctx, 'rareOre', 10)
             case 'auction.rareHerb':
-                ctx.reply(`${lang.rareHerbs}\n На складе ${ctx.bank.inv.rareHerbs}\nЦена покупки ${ctx.bank.dpi.rareHerbs}${lang.curr}\nЦена продажи ${ctx.bank.dpi.rareHerbs*0.8}${lang.curr}.`, null, Markup
-                    .keyboard(
-                        [
-                            Markup.button('Купить', 'default', `${ctx.cmd}.buy`),
-                            Markup.button('Продать', 'default', `${ctx.cmd}.sell`),
-                        ],
-                    )
-                    .inline()
-                )
-                return
+                return market.auctionMsg(ctx, 'rareHerbs')
             case 'auction.rareHerb.buy':
-                if (ctx.bank.inv.rareHerbs <= 0) {return ctx.reply('Недостаточно ресурса в Банке')}
-                if (ctx.user.balance < ctx.bank.dpi.rareHerbs) {return ctx.reply('Недостаточно средств')}
-                await ctx.user.dec('balance', ctx.bank.dpi.rareHerbs)
-                await ctx.user.inc('inv', 1, 'rareHerbs')
-                await ctx.bank.dec('inv', 1, 'rareHerbs')
-                await ctx.reply(`Вы успешно приобрели ${lang.rareHerbs} за ${ctx.bank.dpi.rareHerbs}`)
-                return
+                return market.auctionBuy(ctx, 'rareHerbs')
             case 'auction.rareHerb.sell':
-                if (ctx.bank.inv.rareHerb >= 10) {return ctx.reply('Ресурса в банке достаточно')}
-                if (ctx.user.inv.rareHerb <= 0) {return ctx.reply(`Недостаточно ${lang.rareHerbs}`)}
-                await ctx.user.inc('balance', ctx.bank.dpi.rareHerbs*0.8)
-                await ctx.user.dec('inv', 1, 'rareHerbs')
-                await ctx.bank.inc('inv', 1, 'rareHerbs')
-                await ctx.reply(`Вы успешно продали ${lang.rareHerbs} за ${ctx.bank.dpi.rareHerbs*0.8}`)
-                return
+                return market.auctionSell(ctx, 'rareHerbs', 10)
             case 'auction.rareFish':
-                ctx.reply(`${lang.rareFish}\n На складе ${ctx.bank.inv.rareFish}\nЦена покупки ${ctx.bank.dpi.rareFish}${lang.curr}\nЦена продажи ${ctx.bank.dpi.rareFish*0.8}${lang.curr}`, null, Markup
-                    .keyboard(
-                        [
-                            Markup.button('Купить', 'default', `${ctx.cmd}.buy`),
-                            Markup.button('Продать', 'default', `${ctx.cmd}.sell`),
-                        ],
-                    )
-                    .inline()
-                )
-                return
+                return market.auctionMsg(ctx, 'rareFish')
             case 'auction.rareFish.buy':
-                if (ctx.bank.inv.rareFish <= 0) {return ctx.reply('Недостаточно ресурса в Банке')}
-                if (ctx.user.balance < ctx.bank.dpi.rareFish) {return ctx.reply('Недостаточно средств')}
-                await ctx.user.dec('balance', ctx.bank.dpi.rareFish)
-                await ctx.user.inc('inv', 1, 'rareFish')
-                await ctx.bank.dec('inv', 1, 'rareFish')
-                await ctx.reply(`Вы успешно приобрели ${lang.rareFish} за ${ctx.bank.dpi.rareFish}`)
-                return
+                return market.auctionBuy(ctx, 'rareFish')
             case 'auction.rareFish.sell':
-                if (ctx.bank.inv.rareFish >= 100) {return ctx.reply('Ресурса в банке достаточно')}
-                if (ctx.user.inv.rareFish <= 0) {return ctx.reply(`Недостаточно ${lang.rareFish}`)}
-                await ctx.user.inc('balance', ctx.bank.dpi.rareFish*0.8)
-                await ctx.user.dec('inv', 1, 'rareFish')
-                await ctx.bank.inc('inv', 1, 'rareFish')
-                await ctx.reply(`Вы успешно продали ${lang.rareFish} за ${ctx.bank.dpi.rareFish*0.8}`)
-                return
+                return market.auctionSell(ctx, 'rareFish', 100)
             case 'energyPotion':
                 ctx.reply(`${lang.energyPotion} стоит 6 500 ${lang.curr} восстанавливает 25 ⚡.`, null, Markup
                     .keyboard(
@@ -691,14 +536,6 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 marketSell(ctx.cmd.split('.')[2], ctx.cmd.split('.')[0], ctx.bank.dpi.wood)
                 return
             case lang.land:
-                if (!ctx.user.plot.own) return await ctx.reply(`У вас есть участок но его поверхность неподходит для строительства необходимо ${resCheck(ctx, 'sand', 5000)} что-бы его выровнять.`, null, Markup
-                    .keyboard(
-                        [
-                            Markup.button('Выровнять участок', 'default', 'plot.align'),
-                        ],
-                    )
-                    .inline()
-                )
                 return plot.plotMenu(ctx)
             case 'plot.well':
                 return plot.well(ctx)

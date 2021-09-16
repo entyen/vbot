@@ -2,9 +2,11 @@ const Markup = require('node-vk-bot-api/lib/markup')
 const fs = require('fs')
 let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 
-async function menu(ctx) {
+const menu = {}
+
+menu.main = (ctx) => {
     if (ctx.user.acclvl >= 4) {
-        return await ctx.reply(lang.navm, null, Markup
+        return ctx.reply(lang.navm, null, Markup
             .keyboard([
                 [
                     Markup.button(lang.crafts, 'primary'),
@@ -22,7 +24,7 @@ async function menu(ctx) {
             ])
         )
     } else
-        return await ctx.reply(lang.navm, null, Markup
+        return ctx.reply(lang.navm, null, Markup
             .keyboard([
                 [
                     Markup.button(lang.crafts, 'primary'),
@@ -40,7 +42,7 @@ async function menu(ctx) {
     )
 }
 
-async function profile(ctx) {
+menu.profile = (ctx) => {
     let text = ``
     text += `🆔 ${ctx.user.uid}\n`
     text += `👤 Статус Аккаунта: ${ctx.user._acclvl}\n`
@@ -51,10 +53,10 @@ async function profile(ctx) {
     text += `${ctx.user.alert ? '🔔' : '🔕'} Уведомления: ${ctx.user.alert ? 'Включены' : 'Выключены'}\n`
     text += `\n📗 Дата регистрации: ${ctx.user.regDate}`
 
-    return await ctx.reply(`Профиль\n ${text}`)
+    return ctx.reply(`Профиль\n ${text}`)
 }
 
-async function inventory(ctx) {
+menu.inventory = (ctx) => {
     let inv = ``
     inv += `💠 Оргулы: ${ctx.user.balance}\n`
     inv += `${ctx.user.inv.herbs === 0 ? '' : `${lang.herbs}: ${ctx.user.inv.herbs}\n`}`
@@ -72,15 +74,16 @@ async function inventory(ctx) {
     inv += `${ctx.user.items.energyPotion === 0 ? '' : `${lang.energyPotion}: ${ctx.user.items.energyPotion}\n`}`
     inv += `\n👜 Вес Инвентаря: ${ctx.user.currWeight.toFixed(0)}/${ctx.user.invWeight}\n`
 
-    return await ctx.reply(`Инвентарь\n ${inv}`)
+    return ctx.reply(`Инвентарь\n ${inv}`)
 }
 
-async function setting(ctx) {
+menu.setting = (ctx) => {
     const alertState = ctx.user.alert ? 'positive' : 'negative'
     const acclvl = ctx.user.acclvl > 5 ? 'negative' : ctx.user.acclvl > 0 ? 'primary' : 'secondary'
     ctx.user._acclvl = ctx.user.acclvl == 0 ? lang.user : ctx.user.acclvl == 1 ? lang.vip : ctx.user.acclvl == 2 ? lang.plat :
         ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
-    await ctx.reply('Настройки', null, Markup
+
+    ctx.reply('Настройки', null, Markup
         .keyboard([
             [
                 Markup.button(`${ctx.user._acclvl}`, acclvl),
@@ -99,7 +102,7 @@ async function setting(ctx) {
     return
 }
 
-function buffs(ctx) {
+menu.buffs = (ctx) => {
     const cmba = ctx.message.text.toLowerCase().split(' ')
     let time = {}
     time.newby = ((ctx.user.buffs.newby - ctx.timestamp)/60/60/1000).toFixed(0)
@@ -121,4 +124,4 @@ function buffs(ctx) {
     return ctx.reply(`${cmba.join().replace(/,/g, ' ').replace(cmba[0], '')} ${buffs}`)
 }
 
-module.exports = { menu, profile, inventory, setting, buffs }
+module.exports = { menu }

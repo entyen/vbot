@@ -7,6 +7,17 @@ let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 const plot = {}
 
 plot.plotMenu = (ctx) => {
+    if (!ctx.user.plot.own) {
+        return ctx.reply(`У вас есть участок но его поверхность неподходит для строительства необходимо ${resCheck(ctx, 'sand', 5000)} что-бы его выровнять.`, null, Markup
+            .keyboard(
+                [
+                    Markup.button('Выровнять участок', 'default', 'plot.align'),
+                ],
+            )
+            .inline()
+        )
+    }
+
     let plot = ``
     plot += `🏠 Дом: ${ctx.user.plot.house === 0 ? 'Нет' : 'Есть'}\n`
     plot += `🏚 Склад: ${ctx.user.plot.wh === 0 ? 'Нет' : 'Есть'}\n`
@@ -77,7 +88,7 @@ plot.plotUpgradeLv1 = (ctx) => {
     return 
 }
 
-plot.buildWell = async (ctx) => {
+plot.buildWell = async(ctx) => {
     if (ctx.user.plot.well >= 1) return ctx.reply('Уже есть колодец')
     if (ctx.user.inv.ore < 5000 && ctx.user.inv.rareOre < 2) return ctx.reply('Недостаточно средств')
         await ctx.user.dec('inv', 3000, 'ore')
@@ -87,7 +98,7 @@ plot.buildWell = async (ctx) => {
     return
 }
 
-plot.plotBuildLv1 = async (ctx) => {
+plot.plotBuildLv1 = async(ctx) => {
     if (ctx.user.plot.size >= 1) return ctx.reply('Ваш участок уже Средний')
     if (ctx.user.inv.sand < 10000) return ctx.reply('Недостаточно средств')
         await ctx.user.dec('inv', 10000, 'sand')
@@ -96,7 +107,7 @@ plot.plotBuildLv1 = async (ctx) => {
     return
 }
 
-plot.trowPotion = async (ctx) => {
+plot.trowPotion = async(ctx) => {
     if (ctx.user.buffs.energyWell >= ctx.timestamp) { return ctx.reply( '⚡ Колодец уже активен' ) }
     if (ctx.user.items.energyPotion < 1) return ctx.reply('Недостаточно Зелий')
         await ctx.user.dec('items', 1, 'energyPotion')
