@@ -127,11 +127,11 @@ class Job {
 
         this.ctx.user.energy = this.ctx.user.energy - this.jobs.herb.energy
 
+        const earn = Math.round(randCurr(5, 18) * this.jobs.herb.lvlx)
+
+        let bait = 0
         const rare = randCurr(0, 200)
         const rareBait = randCurr(0, 50)
-        const earn = Math.round(randCurr(5, 18) * this.jobs.herb.lvlx)
-        let bait = 0
-
         rare === 27 ? this.ctx.user.inv.rareHerbs = this.ctx.user.inv.rareHerbs + 1 : null
         rareBait === 10 ? bait = 5 : bait = 0
         this.ctx.user.inv.herbs = this.ctx.user.inv.herbs + earn
@@ -149,9 +149,9 @@ class Job {
 
         this.ctx.user.energy = this.ctx.user.energy - this.jobs.ore.energy
 
-        const rare = randCurr(0, 400)
         const earn = Math.round(randCurr(3, 24) * this.jobs.ore.lvlx)
 
+        const rare = randCurr(0, 400)
         rare === 277 ? this.ctx.user.inv.rareOre = this.ctx.user.inv.rareOre + 1 : null
         this.ctx.user.inv.ore = this.ctx.user.inv.ore + earn
         this.ctx.user.exp = this.ctx.user.exp + 1
@@ -169,10 +169,12 @@ class Job {
 
         const earn = Math.round(randCurr(8, 48) * this.jobs.sand.lvlx)
 
+        const rare = randCurr(0, 1000)
+        rare === 277 ? this.ctx.user.inv.rareSand = this.ctx.user.inv.rareSand + 1 : null
         this.ctx.user.inv.sand = this.ctx.user.inv.sand + earn
         this.ctx.user.exp = this.ctx.user.exp + 1
         await this.ctx.user.save()
-        await this.cb.reply(`Вы направились на пляж и откопали ${earn} 🏝 у вас еще ${this.ctx.user.energy} ⚡`)
+        await this.cb.reply(`Вы направились на пляж и откопали ${earn} 🏝 ${rare === 277 ? 'и 1 🏺' : ''} у вас еще ${this.ctx.user.energy} ⚡`)
     }
 
     async collectForest() {
@@ -184,10 +186,12 @@ class Job {
 
         const earn = Math.round(randCurr(16, 28) * this.jobs.forest.lvlx)
 
+        const rare = randCurr(0, 800)
+        rare === 277 ? this.ctx.user.inv.rareWood = this.ctx.user.inv.rareWood + 1 : null
         this.ctx.user.inv.wood = this.ctx.user.inv.wood + earn
         this.ctx.user.exp = this.ctx.user.exp + 1
         await this.ctx.user.save()
-        await this.cb.reply(`Вы направились в лес и нарубили ${earn} 🌲 у вас еще ${this.ctx.user.energy} ⚡`)
+        await this.cb.reply(`Вы направились в лес и нарубили ${earn} 🌲 ${rare === 277 ? 'и 1 🌰' : ''} у вас еще ${this.ctx.user.energy} ⚡`)
     }
 
     async fishing() {

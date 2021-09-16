@@ -62,7 +62,9 @@ async function inventory(ctx) {
     inv += `${ctx.user.inv.wood === 0 ? '' : `${lang.wood}: ${ctx.user.inv.wood}\n`}`
     inv += `${ctx.user.inv.fish === 0 ? '' : `${lang.fish}: ${ctx.user.inv.fish}\n`}`
     inv += `${ctx.user.inv.rareHerbs === 0 ? '' : `${lang.rareHerbs}: ${ctx.user.inv.rareHerbs}\n`}`
+    inv += `${ctx.user.inv.rareSand === 0 ? '' : `${lang.rareSand}: ${ctx.user.inv.rareSand}\n`}`
     inv += `${ctx.user.inv.rareOre === 0 ? '' : `${lang.rareOre}: ${ctx.user.inv.rareOre}\n`}`
+    inv += `${ctx.user.inv.rareWood === 0 ? '' : `${lang.rareWood}: ${ctx.user.inv.rareWood}\n`}`
     inv += `${ctx.user.inv.rareFish === 0 ? '' : `${lang.rareFish}: ${ctx.user.inv.rareFish}\n`}`
     inv += `\n${!ctx.user.items.fishingRod ? '' : `🎣 Удочка: Есть\n`}`
     inv += `${ctx.user.items.bait === 0 ? '' : `🐛 Наживка: ${ctx.user.items.bait}\n`}`

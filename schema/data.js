@@ -28,6 +28,7 @@ const userSchem = new mongoose.Schema({
         herbs: { type: Number, default: 0 },
         rareHerbs: { type: Number, default: 0 },
         sand: { type: Number, default: 0 },
+        rareSand: { type: Number, default: 0 },
         ore: { type: Number, default: 0 },
         rareOre: { type: Number, default: 0 },
         wood: { type: Number, default: 0 },
