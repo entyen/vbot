@@ -120,11 +120,12 @@ bot.use(async (ctx, next) => {
         }
         const weightMath = async () => {
             const massItems = [
-            { count: ctx.user.inv.herbs*0.5 },
-            { count: ctx.user.inv.sand*2 },
-            { count: ctx.user.inv.ore*3 },
-            { count: ctx.user.inv.wood*1 },
-            { count: ctx.user.inv.fish*10 },
+                { count: ctx.user.balance*0.01 },
+                { count: ctx.user.inv.herbs*0.5 },
+                { count: ctx.user.inv.sand*2 },
+                { count: ctx.user.inv.ore*3 },
+                { count: ctx.user.inv.wood*1 },
+                { count: ctx.user.inv.fish*10 },
             ] 
             let sum = 0
             massItems.forEach((x,y,z) => sum += +massItems[y].count)

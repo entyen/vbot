@@ -45,6 +45,7 @@ const userSchem = new mongoose.Schema({
         energyCount: { type: Number, default: 1 },
         energyRegen: { type: Number, default: 1 },
         harvest: { type: Number, default: 1 },
+        exp: { type: Number, default: 1 },
     },
     buffs: {
         newby: { type: Number, default: +timestamp + (10080*60*1000) },

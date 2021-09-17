@@ -113,13 +113,13 @@ menu.buffs = (ctx) => {
     time.rate9st = ((ctx.user.buffs.rate9st - ctx.timestamp)/60/1000).toFixed(0)
     time.energyWell = ((ctx.user.buffs.energyWell - ctx.timestamp)/60/1000)
     let buffs = `Баффы:`
-    buffs += `${time.rate1st <= 0 ? `` : `\n${lang.Rate1St}: ${time.rate1st} мин.`}`
-    buffs += `${time.rate2st <= 0 ? `` : `\n${lang.Rate2St}: ${time.rate2st} мин.`}`
-    buffs += `${time.rate3st <= 0 ? `` : `\n${lang.Rate3St}: ${time.rate3st} мин.`}`
-    buffs += `${time.rate9st <= 0 ? `` : `\n${lang.Rate9St}: ${time.rate9st} мин.`}`
-    buffs += `${time.energyWell <= 0 ? `` : `\n${lang.energyWell}: ${time.energyWell >= 60 ? (time.energyWell/60).toFixed(0) + 'ч.' : time.energyWell.toFixed(0) + 'мин.'}`}`
-    buffs += `${time.newby <= 0 ? `` : `\n${lang.newBy}: ${time.newby} ч.`}`
-    buffs += `${time.vip <= 0 ? `` : `\n\n${lang.Vip}: ${time.vip} ч.`}`
+    buffs += `${time.rate1st <= 0 ? `` : `\n${lang.Rate1St}: ${time.rate1st}мин.${lang.Rate1StMsg}`}`
+    buffs += `${time.rate2st <= 0 ? `` : `\n${lang.Rate2St}: ${time.rate2st}мин.${lang.Rate2StMsg}`}`
+    buffs += `${time.rate3st <= 0 ? `` : `\n${lang.Rate3St}: ${time.rate3st}мин.${lang.Rate3StMsg}`}`
+    buffs += `${time.rate9st <= 0 ? `` : `\n${lang.Rate9St}: ${time.rate9st}мин.${lang.Rate9StMsg}`}`
+    buffs += `${time.energyWell <= 0 ? `` : `\n${lang.energyWell}: ${time.energyWell >= 60 ? (time.energyWell/60).toFixed(0) + 'ч.' : time.energyWell.toFixed(0) + 'мин.'}${lang.energyWellMsg}`}`
+    buffs += `${time.newby <= 0 ? `` : `\n${lang.newBy}: ${time.newby}ч.${lang.newByMsg}`}`
+    buffs += `${time.vip <= 0 ? `` : `\n\n${lang.Vip}: ${time.vip}ч.${lang.VipMsg}`}`
 
     return ctx.reply(`${cmba.join().replace(/,/g, ' ').replace(cmba[0], '')} ${buffs}`)
 }

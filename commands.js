@@ -233,7 +233,7 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 }
             } catch (e) {ctx.reply('‼️ Что-то не верно проверте значения')}
         } else
-        if (cmba[0] === 'update_db') {
+        if (cmba[0] === 'updatedb') {
             let allUser = await userdb.find({})
             if (ctx.user.acclvl >= 7) {
                 allUser.forEach( async (x,y,z) => {
@@ -244,11 +244,6 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 await ctx.reply('Нет прав использовать данную команду')
             }
         } else
-        if (cmba[0] === 'lang' && cmba[1] === 'ru' || cmba[1] === 'en') {
-            ctx.user.lang = cmba[1]
-            await ctx.user.save()
-            await ctx.reply(`Язык изменен на ${cmba[1]}`)
-        }
         if (ctx.cmd === lang.dev || ctx.cmd === lang.adm || ctx.cmd === lang.moder || ctx.cmd === lang.user || ctx.cmd === lang.vip || ctx.cmd === lang.plat) {
             ctx.user.acclvl >= 7 ? ctx.reply(`${lang.userGrpCmd} ${lang.dev} ${lang.help} ${lang.devCmd}`)
              : ctx.user.acclvl == 6 ? ctx.reply(`${lang.userGrpCmd} ${lang.adm} ${lang.help}`)

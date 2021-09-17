@@ -27,7 +27,7 @@ class Job {
         }
         this.cb = eventAnswer
 
-        const lvlx = this.ctx.user.level <= 0 ? 1 : 1 + (this.ctx.user.boosters.harvest * 0.2)
+        const lvlx = 1 + (this.ctx.user.boosters.harvest * 0.3)
 
         this.jobs = {
             herb: {
@@ -195,12 +195,6 @@ class Job {
     }
 
     async fishing() {
-        // if (this.ctx.user.level < this.jobs.fishing.level) {
-        //     return await this.cb.reply(`Простите, но рыбалка доступна с ${this.jobs.fishing.level} уровня.`)
-        // } else if (this.ctx.user.energy < this.jobs.fishing.energy) {
-        //     return await this.cb.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
-        // }
-
         await this.cb.reply('Вы отправляетесь на рыбалку, выберите место, куда идти')
         await this.ctx.reply(`Места для рыбалки:`, null, Markup
             .keyboard([
@@ -273,15 +267,6 @@ class Job {
             ])
             .inline()
         )
-        // await this.ctx.user.dec('energy', this.jobs.fishing.energy)
-
-        //const earn = Math.round(randCurr(0, 0) * this.jobs.fishing.lvlx)
-
-        // ctx.user.inv.wood = ctx.user.inv.wood+earn
-        // ctx.user.exp = ctx.user.exp+1
-        // await ctx.user.save()
-
-        // await cb.reply(`Вы направились на рыбалку и поймали ${earn} 🐟 у вас еще ${ctx.user.energy} энергии.`)
     }
 
     async collectBaikalX() {
@@ -358,7 +343,6 @@ class Job {
             case this.jobs.fishing.places.hafen.id:
                 return await this.collectHafen()
             default:
-                // await this.ctx.scene.enter('menu')
                 return
         }
 

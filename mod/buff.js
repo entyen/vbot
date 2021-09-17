@@ -105,7 +105,7 @@ module.exports = async(bot, i, user, lang) => {
                 await user[i].set('timers', false, 'buffRate9St')
                 // await user[i].set('acclvl', )
                 await user[i].inc('boosters', 1, 'energyRegen')
-                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.energyWell}.`)
+                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate9St}.`)
             }
         }
 
