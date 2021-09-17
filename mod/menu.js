@@ -104,22 +104,18 @@ menu.setting = (ctx) => {
 
 menu.buffs = (ctx) => {
     const cmba = ctx.message.text.toLowerCase().split(' ')
-    let time = {}
-    time.newby = ((ctx.user.buffs.newby - ctx.timestamp)/60/60/1000).toFixed(0)
-    time.vip = ((ctx.user.buffs.vip - ctx.timestamp)/60/60/1000).toFixed(0)
-    time.rate1st = ((ctx.user.buffs.rate1st - ctx.timestamp)/60/1000).toFixed(0)
-    time.rate2st = ((ctx.user.buffs.rate2st - ctx.timestamp)/60/1000).toFixed(0)
-    time.rate3st = ((ctx.user.buffs.rate3st - ctx.timestamp)/60/1000).toFixed(0)
-    time.rate9st = ((ctx.user.buffs.rate9st - ctx.timestamp)/60/1000).toFixed(0)
-    time.energyWell = ((ctx.user.buffs.energyWell - ctx.timestamp)/60/1000)
+    const buffTime = (msg, lng, lngM) => {
+        let time = Math.round((msg - ctx.timestamp)/60/1000)
+        return time < 0 ? '' : time > 60 ? `\n${lang[lng]} ${(time/60).toFixed(0)} ч.${lang[lngM]}` : `\n${lang[lng]} ${time} мин.${lang[lngM]}`
+    }
     let buffs = `Баффы:`
-    buffs += `${time.rate1st <= 0 ? `` : `\n${lang.Rate1St}: ${time.rate1st}мин.${lang.Rate1StMsg}`}`
-    buffs += `${time.rate2st <= 0 ? `` : `\n${lang.Rate2St}: ${time.rate2st}мин.${lang.Rate2StMsg}`}`
-    buffs += `${time.rate3st <= 0 ? `` : `\n${lang.Rate3St}: ${time.rate3st}мин.${lang.Rate3StMsg}`}`
-    buffs += `${time.rate9st <= 0 ? `` : `\n${lang.Rate9St}: ${time.rate9st}мин.${lang.Rate9StMsg}`}`
-    buffs += `${time.energyWell <= 0 ? `` : `\n${lang.energyWell}: ${time.energyWell >= 60 ? (time.energyWell/60).toFixed(0) + 'ч.' : time.energyWell.toFixed(0) + 'мин.'}${lang.energyWellMsg}`}`
-    buffs += `${time.newby <= 0 ? `` : `\n${lang.newBy}: ${time.newby}ч.${lang.newByMsg}`}`
-    buffs += `${time.vip <= 0 ? `` : `\n\n${lang.Vip}: ${time.vip}ч.${lang.VipMsg}`}`
+    buffs += buffTime(ctx.user.buffs.rate1st, 'Rate1St', 'Rate1StMsg')
+    buffs += buffTime(ctx.user.buffs.rate2st, 'Rate2St', 'Rate2StMsg')
+    buffs += buffTime(ctx.user.buffs.rate3st, 'Rate3St', 'Rate3StMsg')
+    buffs += buffTime(ctx.user.buffs.rate9st, 'Rate9St', 'Rate9StMsg')
+    buffs += buffTime(ctx.user.buffs.energyWell, 'energyWell', 'energyWellMsg')
+    buffs += buffTime(ctx.user.buffs.newby, 'newBy', 'newByMsg')
+    buffs += `\n ${buffTime(ctx.user.buffs.vip, 'Vip', 'VipMsg')}`
 
     return ctx.reply(`${cmba.join().replace(/,/g, ' ').replace(cmba[0], '')} ${buffs}`)
 }

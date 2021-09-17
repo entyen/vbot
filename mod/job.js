@@ -13,8 +13,8 @@ class Job {
         this.bot = bot
         this.ctx = ctx
 
-        const eventAnswer = {}
-        eventAnswer.reply = async (message) => {
+        this.cb = {}
+        this.cb.reply = async (message) => {
             this.bot.execute('messages.sendMessageEventAnswer', {
                 user_id: this.ctx.message.user_id,
                 peer_id: this.ctx.message.peer_id,
@@ -25,7 +25,6 @@ class Job {
                 }),
             })
         }
-        this.cb = eventAnswer
 
         const lvlx = 1 + (this.ctx.user.boosters.harvest * 0.3)
 

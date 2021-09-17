@@ -90,11 +90,24 @@ plot.plotUpgradeLv1 = (ctx) => {
 
 plot.buildWell = async(ctx) => {
     if (ctx.user.plot.well >= 1) return ctx.reply('Уже есть колодец')
-    if (ctx.user.inv.ore < 5000 && ctx.user.inv.rareOre < 2) return ctx.reply('Недостаточно средств')
+    if (ctx.user.inv.ore < 5000 || ctx.user.inv.rareOre < 2) return ctx.reply('Недостаточно средств')
         await ctx.user.dec('inv', 3000, 'ore')
         await ctx.user.dec('inv', 2, 'rareOre')
         await ctx.user.set('plot', 1, 'well')
         await ctx.reply('Теперь у вас есть колодец')
+    return
+}
+
+plot.buildWh = async(ctx) => {
+    if (ctx.user.plot.wh >= 1) return ctx.reply('Уже есть склад')
+    console.log(ctx.user.inv.wood)
+    if (ctx.user.inv.ore < 1500 || ctx.user.inv.sand < 2000 || ctx.user.inv.wood < 7000) return ctx.reply('Недостаточно средств')
+        await ctx.user.dec('inv', 1500, 'ore')
+        await ctx.user.dec('inv', 2000, 'sand')
+        await ctx.user.dec('inv', 7000, 'wood')
+        await ctx.user.inc('invWeight', 20000)
+        await ctx.user.set('plot', 1, 'wh')
+        await ctx.reply('Теперь у вас есть склад')
     return
 }
 
@@ -136,7 +149,10 @@ plot.temple = (ctx) => {
 
 plot.wh = (ctx) => {
     if (ctx.user.plot.wh === 0) {
-        ctx.reply(`🏚 Склад позволит вам увеличить место в хранилище\n⚒ На его строительство требуется:\n${resCheck(ctx, 'ore', 4000)}\n︎${resCheck(ctx, 'sand', 7000)}\n︎${resCheck(ctx, 'wood', 10000)}`)
+        ctx.reply(`🏚 Склад позволит вам увеличить место в хранилище\n⚒ На его строительство требуется:\n${resCheck(ctx, 'ore', 1500)}\n︎${resCheck(ctx, 'sand', 2000)}\n︎${resCheck(ctx, 'wood', 7000)}`, null, build.wh)
+    } else
+    if (ctx.user.plot.wh === 1) {
+        ctx.reply(`🏚 Склад 1ур:\nВес Увеличен на 20000`)
     }
     return 
 }
@@ -158,6 +174,12 @@ const build = {}
 build.well = Markup.keyboard(
         [
             Markup.button('Построить', 'secondary', 'build.well'),
+        ],
+).inline()
+
+build.wh = Markup.keyboard(
+        [
+            Markup.button('Построить', 'secondary', 'build.wh'),
         ],
 ).inline()
 

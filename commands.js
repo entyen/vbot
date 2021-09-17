@@ -540,6 +540,8 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 return plot.trowPotion(ctx)
             case 'plot.wh':
                 return plot.wh(ctx)
+            case 'build.wh':
+                return plot.buildWh(ctx)
             case 'plot.house':
                 return plot.house(ctx)
             case 'plot.temple':
