@@ -278,6 +278,12 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 return menu.setting(ctx)
             case 'report':
                 return ctx.reply('Введите команду:\n репорт \'Текст вашего сообщения\'')
+            case 'adventure':
+                return forest.main(ctx)
+            case 'adventure.left':
+                return forest.side(ctx)
+            case 'adventure.right':
+                return forest.side(ctx)
             case lang.alert:
                 if (ctx.user.alert) {
                     ctx.user.alert = false

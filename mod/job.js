@@ -26,7 +26,7 @@ class Job {
             })
         }
 
-        const lvlx = 1 + (this.ctx.user.boosters.harvest * 0.3)
+        const lvlx = this.ctx.user.boosters.harvest * 1
 
         this.jobs = {
             herb: {
@@ -76,6 +76,10 @@ class Job {
                         id: 'fishZ',
                         label: '🐡',
                     },
+                    fishChest: {
+                        id: 'fishChest',
+                        label: '📦',
+                    },
                     event: {
                         id: 'event',
                         label: '💥',
@@ -90,15 +94,19 @@ class Job {
     }
 
     async deleteMesage() {
-        const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
-            peer_id: this.ctx.message.user_id,
-            conversation_message_ids: this.ctx.message.conversation_message_id,
-        })
-        await this.bot.execute('messages.delete', {
-            peer_id: this.ctx.message.user_id,
-            message_id: NeedMessage.items[0].id,
-            delete_for_all: 1,
-        })
+        try {
+            const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
+                peer_id: this.ctx.message.user_id,
+                conversation_message_ids: this.ctx.message.conversation_message_id,
+            })
+            await this.bot.execute('messages.delete', {
+                peer_id: this.ctx.message.user_id,
+                message_id: NeedMessage.items[0].id,
+                delete_for_all: 1,
+            })
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     async canStartJob() {
@@ -126,7 +134,7 @@ class Job {
 
         this.ctx.user.energy = this.ctx.user.energy - this.jobs.herb.energy
 
-        const earn = Math.round(randCurr(5, 18) * this.jobs.herb.lvlx)
+        const earn = Math.round(randCurr(8, 23) * this.jobs.herb.lvlx)
 
         let bait = 0
         const rare = randCurr(0, 200)
@@ -148,7 +156,7 @@ class Job {
 
         this.ctx.user.energy = this.ctx.user.energy - this.jobs.ore.energy
 
-        const earn = Math.round(randCurr(3, 24) * this.jobs.ore.lvlx)
+        const earn = Math.round(randCurr(10, 24) * this.jobs.ore.lvlx)
 
         const rare = randCurr(0, 400)
         rare === 277 ? this.ctx.user.inv.rareOre = this.ctx.user.inv.rareOre + 1 : null
@@ -166,7 +174,7 @@ class Job {
 
         this.ctx.user.energy = this.ctx.user.energy - this.jobs.sand.energy
 
-        const earn = Math.round(randCurr(8, 48) * this.jobs.sand.lvlx)
+        const earn = Math.round(randCurr(12, 48) * this.jobs.sand.lvlx)
 
         const rare = randCurr(0, 1000)
         rare === 277 ? this.ctx.user.inv.rareSand = this.ctx.user.inv.rareSand + 1 : null
@@ -183,7 +191,7 @@ class Job {
 
         this.ctx.user.energy = this.ctx.user.energy - this.jobs.forest.energy
 
-        const earn = Math.round(randCurr(16, 28) * this.jobs.forest.lvlx)
+        const earn = Math.round(randCurr(16, 30) * this.jobs.forest.lvlx)
 
         const rare = randCurr(0, 800)
         rare === 277 ? this.ctx.user.inv.rareWood = this.ctx.user.inv.rareWood + 1 : null
@@ -229,12 +237,15 @@ class Job {
         let massFish = []
         let buttonMass = []
         for (let i = 0; i < 10; i++) {
-            const randFish = randCurr(0, 100)
-                if (randFish < 30) {
+            const randFish = randCurr(0, 1000)
+                if (randFish < 300) {
                     massFish[i] = this.jobs.fishing.places.fishY
                 } else
-                if (randFish > 30 && randFish < 35) {
+                if (randFish > 300 && randFish < 350) {
                     massFish[i] = this.jobs.fishing.places.fishZ
+                } else
+                if (randFish > 350 && randFish < 352) {
+                    massFish[i] = this.jobs.fishing.places.fishChest
                 } else {
                     massFish[i] = this.jobs.fishing.places.fishX
                 }
@@ -272,7 +283,7 @@ class Job {
         try {
             if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
             await this.ctx.user.dec('items', 1, 'bait')
-            const earn = Math.round(randCurr(1, 5))
+            const earn = Math.round(randCurr(1, 5) * this.jobs.fishing.lvlx)
             this.deleteMesage()
             await this.ctx.user.inc('inv', earn, 'fish')
             await this.cb.reply(`Эххх ну так себе вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.items.bait} наживки.`)
@@ -283,7 +294,7 @@ class Job {
         try {
             if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
             await this.ctx.user.dec('items', 1, 'bait')
-            const earn = Math.round(randCurr(4, 10))
+            const earn = Math.round(randCurr(4, 10) * this.jobs.fishing.lvlx)
             this.deleteMesage()
             await this.ctx.user.inc('inv', earn, 'fish')
             await this.cb.reply(`Неплохо неплохо вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.items.bait} наживки.`)
@@ -294,7 +305,7 @@ class Job {
         try {
             if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
             await this.ctx.user.dec('items', 1, 'bait')
-            const earn = Math.round(randCurr(10, 24))
+            const earn = Math.round(randCurr(10, 24) * this.jobs.fishing.lvlx)
             this.deleteMesage()
             const rare = randCurr(0, 30)
             let rFish = 0
@@ -304,6 +315,24 @@ class Job {
             await this.cb.reply(`Уххх удачный улов вы поймали ${earn} 🐟 ${rare === 3 ? `и ${rFish} 🐡` : ''}у вас еще ${this.ctx.user.items.bait} наживки.`)
         } catch (e) {
          this.ctx.reply('Что-то пошло не так.')
+        }
+    }
+
+    async collectChest() {
+        try {
+            if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
+            await this.ctx.user.dec('items', 1, 'bait')
+            this.deleteMesage()
+            const earn = Math.round(randCurr(5, 10) * this.jobs.fishing.lvlx)
+            const rare = randCurr(0, 3000)
+            let reward = ''
+            rare < 2000 ? reward = 'rareFish' : rare > 2000 ? reward = 'rareHerbs' : null
+            await this.ctx.user.inc('inv', earn, 'vinmt')
+            await this.ctx.user.inc('inv', 1, reward)
+            await this.cb.reply(`Вы поймали редкий сундук ${earn} ${lang.vinmt} ${rare < 2000 ? `и 1 🐡` : 'и 1 🍀'}у вас еще ${this.ctx.user.items.bait} наживки.`)
+        } catch (e) {
+            console.log(e)
+            this.ctx.reply('Что-то пошло не так.')
         }
     }
 
@@ -337,6 +366,8 @@ class Job {
                 return await this.collectBaikalY()
             case this.jobs.fishing.places.fishZ.id:
                 return await this.collectBaikalZ()
+            case this.jobs.fishing.places.fishChest.id:
+                return await this.collectChest()
             case this.jobs.fishing.places.baikal.id:
                 return await this.fishingBaikal()
             case this.jobs.fishing.places.hafen.id:

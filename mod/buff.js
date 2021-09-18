@@ -49,14 +49,14 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate1st <= timestamp) {
             if (!user[i].timers.buffRate1St) {
                 await user[i].set('timers', true, 'buffRate1St')
-                // await user[i].inc('boosters', 1, 'energyCount')
+                await user[i].dec('boosters', 0.6, 'harvest')
                 await bot.sendMessage(user[i].id, `Действие ${lang.Rate1St} рассеялось.`)
             }
         } else 
         if (user[i].buffs.rate1st >= timestamp) {
             if (user[i].timers.buffRate1St) {
                 await user[i].set('timers', false, 'buffRate1St')
-                // await user[i].dec('boosters', 1, 'energyCount')
+                await user[i].inc('boosters', 0.6, 'harvest')
                 await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate1St}.`)
             }
         }
@@ -64,14 +64,14 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate2st <= timestamp) {
             if (!user[i].timers.buffRate2St) {
                 await user[i].set('timers', true, 'buffRate2St')
-                // await user[i].set('acclvl', 0)
+                await user[i].dec('boosters', 0.3, 'harvest')
                 await bot.sendMessage(user[i].id, `Действие ${lang.Rate2St} рассеялось.`)
             }
         } else 
         if (user[i].buffs.rate2st >= timestamp) {
             if (user[i].timers.buffRate2St) {
                 await user[i].set('timers', false, 'buffRate2St')
-                // await user[i].set('acclvl', )
+                await user[i].inc('boosters', 0.3, 'harvest')
                 await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate2St}.`)
             }
         }
@@ -79,7 +79,7 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate3st <= timestamp) {
             if (!user[i].timers.buffRate3St) {
                 await user[i].set('timers', true, 'buffRate3St')
-                // await user[i].set('acclvl', 0)
+                await user[i].dec('boosters', 0.3, 'harvest')
                 await bot.sendMessage(user[i].id, `Действие ${lang.Rate3St} рассеялось.`)
             }
         } else 
@@ -87,7 +87,7 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate3st >= timestamp) {
             if (user[i].timers.buffRate3St) {
                 await user[i].set('timers', false, 'buffRate3St')
-                // await user[i].set('acclvl', )
+                await user[i].inc('boosters', 0.3, 'harvest')
                 await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate3St}.`)
             }
         }
@@ -95,7 +95,7 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate9st <= timestamp) {
             if (!user[i].timers.buffRate9St) {
                 await user[i].set('timers', true, 'buffRate9St')
-                // await user[i].set('acclvl', 0)
+                await user[i].dec('boosters', 0.2, 'harvest')
                 await bot.sendMessage(user[i].id, `Действие ${lang.Rate9St} рассеялось.`)
             }
         } else 
@@ -103,7 +103,7 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate9st >= timestamp) {
             if (user[i].timers.buffRate9St) {
                 await user[i].set('timers', false, 'buffRate9St')
-                // await user[i].set('acclvl', )
+                await user[i].inc('boosters', 0.2, 'harvest')
                 await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate9St}.`)
             }
         }

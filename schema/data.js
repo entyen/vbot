@@ -25,6 +25,7 @@ const userSchem = new mongoose.Schema({
         buffEnergyWell: { type: Boolean, default: true },
     },
     inv: {
+        vinmt: { type: Number, default: 0 },
         herbs: { type: Number, default: 0 },
         rareHerbs: { type: Number, default: 0 },
         sand: { type: Number, default: 0 },

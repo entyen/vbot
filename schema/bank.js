@@ -6,6 +6,7 @@ const bankSchem = new mongoose.Schema({
     name: String,
     balance: { type: Number, default: 0 },
     inv: {
+        vinmt: { type: Number, default: 0 },
         herbs: { type: Number, default: 0 },
         rareHerbs: { type: Number, default: 0 },
         sand: { type: Number, default: 0 },
@@ -18,6 +19,7 @@ const bankSchem = new mongoose.Schema({
         rareFish: { type: Number, default: 0 },
     },
     dpi: { 
+        vinmt: { type: Number, default: 0 },
         herbs: { type: Number, default: 0 },
         sand: { type: Number, default: 0 },
         ore: { type: Number, default: 0 },

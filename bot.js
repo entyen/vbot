@@ -94,10 +94,11 @@ utils.rand = (min, max) => {
 //middlewere for bot chek user in database or not create user
 bot.use(async (ctx, next) => {
     ctx.timestamp = new Date().getTime()
-    // const storageGet = await bot.execute('storage.get', {
-    //     user_id: ctx.message.peer_id,
-    //     key: 'waitTime',
-    // })
+    const messageInfo = await bot.execute('messages.isMessagesFromGroupAllowed', {
+        group_id: tea.GROUP_ID,
+        user_id: ctx.message.peer_id,
+    })
+    if (messageInfo.is_allowed === 0) { return } 
 
     const acc = async (ctx, user_id) => {
         ctx.user = await userdb.findOne({id: user_id})
@@ -219,6 +220,11 @@ energy.addCallback(async () => {
             if (userEn[i].alert) {
                 if (!userEn[i].timers.eFullAlert) {
                     await userEn[i].set('timers', true, 'eFullAlert')
+                    const messageInfo = await bot.execute('messages.isMessagesFromGroupAllowed', {
+                        group_id: tea.GROUP_ID,
+                        user_id: userEn[i].id,
+                    })
+                    if (messageInfo.is_allowed === 0) { return } 
                     await bot.sendMessage(userEn[i].id, `⚡ Энергия полная, вперед тратить. 🥳\n Если вы не хотите получать это уведомление вы можете отключить его в Настройках => Уведомления`)
                 }
             }
@@ -237,7 +243,12 @@ energy.addCallback(async () => {
 setInterval(async () => {
     user = await userdb.find({})
     user.forEach(async(x,i,z)=>{
-        if(!user[i]) return
+        const messageInfo = await bot.execute('messages.isMessagesFromGroupAllowed', {
+            group_id: tea.GROUP_ID,
+            user_id: user[i].id,
+        })
+        if (messageInfo.is_allowed === 0) { return await user[i].set('alert', false) } 
+        if (!user[i]) return
         await buff(bot, i, user, lang)
     })
 }, 4000)
