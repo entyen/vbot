@@ -45,7 +45,7 @@ const userSchem = new mongoose.Schema({
     boosters: {
         energyCount: { type: Number, default: 1 },
         energyRegen: { type: Number, default: 1 },
-        harvest: { type: Number, default: 1 },
+        harvest: { type: Number, default: 0 },
         exp: { type: Number, default: 1 },
     },
     buffs: {
@@ -93,6 +93,7 @@ const userSchem = new mongoose.Schema({
     energy: { type: Number, default: 100 },
     race: { type: Number, default: 0 },
     alert: { type: Boolean, default: true },
+    _bm: { type: Number, default: 1, min: 0, max: 1 },
 })
 
 module.exports = userSchem

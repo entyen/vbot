@@ -10,8 +10,8 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
 
     const usersMap = new Map()
     const LIMIT = 5
-    const DIFF = 205
-    const TIME = 200
+    const DIFF = 105
+    const TIME = 100
     bot.event('message_event', async (ctx) => {
         const cb = (message) => {
             bot.execute('messages.sendMessageEventAnswer', {
@@ -40,7 +40,6 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             userData.timer = setTimeout(() => {
                 usersMap.delete(ctx.message.peer_id)
                 console.log('Removed from map.')
-                cb(`Подождите немного`)
             }, TIME)
             usersMap.set(ctx.message.peer_id, userData)
         }
@@ -48,7 +47,7 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             ++msgCount
             if(parseInt(msgCount) === LIMIT) {
 
-               cb(`Warning: Spamming forbidden.`)
+               console.log(`Warning: Spamming forbidden.`)
                
             } else {
                 userData.msgCount = msgCount;
@@ -71,13 +70,8 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
         }
     })
 
-    await bot.event('message_reply', async (ctx, next) => {
-        // console.log(ctx)
-
-        return next()
-    })
-
     bot.on(async (ctx) => {
+        if(ctx.user._bm === 0) return 
         if(ctx.user.acclvl < 0) return ctx.reply(`☠️ Ваша душа зепечатанна, печать спадет через ${Math.round((ctx.user.buffs.ban-ctx.timestamp)/1000/60/60)} часов`)
         const cmba = ctx.message.text.toLowerCase().split(' ')
         // console.log(toString(cmba[0]) === /^(?:рейт|рейтинг)$/i, cmba[0])
@@ -131,10 +125,21 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
         if (cmba[0] === 'рейтинг' || cmba[0] === 'rate' || cmba[0] === 'топ') {
             user = await userdb.find({})
             let result = `Рейтинг: \n`
-            user = user.filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
+            user = user.filter(x => x._bm > 0).filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
             for (i = 0; i < 9; i++) {
                 result += `${i === 0 ? '🥇': i === 1 ? '🥈': i === 2 ? '🥉' : '🏅'} @id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
             }
+            ctx.reply(`${result}`)
+            return
+        } else
+        if (cmba[0] === 'stat') {
+            user = await userdb.find({})
+            let result = `Статистика: \n\n`
+            user = user.filter(x => x._bm > 0).filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
+            result += `Активных пользователей: ${user.length}\n`
+            // for (i = 0; i < user.length; i++) {
+            //     result += `@id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
+            // }
             ctx.reply(`${result}`)
             return
         } else

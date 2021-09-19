@@ -1,15 +1,17 @@
 module.exports = async(bot, i, user, lang) => {
         const timestamp = new Date().getTime()
         //NEWBY BUFF
-        if (user[i].buffs.newby <= timestamp) {
+        if (user[i].buffs.newby < timestamp) {
             if (user[i].timers.buffNewByAlert) {
                 await user[i].set('timers', false, 'buffNewByAlert')
                 await user[i].dec('boosters', 1, 'energyCount')
                 await user[i].dec('boosters', 1, 'energyRegen')
-                await bot.sendMessage(user[i].id, `Действие баффа ${lang.newBy} рассеялось.`)
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Действие баффа ${lang.newBy} рассеялось.`)
+                }
             }
-        } else 
-        if (user[i].buffs.newby >= timestamp) {
+        } else
+        if (user[i].buffs.newby > timestamp) {
             if (!user[i].timers.buffNewByAlert) {
                 await user[i].set('timers', true, 'buffNewByAlert')
                 await user[i].inc('boosters', 1, 'energyCount')
@@ -21,14 +23,18 @@ module.exports = async(bot, i, user, lang) => {
             if (!user[i].timers.buffVipAlert) {
                 await user[i].set('timers', true, 'buffVipAlert')
                 await user[i].set('acclvl', 0)
-                await bot.sendMessage(user[i].id, `Действие баффа ${lang.Vip} рассеялось.`)
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Действие баффа ${lang.Vip} рассеялось.`)
+                }
             }
-        } else 
+        } else
         if (user[i].buffs.vip >= timestamp && user[i].acclvl < 4) {
             if (user[i].timers.buffVipAlert) {
                 await user[i].set('timers', false, 'buffVipAlert')
                 await user[i].set('acclvl', 1)
-                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Vip}.`)
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Vip}.`)
+                }
             }
         }
         //BAN DE-BUFF
@@ -38,73 +44,90 @@ module.exports = async(bot, i, user, lang) => {
                 await user[i].set('acclvl', 0)
                 await bot.sendMessage(user[i].id, `Действие ${lang.ban} рассеялось.`)
             }
-        } else 
+        } else
         if (user[i].buffs.ban >= timestamp && user[i].acclvl < 7) {
             if (user[i].timers.buffBanAlert) {
                 await user[i].set('timers', false, 'buffBanAlert')
                 await user[i].set('acclvl', -1)
+                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.ban}.`)
             }
         }
 
         if (user[i].buffs.rate1st <= timestamp) {
             if (!user[i].timers.buffRate1St) {
                 await user[i].set('timers', true, 'buffRate1St')
-                await user[i].dec('boosters', 0.6, 'harvest')
-                await bot.sendMessage(user[i].id, `Действие ${lang.Rate1St} рассеялось.`)
+                await user[i].dec('boosters', 60, 'harvest')
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Действие ${lang.Rate1St} рассеялось.`)
+                }
             }
-        } else 
+        } else
         if (user[i].buffs.rate1st >= timestamp) {
             if (user[i].timers.buffRate1St) {
                 await user[i].set('timers', false, 'buffRate1St')
-                await user[i].inc('boosters', 0.6, 'harvest')
-                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate1St}.`)
+                await user[i].inc('boosters', 60, 'harvest')
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate1St}.`)
+                }
             }
         }
 
         if (user[i].buffs.rate2st <= timestamp) {
             if (!user[i].timers.buffRate2St) {
                 await user[i].set('timers', true, 'buffRate2St')
-                await user[i].dec('boosters', 0.3, 'harvest')
-                await bot.sendMessage(user[i].id, `Действие ${lang.Rate2St} рассеялось.`)
+                await user[i].dec('boosters', 30, 'harvest')
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Действие ${lang.Rate2St} рассеялось.`)
+                }
             }
-        } else 
+        } else
         if (user[i].buffs.rate2st >= timestamp) {
             if (user[i].timers.buffRate2St) {
                 await user[i].set('timers', false, 'buffRate2St')
-                await user[i].inc('boosters', 0.3, 'harvest')
-                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate2St}.`)
+                await user[i].inc('boosters', 30, 'harvest')
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate2St}.`)
+                }
             }
         }
 
         if (user[i].buffs.rate3st <= timestamp) {
             if (!user[i].timers.buffRate3St) {
                 await user[i].set('timers', true, 'buffRate3St')
-                await user[i].dec('boosters', 0.3, 'harvest')
-                await bot.sendMessage(user[i].id, `Действие ${lang.Rate3St} рассеялось.`)
+                await user[i].dec('boosters', 30, 'harvest')
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Действие ${lang.Rate3St} рассеялось.`)
+                }
             }
         } else 
 
         if (user[i].buffs.rate3st >= timestamp) {
             if (user[i].timers.buffRate3St) {
                 await user[i].set('timers', false, 'buffRate3St')
-                await user[i].inc('boosters', 0.3, 'harvest')
-                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate3St}.`)
+                await user[i].inc('boosters', 30, 'harvest')
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate3St}.`)
+                }
             }
         }
 
         if (user[i].buffs.rate9st <= timestamp) {
             if (!user[i].timers.buffRate9St) {
                 await user[i].set('timers', true, 'buffRate9St')
-                await user[i].dec('boosters', 0.2, 'harvest')
-                await bot.sendMessage(user[i].id, `Действие ${lang.Rate9St} рассеялось.`)
+                await user[i].dec('boosters', 20, 'harvest')
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Действие ${lang.Rate9St} рассеялось.`)
+                }
             }
         } else 
 
         if (user[i].buffs.rate9st >= timestamp) {
             if (user[i].timers.buffRate9St) {
                 await user[i].set('timers', false, 'buffRate9St')
-                await user[i].inc('boosters', 0.2, 'harvest')
-                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate9St}.`)
+                await user[i].inc('boosters', 20, 'harvest')
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate9St}.`)
+                }
             }
         }
 
@@ -112,7 +135,9 @@ module.exports = async(bot, i, user, lang) => {
             if (!user[i].timers.buffEnergyWell) {
                 await user[i].set('timers', true, 'buffEnergyWell')
                 await user[i].dec('boosters', 1, 'energyRegen')
-                await bot.sendMessage(user[i].id, `Действие ${lang.energyWell} рассеялось.`)
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Действие ${lang.energyWell} рассеялось.`)
+                }
             }
         } else 
 
@@ -120,7 +145,9 @@ module.exports = async(bot, i, user, lang) => {
             if (user[i].timers.buffEnergyWell) {
                 await user[i].set('timers', false, 'buffEnergyWell')
                 await user[i].inc('boosters', 1, 'energyRegen')
-                await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.energyWell} восстановление Энергии ускоренно.`)
+                if (user[i].alert === true) {
+                    await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.energyWell} восстановление Энергии ускоренно.`)
+                }
             }
         }
 }

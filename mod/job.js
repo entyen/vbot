@@ -26,7 +26,7 @@ class Job {
             })
         }
 
-        const lvlx = this.ctx.user.boosters.harvest * 1
+        const lvlx = 1 + (0.01 * this.ctx.user.boosters.harvest)
 
         this.jobs = {
             herb: {
@@ -58,7 +58,7 @@ class Job {
                 energy: 4,
                 energyX: 1,
                 level: 4,
-                lvlx: lvlx,
+                lvlx: 1,
                 places: {
                     baikal: {
                         id: 'baikal',

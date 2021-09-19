@@ -94,11 +94,6 @@ utils.rand = (min, max) => {
 //middlewere for bot chek user in database or not create user
 bot.use(async (ctx, next) => {
     ctx.timestamp = new Date().getTime()
-    const messageInfo = await bot.execute('messages.isMessagesFromGroupAllowed', {
-        group_id: tea.GROUP_ID,
-        user_id: ctx.message.peer_id,
-    })
-    if (messageInfo.is_allowed === 0) { return } 
 
     const acc = async (ctx, user_id) => {
         ctx.user = await userdb.findOne({id: user_id})
@@ -119,6 +114,15 @@ bot.use(async (ctx, next) => {
             await bot.sendMessage([tea.OWNER, tea.OWNER1], `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
             await ctx.reply(`Вы получили ${lang.newBy} на ${Math.round(newByBuffTime)} Дней \nПроверить эффекты на себе можно в Настройках`, null, Markup.keyboard([[Markup.button('Меню', 'default', 'menu')]]))
         }
+
+        if (ctx.message.type === 'message_deny') {
+            await ctx.user.set('_bm', 0)
+        } else
+        if (ctx.message.type === 'message_allow') {
+            await ctx.user.set('_bm', 1)
+            ctx.reply('Аккаунт восстановлен')
+        }
+
         const weightMath = async () => {
             const massItems = [
                 { count: ctx.user.balance*0.01 },
@@ -132,7 +136,9 @@ bot.use(async (ctx, next) => {
             massItems.forEach((x,y,z) => sum += +massItems[y].count)
             return sum
         }
+
         ctx.user.currWeight = await weightMath()
+
         ctx.user._acclvl = ctx.user.acclvl == 0 ? lang.user : ctx.user.acclvl == 1 ? lang.vip : ctx.user.acclvl == 2 ? lang.plat :
             ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
 
@@ -141,7 +147,6 @@ bot.use(async (ctx, next) => {
             await ctx.user.inc('level', 1)
             await ctx.reply(`Поздравляю вы повысили уровень до ${ctx.user.level} 🎉`)
         }
-
     }
 
     if (ctx.message.peer_id === tea.REPORTCHAT) { 
@@ -157,7 +162,7 @@ bot.use(async (ctx, next) => {
                 if (command === 'rate' || command === 'Рейтинг') {
                     user = await userdb.find({})
                     let result = `Рейтинг: \n`
-                    user = user.filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
+                    user = user.filter(x => x._bm > 0).filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
                     for (i = 0; i < 9; i++) {
                         result += `${i === 0 ? '🥇': i === 1 ? '🥈': i === 2 ? '🥉' : '🏅'} @id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
                     }
@@ -191,7 +196,6 @@ bot.use(async (ctx, next) => {
             ctx.reply('Что-то пошло не так ошибка, напишите в репорт что случилось report \'Текст сообщения\'')
         }
     }
-    else return
 
     return await next()
 })
@@ -212,25 +216,20 @@ const randCurr = (min, max) => {
 //enegry regen check
 const energy = new CronJob('*/3 * * * *', null, true, 'Europe/Moscow')
 energy.addCallback(async () => {
-    userEn = await userdb.find({})
-    userEn.forEach( async (x,i,z) => {
+    let user = await userdb.find({_bm: 1})
+    user.forEach( async (x,i,z) => {
      try {
-        if (!userEn[i]) return
-        if (userEn[i].energy >= (100 * userEn[i].boosters.energyCount)) {
-            if (userEn[i].alert) {
-                if (!userEn[i].timers.eFullAlert) {
-                    await userEn[i].set('timers', true, 'eFullAlert')
-                    const messageInfo = await bot.execute('messages.isMessagesFromGroupAllowed', {
-                        group_id: tea.GROUP_ID,
-                        user_id: userEn[i].id,
-                    })
-                    if (messageInfo.is_allowed === 0) { return } 
-                    await bot.sendMessage(userEn[i].id, `⚡ Энергия полная, вперед тратить. 🥳\n Если вы не хотите получать это уведомление вы можете отключить его в Настройках => Уведомления`)
+        if (!user[i]) return
+        if (user[i].energy >= (100 * user[i].boosters.energyCount)) {
+            if (user[i].alert) {
+                if (!user[i].timers.eFullAlert) {
+                    await user[i].set('timers', true, 'eFullAlert')
+                    await bot.sendMessage(user[i].id, `⚡ Энергия полная, вперед тратить. 🥳\n Если вы не хотите получать это уведомление вы можете отключить его в Настройках => Уведомления`)
                 }
             }
         } else {
-            await userEn[i].set('timers', false, 'eFullAlert')
-            await userEn[i].inc('energy', userEn[i].boosters.energyRegen)
+            await user[i].set('timers', false, 'eFullAlert')
+            await user[i].inc('energy', user[i].boosters.energyRegen)
         }
      } catch(e) {
          console.errore(e)
@@ -241,14 +240,8 @@ energy.addCallback(async () => {
 
 //buff check
 setInterval(async () => {
-    user = await userdb.find({})
+    let user = await userdb.find({_bm: 1})
     user.forEach(async(x,i,z)=>{
-        const messageInfo = await bot.execute('messages.isMessagesFromGroupAllowed', {
-            group_id: tea.GROUP_ID,
-            user_id: user[i].id,
-        })
-        if (messageInfo.is_allowed === 0) { return await user[i].set('alert', false) } 
-        if (!user[i]) return
         await buff(bot, i, user, lang)
     })
 }, 4000)
@@ -287,7 +280,7 @@ updater.addCallback(async () => {
     await bank.set('dpi', herbs.price.toFixed(1), 'herbs')
     await bank.set('dpi', Math.round(fish), 'fish')
 
-    user = await userdb.find({})
+    let user = await userdb.find({_bm: 1})
     let result = ``
     user = user.filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
     for (i = 0; i < 9; i++) {

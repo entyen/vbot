@@ -69,8 +69,8 @@ market.auctionMsg = (ctx, type) => {
 }
 
 market.auctionBuy = async(ctx, type) => {
-    if (ctx.bank.inv[type] <= 0) {return ctx.reply('Недостаточно ресурса в Банке')}
     if (ctx.user.balance < ctx.bank.dpi[type]) {return ctx.reply('Недостаточно средств')}
+    if (ctx.bank.inv[type] <= 0) {return ctx.reply('Недостаточно ресурса в Банке')}
         await ctx.user.dec('balance', ctx.bank.dpi[type])
         await ctx.user.inc('inv', 1, type)
         await ctx.bank.dec('inv', 1, type)
@@ -79,8 +79,8 @@ market.auctionBuy = async(ctx, type) => {
 }
 
 market.auctionSell = async(ctx, type, max) => {
-    if (ctx.bank.inv[type] >= max) {return ctx.reply('Ресурса в банке достаточно')}
     if (ctx.user.inv[type] <= 0) {return ctx.reply(`Недостаточно ${lang[type]}`)}
+    if (ctx.bank.inv[type] >= max) {return ctx.reply('Ресурса в банке достаточно')}
         await ctx.user.inc('balance', ctx.bank.dpi[type]*0.8)
         await ctx.user.dec('inv', 1, type)
         await ctx.bank.inc('inv', 1, type)

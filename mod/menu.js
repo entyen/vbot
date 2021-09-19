@@ -59,6 +59,7 @@ menu.profile = (ctx) => {
 menu.inventory = (ctx) => {
     let inv = ``
     inv += `💠 Оргулы: ${ctx.user.balance}\n`
+    inv += `${ctx.user.inv.vinmt === 0 ? '' : `${lang.vinmt}: ${ctx.user.inv.vinmt}\n`}`
     inv += `${ctx.user.inv.herbs === 0 ? '' : `${lang.herbs}: ${ctx.user.inv.herbs}\n`}`
     inv += `${ctx.user.inv.ore === 0 ? '' : `${lang.ore}: ${ctx.user.inv.ore}\n`}`
     inv += `${ctx.user.inv.sand === 0 ? '' : `${lang.sand}: ${ctx.user.inv.sand}\n`}`
