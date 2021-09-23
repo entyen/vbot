@@ -94,19 +94,18 @@ class Job {
     }
 
     async deleteMesage() {
-        try {
-            const NeedMessage = await this.bot.execute('messages.getByConversationMessageId', {
+        await this.bot.execute('messages.getByConversationMessageId', {
+            peer_id: this.ctx.message.user_id,
+            conversation_message_ids: this.ctx.message.conversation_message_id,
+        }).then(msg => {
+            return this.bot.execute('messages.delete', {
                 peer_id: this.ctx.message.user_id,
-                conversation_message_ids: this.ctx.message.conversation_message_id,
-            })
-            await this.bot.execute('messages.delete', {
-                peer_id: this.ctx.message.user_id,
-                message_id: NeedMessage.items[0].id,
+                message_id: msg.items[0].id,
                 delete_for_all: 1,
             })
-        } catch (e) {
-            console.log(e)
-        }
+            .catch(e => {})
+        })
+        .catch(e => {})
     }
 
     async canStartJob() {
@@ -279,61 +278,60 @@ class Job {
         )
     }
 
-    async collectBaikalX() {
+    collectBaikalX() {
+        if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
         try {
-            if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
-            await this.ctx.user.dec('items', 1, 'bait')
-            const earn = Math.round(randCurr(1, 5) * this.jobs.fishing.lvlx)
-            this.deleteMesage()
-            await this.ctx.user.inc('inv', earn, 'fish')
-            await this.cb.reply(`Эххх ну так себе вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.items.bait} наживки.`)
-        } catch (e) {'Что-то пошло не так'}
+            this.deleteMesage().then(async() => {
+                const earn = Math.round(randCurr(1, 5) * this.jobs.fishing.lvlx)
+                await this.ctx.user.dec('items', 1, 'bait')
+                await this.ctx.user.inc('inv', earn, 'fish')
+                await this.cb.reply(`Эххх ну так себе вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.items.bait} наживки.`)
+            })
+        } catch(e) {console.log(e)}
     }
 
-    async collectBaikalY() {
+    collectBaikalY() {
+        if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
         try {
-            if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
-            await this.ctx.user.dec('items', 1, 'bait')
-            const earn = Math.round(randCurr(4, 10) * this.jobs.fishing.lvlx)
-            this.deleteMesage()
-            await this.ctx.user.inc('inv', earn, 'fish')
-            await this.cb.reply(`Неплохо неплохо вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.items.bait} наживки.`)
-        } catch (e) {'Что-то пошло не так'}
+            this.deleteMesage().then(async() => {
+                const earn = Math.round(randCurr(4, 10) * this.jobs.fishing.lvlx)
+                await this.ctx.user.dec('items', 1, 'bait')
+                await this.ctx.user.inc('inv', earn, 'fish')
+                await this.cb.reply(`Неплохо неплохо вы поймали ${earn} 🐟 у вас еще ${this.ctx.user.items.bait} наживки.`)
+            })
+        } catch(e) {console.log(e)}
     }
 
-    async collectBaikalZ() {
+    collectBaikalZ() {
+        if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
         try {
-            if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
-            await this.ctx.user.dec('items', 1, 'bait')
-            const earn = Math.round(randCurr(10, 24) * this.jobs.fishing.lvlx)
-            this.deleteMesage()
-            const rare = randCurr(0, 30)
-            let rFish = 0
-            rare === 3 ? rFish = 1 : rFish = 0
-            await this.ctx.user.inc('inv', earn, 'fish')
-            await this.ctx.user.inc('inv', rFish, 'rareFish')
-            await this.cb.reply(`Уххх удачный улов вы поймали ${earn} 🐟 ${rare === 3 ? `и ${rFish} 🐡` : ''}у вас еще ${this.ctx.user.items.bait} наживки.`)
-        } catch (e) {
-         this.ctx.reply('Что-то пошло не так.')
-        }
+            this.deleteMesage().then(async() => {
+                const earn = Math.round(randCurr(10, 24) * this.jobs.fishing.lvlx)
+                const rare = randCurr(0, 30)
+                let rFish = 0
+                rare === 3 ? rFish = 1 : rFish = 0
+                await this.ctx.user.dec('items', 1, 'bait')
+                await this.ctx.user.inc('inv', earn, 'fish')
+                await this.ctx.user.inc('inv', rFish, 'rareFish')
+                await this.cb.reply(`Уххх удачный улов вы поймали ${earn} 🐟 ${rare === 3 ? `и ${rFish} 🐡` : ''}у вас еще ${this.ctx.user.items.bait} наживки.`)
+            })
+        } catch(e) {console.log(e)}
     }
 
-    async collectChest() {
+    collectChest() {
+        if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
         try {
-            if (this.ctx.user.items.bait < 1) {return this.cb.reply('Недостаточно наживки 🐛')}
-            await this.ctx.user.dec('items', 1, 'bait')
-            this.deleteMesage()
-            const earn = Math.round(randCurr(5, 10) * this.jobs.fishing.lvlx)
-            const rare = randCurr(0, 3000)
-            let reward = ''
-            rare < 2000 ? reward = 'rareFish' : rare > 2000 ? reward = 'rareHerbs' : null
-            await this.ctx.user.inc('inv', earn, 'vinmt')
-            await this.ctx.user.inc('inv', 1, reward)
-            await this.cb.reply(`Вы поймали редкий сундук ${earn} ${lang.vinmt} ${rare < 2000 ? `и 1 🐡` : 'и 1 🍀'}у вас еще ${this.ctx.user.items.bait} наживки.`)
-        } catch (e) {
-            console.log(e)
-            this.ctx.reply('Что-то пошло не так.')
-        }
+            this.deleteMesage().then(async() => {
+                const earn = Math.round(randCurr(5, 10) * this.jobs.fishing.lvlx)
+                const rare = randCurr(0, 3000)
+                let reward = ''
+                rare < 2000 ? reward = 'rareFish' : rare > 2000 ? reward = 'rareHerbs' : null
+                await this.ctx.user.dec('items', 1, 'bait')
+                await this.ctx.user.inc('inv', earn, 'vinmt')
+                await this.ctx.user.inc('inv', 1, reward)
+                await this.cb.reply(`Вы поймали редкий сундук ${earn} ${lang.vinmt} ${rare < 2000 ? `и 1 🐡` : 'и 1 🍀'}у вас еще ${this.ctx.user.items.bait} наживки.`)
+            })
+        } catch(e) {console.log(e)}
     }
 
     async collectHafen() {
@@ -361,13 +359,13 @@ class Job {
             case this.jobs.fishing.id:
                 return await this.fishing()
             case this.jobs.fishing.places.fishX.id:
-                return await this.collectBaikalX()
+                return this.collectBaikalX()
             case this.jobs.fishing.places.fishY.id:
-                return await this.collectBaikalY()
+                return this.collectBaikalY()
             case this.jobs.fishing.places.fishZ.id:
-                return await this.collectBaikalZ()
+                return this.collectBaikalZ()
             case this.jobs.fishing.places.fishChest.id:
-                return await this.collectChest()
+                return this.collectChest()
             case this.jobs.fishing.places.baikal.id:
                 return await this.fishingBaikal()
             case this.jobs.fishing.places.hafen.id:

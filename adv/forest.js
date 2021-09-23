@@ -23,8 +23,6 @@ monster += {
     name: 'Высший Гоблин'
 }
 
-console.log(monster)
-
 forest.main = (ctx) => {
     return ctx.reply('Вы направились в лес', null, keyboard.main)
 }

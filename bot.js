@@ -44,10 +44,19 @@ app.use(express.json())
 
 //db const
 const mongoose = require('mongoose')
-const userSchem = require('./schema/data.js')
-const bankSchem = require('./schema/bank.js')
+const { userSchem, itemSchem, bankSchem } = require('./schema/data.js')
 const userdb = mongoose.model('users', userSchem)
 const bankdb = mongoose.model('bank', bankSchem)
+const itemdb = mongoose.model('items', itemSchem)
+const items = require('./items/items.js')
+
+async function createItem() {
+    for (i = 0; i < items.length; i++) {
+        await items[i].save()
+    }
+}
+
+// createItem()
 
 //modules
 const commands = require('./commands.js')
@@ -158,15 +167,16 @@ bot.use(async (ctx, next) => {
     if (ctx.message.from_id > 0 && ctx.message.id == 0) {
         try {
             if (ctx.message.text.split(' ')[0] === '[club206762312|@vinmt]') {
-                const command = ctx.message.text.split(' ')[1]
-                if (command === 'rate' || command === 'Рейтинг') {
-                    user = await userdb.find({})
-                    let result = `Рейтинг: \n`
-                    user = user.filter(x => x._bm > 0).filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
-                    for (i = 0; i < 9; i++) {
-                        result += `${i === 0 ? '🥇': i === 1 ? '🥈': i === 2 ? '🥉' : '🏅'} @id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
-                    }
-                    ctx.reply(`${result}`)
+                const command = ctx.message.text.split(' ')[1].toLowerCase()
+                if (command === 'rate' || command === 'рейтинг') {
+                    userdb.find({_bm: 1}).then(user=> {
+                        let result = `Рейтинг: \n`
+                        user = user.filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
+                        for (i = 0; i < 9; i++) {
+                            result += `${i === 0 ? '🥇': i === 1 ? '🥈': i === 2 ? '🥉' : '🏅'} @id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
+                        }
+                        ctx.reply(`${result}`)
+                    })
                     return
                 } else {
                     await ctx.reply('Простите но в публичных чатах доступна только команда \'Рейтинг\'')
@@ -200,7 +210,7 @@ bot.use(async (ctx, next) => {
     return await next()
 })
 
-commands(bot, utils, lang, userdb, bp)
+commands(bot, utils, lang, userdb, itemdb, bp)
 
 //Start polling messages
 bot.startPolling((err) => {
@@ -215,34 +225,30 @@ const randCurr = (min, max) => {
 
 //enegry regen check
 const energy = new CronJob('*/3 * * * *', null, true, 'Europe/Moscow')
-energy.addCallback(async () => {
-    let user = await userdb.find({_bm: 1})
-    user.forEach( async (x,i,z) => {
-     try {
-        if (!user[i]) return
-        if (user[i].energy >= (100 * user[i].boosters.energyCount)) {
-            if (user[i].alert) {
-                if (!user[i].timers.eFullAlert) {
-                    await user[i].set('timers', true, 'eFullAlert')
-                    await bot.sendMessage(user[i].id, `⚡ Энергия полная, вперед тратить. 🥳\n Если вы не хотите получать это уведомление вы можете отключить его в Настройках => Уведомления`)
+energy.addCallback( () => {
+    userdb.find({_bm: 1}).then(user => {
+        user.forEach( async (x,i,z) => {
+            if (user[i].energy >= (100 * user[i].boosters.energyCount)) {
+                if (user[i].alert) {
+                    if (!user[i].timers.eFullAlert) {
+                        await user[i].set('timers', true, 'eFullAlert')
+                        await bot.sendMessage(user[i].id, `⚡ Энергия полная, вперед тратить. 🥳\n Если вы не хотите получать это уведомление вы можете отключить его в Настройках => Уведомления`)
+                    }
                 }
+            } else {
+                await user[i].set('timers', false, 'eFullAlert')
+                await user[i].inc('energy', user[i].boosters.energyRegen)
             }
-        } else {
-            await user[i].set('timers', false, 'eFullAlert')
-            await user[i].inc('energy', user[i].boosters.energyRegen)
-        }
-     } catch(e) {
-         console.errore(e)
-         bot.sendMessage(tea.OWNER, 'error in energy regen')
-     }
+        })
     })
 })
 
 //buff check
-setInterval(async () => {
-    let user = await userdb.find({_bm: 1})
-    user.forEach(async(x,i,z)=>{
-        await buff(bot, i, user, lang)
+setInterval( () => {
+    userdb.find({_bm: 1}).then(user => {
+        user.forEach(async(x,i,z)=>{
+            await buff(bot, i, user, lang)
+        })
     })
 }, 4000)
 
@@ -512,6 +518,24 @@ userdb.prototype.set = function (field, value, field2) {
     this[field][field2] = value
   } else {
     this[field] = value
+  }
+  return this.save()
+}
+
+userdb.prototype.add = async function (field, value) {
+  let checkPoint
+  this[field].find(x => x.item.toString() === value.item) ? checkPoint = true : checkPoint = false
+  if (checkPoint) {
+    for (i = 0; i < this[field].length; i++) {
+      if (this[field][i].item.toString() === value.item) {
+          this[field][i].quantity += value.quantity
+      }
+      if (this[field][i].quantity <= 0) {
+          this[field].splice(i, 1)
+      }
+    }
+  } else {
+    this[field].push(value)
   }
   return this.save()
 }

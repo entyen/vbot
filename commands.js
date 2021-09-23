@@ -4,8 +4,9 @@ const { menu } = require('./mod/menu')
 const { plot } = require('./mod/plot')
 const { market } = require('./mod/market')
 const fs = require('fs')
+const { Mongoose } = require('mongoose')
 
-module.exports = async(bot, utils, lang, userdb, bp) => {
+module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
     const Markup = require('node-vk-bot-api/lib/markup')
 
     const usersMap = new Map()
@@ -123,28 +124,29 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
             }
         } else
         if (cmba[0] === 'рейтинг' || cmba[0] === 'rate' || cmba[0] === 'топ') {
-            user = await userdb.find({})
-            let result = `Рейтинг: \n`
-            user = user.filter(x => x._bm > 0).filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
-            for (i = 0; i < 9; i++) {
-                result += `${i === 0 ? '🥇': i === 1 ? '🥈': i === 2 ? '🥉' : '🏅'} @id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
-            }
-            ctx.reply(`${result}`)
+            userdb.find({_bm: 1}).then(user=> {
+                let result = `Рейтинг: \n`
+                user = user.filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
+                for (i = 0; i < 9; i++) {
+                    result += `${i === 0 ? '🥇': i === 1 ? '🥈': i === 2 ? '🥉' : '🏅'} @id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
+                }
+                ctx.reply(`${result}`)
+            })
             return
         } else
         if (cmba[0] === 'stat') {
-            user = await userdb.find({})
-            let result = `Статистика: \n\n`
-            user = user.filter(x => x._bm > 0).filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
-            result += `Активных пользователей: ${user.length}\n`
-            // for (i = 0; i < user.length; i++) {
-            //     result += `@id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
-            // }
-            ctx.reply(`${result}`)
+            userdb.find({}).then(user=>{
+                let result = `Статистика: \n\n`
+                user = user.filter(x => x._bm > 0).filter(x => x.acclvl < 3).filter(x => x.balance > 0).sort((a,b) => { return b.balance - a.balance })
+                result += `Активных пользователей: ${user.length}\n`
+                // for (i = 0; i < user.length; i++) {
+                //     result += `@id${user[i].id}(${user[i].f_name}) = ${user[i].balance} ${lang.curr}\n`
+                // }
+                ctx.reply(`${result}`)
+                })
             return
         } else
         if (cmba[0] === 'report' || cmba[0] === 'репорт') {
-            console.log(user.filter(x => x.uid === ctx.user.uid)[0].balance)
                 await utils.smChat(2000000005, `📝 Репорт от пользователя @id${ctx.user.id}(${ctx.user.f_name})\n💬 ${ctx.message.text.split(' ').join().replace(/,/g, ' ').replace(cmba[0], '')}`)
                 .then(() => {
                     return ctx.reply(`📤 Репорт отправлен ожидайте ответа Тех. Поддержки`)
@@ -162,16 +164,16 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
         } else
         if (cmba[0] === 'send' || cmba[0] === 'передать') {
             try {
-            let locUser = await userdb.findOne({ uid: cmba[1] })
-            if (Number(cmba[1]) && Number(cmba[2]) && ctx.user.balance > +cmba[2] && +cmba[2] > 0) {
-                await ctx.user.dec('balance', +cmba[2])
-                await locUser.inc('balance', +cmba[2])
-                await ctx.reply(`Вы передали ${+cmba[2]}${lang.curr} пользователю ${`@id${locUser.id}(${locUser.f_name})`}`)
-                await bot.sendMessage(locUser.id, `Вы получили ${+cmba[2]}${lang.curr} от ${`@id${ctx.user.id}(${ctx.user.f_name})`}`)
-            } else {ctx.reply('Недостаточно средств.')}
+                let locUser = await userdb.findOne({ uid: cmba[1] })
+                if (Number(cmba[1]) && Number(cmba[2]) && ctx.user.balance > +cmba[2] && +cmba[2] > 0) {
+                    await ctx.user.dec('balance', +cmba[2])
+                    await locUser.inc('balance', +cmba[2])
+                    await ctx.reply(`Вы передали ${+cmba[2]}${lang.curr} пользователю ${`@id${locUser.id}(${locUser.f_name})`}`)
+                    await bot.sendMessage(locUser.id, `Вы получили ${+cmba[2]}${lang.curr} от ${`@id${ctx.user.id}(${ctx.user.f_name})`}`)
+                } else {ctx.reply('Недостаточно средств.')}
             } catch (e) {
                 console.log(e)
-                ctx.reply('‼️ Недостаточно средств или еще что-то не так.')
+                ctx.reply('‼️ Что-то не так.')
             }
         } else
         if (cmba[0] === 'race' || cmba[0] === 'раса') {
@@ -249,6 +251,37 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 await ctx.reply('Нет прав использовать данную команду')
             }
         } else
+        if (cmba[0] === 'set') {
+            const item1 = '614776a6298a2b1142b51bd3'
+            if (ctx.user.acclvl >= 7) {
+                if (ctx.user.invent.find(x => x.item.toString() === item1)) return ctx.reply('У вас уже есть такой предмет')
+
+                ctx.user.add('invent', {
+                    item: item1,
+                    quantity: 1,
+                    ench: 0
+                })
+            } else {
+                ctx.reply('Нет прав использовать данную команду')
+            }
+        } else
+        if (cmba[0] === 'chk') {
+            let itemId = await itemdb.findById(ctx.user.invent[1].item)
+            if (ctx.user.acclvl >= 7) {
+                console.log(itemId)
+                ctx.reply(`${itemId.name} ${ctx.user.invent[1].quantity}`, itemId.img)
+            } else {
+                ctx.reply('Нет прав использовать данную команду')
+            }
+        } else
+        if (cmba[0] === 'stop') {
+            if (ctx.user.acclvl >= 7) {
+                ctx.reply(`Api Disable.`)
+                bot.stop()
+            } else {
+                ctx.reply('Нет прав использовать данную команду')
+            }
+        } else
         if (ctx.cmd === lang.dev || ctx.cmd === lang.adm || ctx.cmd === lang.moder || ctx.cmd === lang.user || ctx.cmd === lang.vip || ctx.cmd === lang.plat) {
             ctx.user.acclvl >= 7 ? ctx.reply(`${lang.userGrpCmd} ${lang.dev} ${lang.help} ${lang.devCmd}`)
              : ctx.user.acclvl == 6 ? ctx.reply(`${lang.userGrpCmd} ${lang.adm} ${lang.help}`)
@@ -277,6 +310,8 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                 return menu.profile(ctx)
             case 'inventory':
                 return menu.inventory(ctx)
+            case 'invent':
+                return menu.invent(ctx, itemdb)
             case 'menu':
                 return menu.main(ctx)
             case lang.setting:
@@ -301,7 +336,6 @@ module.exports = async(bot, utils, lang, userdb, bp) => {
                     await ctx.reply(`${lang.alert} ${ctx.user.alert ? 'Включены' : 'Выключены'}`)
                     return menu.setting(ctx)
                 }
-                return
             case lang.crafts:
                 return await ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Job.getKeyboard())
             case lang.market:

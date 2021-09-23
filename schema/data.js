@@ -2,6 +2,29 @@ const mongoose = require('mongoose')
 const date = new Date(new Date().toLocaleString('en-US', {timeZone: 'Etc/GMT-6'}))
 const timestamp = new Date().getTime()
 
+const itemSchem = new mongoose.Schema({
+    id: {type: Number, required: true, unique: true}, 
+    name: {type: String, required: true},
+    desc: {type: String, required: true},
+    img: {type: String, required: true},
+    weight: {type: Number, required: true},
+    char: {
+        hp: Number,
+        mp: Number,
+        f_atk: Number,
+        m_atk: Number,
+        f_def: Number,
+        m_def: Number,
+    },
+    stat: {
+        str: Number,
+        int: Number,
+        con: Number,
+        luc: Number,
+        chr: Number,
+    },
+})
+
 const userSchem = new mongoose.Schema({ 
     id: {type: Number, required: true, unique: true}, 
     uid: {type: Number, required: true, unique: true}, 
@@ -42,6 +65,11 @@ const userSchem = new mongoose.Schema({
         bait: { type: Number, default: 0 },
         energyPotion: { type: Number, default: 0 },
     },
+    invent: [{
+        item: { type: mongoose.Schema.Types.ObjectId, ref: 'items' },
+        quantity: Number,
+        ench: Number
+    }],
     boosters: {
         energyCount: { type: Number, default: 1 },
         energyRegen: { type: Number, default: 1 },
@@ -49,7 +77,7 @@ const userSchem = new mongoose.Schema({
         exp: { type: Number, default: 1 },
     },
     buffs: {
-        newby: { type: Number, default: +timestamp + (10080*60*1000) },
+        newby: { type: Number, default: +timestamp + (168*60*60*1000) },
         vip: { type: Number, default: null },
         ban: { type: Number, default: null },
         rate1st: { type: Number, default: null },
@@ -96,4 +124,36 @@ const userSchem = new mongoose.Schema({
     _bm: { type: Number, default: 1, min: 0, max: 1 },
 })
 
-module.exports = userSchem
+const bankSchem = new mongoose.Schema({ 
+    id: {type: Number, required: true, unique: true}, 
+    name: String,
+    balance: { type: Number, default: 0 },
+    inv: {
+        vinmt: { type: Number, default: 0 },
+        herbs: { type: Number, default: 0 },
+        rareHerbs: { type: Number, default: 0 },
+        sand: { type: Number, default: 0 },
+        rareSand: { type: Number, default: 0 },
+        ore: { type: Number, default: 0 },
+        rareOre: { type: Number, default: 0 },
+        wood: { type: Number, default: 0 },
+        rareWood: { type: Number, default: 0 },
+        fish: { type: Number, default: 0 },
+        rareFish: { type: Number, default: 0 },
+    },
+    dpi: { 
+        vinmt: { type: Number, default: 0 },
+        herbs: { type: Number, default: 0 },
+        sand: { type: Number, default: 0 },
+        ore: { type: Number, default: 0 },
+        wood: { type: Number, default: 0 },
+        fish: { type: Number, default: 0 },
+        rareHerbs: { type: Number, default: 0 },
+        rareSand: { type: Number, default: 0 },
+        rareOre: { type: Number, default: 0 },
+        rareWood: { type: Number, default: 0 },
+        rareFish: { type: Number, default: 0 },
+    }
+})
+
+module.exports = { userSchem, itemSchem, bankSchem }
