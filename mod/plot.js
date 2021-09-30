@@ -20,7 +20,7 @@ plot.plotMenu = (ctx) => {
 
     let plot = ``
     plot += `🏠 Дом: ${ctx.user.plot.house === 0 ? 'Нет' : 'Есть'}\n`
-    plot += `🏚 Склад: ${ctx.user.plot.wh === 0 ? 'Нет' : 'Есть'}\n`
+    plot += `🏚 Склад: ${ctx.user.plot.wh === 0 ? 'Нет' : `${ctx.user.plot.wh}ур`}\n`
     plot += `⛪️ Храм: ${ctx.user.plot.temple === 0 ? 'Нет' : 'Есть'}\n`
     plot += ctx.user.plot.size === 1 ? `🕳 Колодец: ${ctx.user.plot.well === 0 ? 'Нет' : 'Есть'}\n` : ``
     plot += ctx.user.plot.size === 2 ? `⛰ Рудник: ${ctx.user.plot.mc === 0 ? 'Нет' : 'Есть'}\n` : ``
@@ -152,7 +152,7 @@ plot.wh = (ctx) => {
         ctx.reply(`🏚 Склад позволит вам увеличить место в хранилище\n⚒ На его строительство требуется:\n${resCheck(ctx, 'ore', 1500)}\n︎${resCheck(ctx, 'sand', 2000)}\n︎${resCheck(ctx, 'wood', 7000)}`, null, build.wh)
     } else
     if (ctx.user.plot.wh === 1) {
-        ctx.reply(`🏚 Склад 1ур:\nВес Увеличен на 20000`)
+        ctx.reply(`🏚 Склад ${ctx.user.plot.wh}ур:\nВес Увеличен на ${20000*ctx.user.plot.wh}`)
     }
     return 
 }

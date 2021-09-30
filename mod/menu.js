@@ -20,7 +20,6 @@ menu.main = (ctx) => {
                 [
                     Markup.button(`${lang.land}`, 'secondary'),
                     Markup.button('Приключения', 'primary', 'adventure'),
-                    Markup.button('Предметы', 'primary', 'invent'),
                 ],
             ])
         )
@@ -71,30 +70,37 @@ menu.inventory = (ctx) => {
     inv += `${ctx.user.inv.rareOre === 0 ? '' : `${lang.rareOre}: ${ctx.user.inv.rareOre}\n`}`
     inv += `${ctx.user.inv.rareWood === 0 ? '' : `${lang.rareWood}: ${ctx.user.inv.rareWood}\n`}`
     inv += `${ctx.user.inv.rareFish === 0 ? '' : `${lang.rareFish}: ${ctx.user.inv.rareFish}\n`}`
-    inv += `\n${!ctx.user.items.fishingRod ? '' : `🎣 Удочка: Есть\n`}`
-    inv += `${ctx.user.items.bait === 0 ? '' : `🐛 Наживка: ${ctx.user.items.bait}\n`}`
+    inv += `\n${ctx.user.items.bait === 0 ? '' : `🐛 Наживка: ${ctx.user.items.bait}\n`}`
     inv += `${ctx.user.items.energyPotion === 0 ? '' : `${lang.energyPotion}: ${ctx.user.items.energyPotion}\n`}`
-    inv += `\n👜 Вес Инвентаря: ${ctx.user.currWeight.toFixed(0)}/${ctx.user.invWeight}\n`
+    inv += `\n⚖️ Вес: ${ctx.user.currWeight.toFixed(0)}/${ctx.user.invWeight}\n`
 
-    return ctx.reply(`Инвентарь\n ${inv}`)
+    return ctx.reply(`Склад Ресурсов\n ${inv}`, null, Markup
+        .keyboard([
+            Markup.button('Предметы', 'secondary', 'invent'),
+        ]).inline()
+    )
 }
 
 menu.invent = async (ctx, itemdb) => {
-    let itemS = async () => {
-        let item = []
+    const itemS = async () => {
+        const item = []
         for (i = 0; i < ctx.user.invent.length; i++) {
             item[i] = await itemdb.findById(ctx.user.invent[i].item)
         }
         return item
     }
-    let item = await itemS()
+    const item = await itemS()
     let inv = ``
     item.forEach((x,y,z) => {
         inv += `${ctx.user.invent[y].quantity === 1 ? `` : `[${ctx.user.invent[y].quantity}]`} ${item[y].name} ${ctx.user.invent[y].ench === 0 ? `` : `+${ctx.user.invent[y].ench}`}\n`
     })
     inv += `\n👜 Ячеек Занято: ${ctx.user.invent.length}/10\n`
 
-    return ctx.reply(`Инвентарь Предметов\n ${inv}`)
+    return ctx.reply(`Инвентарь Предметов\n ${inv}`, null, Markup
+        .keyboard([
+            Markup.button('Ресурсы', 'secondary', 'inventory'),
+        ]).inline()
+    )
 }
 
 menu.setting = (ctx) => {

@@ -56,7 +56,7 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate1st <= timestamp) {
             if (!user[i].timers.buffRate1St) {
                 await user[i].set('timers', true, 'buffRate1St')
-                await user[i].dec('boosters', 60, 'harvest')
+                await user[i].dec('boosters', 15, 'harvest')
                 if (user[i].alert === true) {
                     await bot.sendMessage(user[i].id, `Действие ${lang.Rate1St} рассеялось.`)
                 }
@@ -65,7 +65,7 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate1st >= timestamp) {
             if (user[i].timers.buffRate1St) {
                 await user[i].set('timers', false, 'buffRate1St')
-                await user[i].inc('boosters', 60, 'harvest')
+                await user[i].inc('boosters', 15, 'harvest')
                 if (user[i].alert === true) {
                     await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate1St}.`)
                 }
@@ -75,7 +75,7 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate2st <= timestamp) {
             if (!user[i].timers.buffRate2St) {
                 await user[i].set('timers', true, 'buffRate2St')
-                await user[i].dec('boosters', 30, 'harvest')
+                await user[i].dec('boosters', 10, 'harvest')
                 if (user[i].alert === true) {
                     await bot.sendMessage(user[i].id, `Действие ${lang.Rate2St} рассеялось.`)
                 }
@@ -84,7 +84,7 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate2st >= timestamp) {
             if (user[i].timers.buffRate2St) {
                 await user[i].set('timers', false, 'buffRate2St')
-                await user[i].inc('boosters', 30, 'harvest')
+                await user[i].inc('boosters', 10, 'harvest')
                 if (user[i].alert === true) {
                     await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate2St}.`)
                 }
@@ -94,7 +94,7 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate3st <= timestamp) {
             if (!user[i].timers.buffRate3St) {
                 await user[i].set('timers', true, 'buffRate3St')
-                await user[i].dec('boosters', 30, 'harvest')
+                await user[i].dec('boosters', 10, 'harvest')
                 if (user[i].alert === true) {
                     await bot.sendMessage(user[i].id, `Действие ${lang.Rate3St} рассеялось.`)
                 }
@@ -104,7 +104,7 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate3st >= timestamp) {
             if (user[i].timers.buffRate3St) {
                 await user[i].set('timers', false, 'buffRate3St')
-                await user[i].inc('boosters', 30, 'harvest')
+                await user[i].inc('boosters', 10, 'harvest')
                 if (user[i].alert === true) {
                     await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate3St}.`)
                 }
@@ -114,7 +114,7 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate9st <= timestamp) {
             if (!user[i].timers.buffRate9St) {
                 await user[i].set('timers', true, 'buffRate9St')
-                await user[i].dec('boosters', 20, 'harvest')
+                await user[i].dec('boosters', 5, 'harvest')
                 if (user[i].alert === true) {
                     await bot.sendMessage(user[i].id, `Действие ${lang.Rate9St} рассеялось.`)
                 }
@@ -124,7 +124,7 @@ module.exports = async(bot, i, user, lang) => {
         if (user[i].buffs.rate9st >= timestamp) {
             if (user[i].timers.buffRate9St) {
                 await user[i].set('timers', false, 'buffRate9St')
-                await user[i].inc('boosters', 20, 'harvest')
+                await user[i].inc('boosters', 5, 'harvest')
                 if (user[i].alert === true) {
                     await bot.sendMessage(user[i].id, `Вы ощущаете на себе действие ${lang.Rate9St}.`)
                 }

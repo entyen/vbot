@@ -9,9 +9,10 @@ const randCurr = (min, max) => {
 
 class Job {
 
-    constructor(bot, ctx) {
+    constructor(bot, ctx, itemdb) {
         this.bot = bot
         this.ctx = ctx
+        this.itemdb = itemdb
 
         this.cb = {}
         this.cb.reply = async (message) => {
@@ -228,7 +229,8 @@ class Job {
     }
 
     async fishingBaikal() {
-        if (!this.ctx.user.items.fishingRod) {return this.cb.reply('У вас нет удочки 🎣')}
+        const item = await this.itemdb.findOne({id: 3})
+        if (!this.ctx.user.invent.find(x => x.item.toString() === item._id.toString())) return this.cb.reply('У вас нет удочки 🎣')
         if (this.ctx.user.items.bait === 0) {return this.cb.reply('У вас нет наживки 🐛')}
         await this.ctx.user.dec('energy', this.jobs.fishing.energy)
         await this.ctx.user.inc('exp', this.jobs.fishing.energy)

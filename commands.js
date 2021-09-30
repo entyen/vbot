@@ -66,7 +66,7 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 lastMessage : ctx.message,
                 timer : fn
             })
-            const job = new Job(bot, ctx)
+            const job = new Job(bot, ctx, itemdb)
             await job.workhard()
         }
     })
@@ -216,9 +216,10 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 return menu.buffs(ctx)
         } else
         if (cmba[0] === 'admbuff') {
+            if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')
             try{
                 let locUser = await userdb.findOne({ uid: cmba[1] })
-                if (cmba[1] && cmba[2] && cmba[3] && ctx.user.acclvl >= 7) {
+                if (cmba[1] && cmba[2] && cmba[3]) {
                     const hour = ctx.timestamp + +cmba[3]*60*60*1000
                     if (cmba[2] === '0') {
                     await ctx.reply(`Вы наложили ${lang.newBy} на игрока @id${locUser.id}(${locUser.f_name}) на ${+cmba[3]} часов`)
@@ -236,51 +237,45 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                     await bot.sendMessage(locUser.id, `Вы получили ${lang.ban} на ${+cmba[3]} часа \nПроверить эффекты на себе можно в Настройках`)
                     } else { ctx.reply('Баффа с таким [BUFFID] не существует')}
                 } else {
-                    await ctx.reply('‼️ Нет прав использовать данную команду')
+                    await ctx.reply('‼️ Не верные поля проверте верность данных')
                 }
-            } catch (e) {ctx.reply('‼️ Что-то не верно проверте значения')}
+            } catch (e) { ctx.reply('‼️ Что-то не верно проверте значения') }
         } else
         if (cmba[0] === 'updatedb') {
+            if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')
             let allUser = await userdb.find({})
-            if (ctx.user.acclvl >= 7) {
                 allUser.forEach( async (x,y,z) => {
                     await allUser[y].set('__v', 0)
                 })
                 ctx.reply(`Обновлено ${allUser.length} пользователей`)
-            } else {
-                await ctx.reply('Нет прав использовать данную команду')
-            }
         } else
         if (cmba[0] === 'set') {
-            const item1 = '614776a6298a2b1142b51bd3'
-            if (ctx.user.acclvl >= 7) {
-                if (ctx.user.invent.find(x => x.item.toString() === item1)) return ctx.reply('У вас уже есть такой предмет')
-
+            if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')
+            let item = await itemdb.findOne({id: 3})
                 ctx.user.add('invent', {
-                    item: item1,
+                    item: item._id.toString(),
                     quantity: 1,
                     ench: 0
                 })
-            } else {
-                ctx.reply('Нет прав использовать данную команду')
-            }
         } else
         if (cmba[0] === 'chk') {
-            let itemId = await itemdb.findById(ctx.user.invent[1].item)
-            if (ctx.user.acclvl >= 7) {
+            if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')
+            // let itemId = await itemdb.findById(ctx.user.invent[cmba[1]].item)
+                ctx.user.invent.find(x => x._id)
+                // console.log(itemId)
+                // ctx.reply(`${itemId.name} ${ctx.user.invent[0].quantity}`)
+        } else
+        if (cmba[0] === 'ench') {
+            if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')
+            let itemId = await itemdb.findById(ctx.user.invent[cmba[1]].item)
+                console.log(ctx.user.invent.find(x => x._id))
                 console.log(itemId)
-                ctx.reply(`${itemId.name} ${ctx.user.invent[1].quantity}`, itemId.img)
-            } else {
-                ctx.reply('Нет прав использовать данную команду')
-            }
+                // ctx.reply(`${itemId.name} ${ctx.user.invent[0].quantity}`)
         } else
         if (cmba[0] === 'stop') {
-            if (ctx.user.acclvl >= 7) {
+            if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')
                 ctx.reply(`Api Disable.`)
                 bot.stop()
-            } else {
-                ctx.reply('Нет прав использовать данную команду')
-            }
         } else
         if (ctx.cmd === lang.dev || ctx.cmd === lang.adm || ctx.cmd === lang.moder || ctx.cmd === lang.user || ctx.cmd === lang.vip || ctx.cmd === lang.plat) {
             ctx.user.acclvl >= 7 ? ctx.reply(`${lang.userGrpCmd} ${lang.dev} ${lang.help} ${lang.devCmd}`)
@@ -393,10 +388,15 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 return
             case 'fishingRod.buy':
                 if (ctx.user.balance < 5000) {return ctx.reply('Недостаточно средств')}
-                if (ctx.user.items.fishingRod) {return ctx.reply('У вас уже есть удочка 🎣')}
+                const item = await itemdb.findOne({id: 3})
+                if (ctx.user.invent.find(x => x.item.toString() === item._id.toString())) return ctx.reply('У вас уже есть такой предмет')
                 await ctx.user.dec('balance', 5000)
                 await ctx.bank.inc('balance', 5000)
-                await ctx.user.set('items', true, 'fishingRod')
+                await ctx.user.add('invent', {
+                        item: item._id.toString(),
+                        quantity: 1,
+                        ench: 0
+                    })
                 await ctx.reply('Вы успешно приобрели 🎣')
                 return
             case 'bait':

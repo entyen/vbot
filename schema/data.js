@@ -8,6 +8,7 @@ const itemSchem = new mongoose.Schema({
     desc: {type: String, required: true},
     img: {type: String, required: true},
     weight: {type: Number, required: true},
+    stack: { type: Boolean, required: true},
     char: {
         hp: Number,
         mp: Number,
@@ -66,9 +67,10 @@ const userSchem = new mongoose.Schema({
         energyPotion: { type: Number, default: 0 },
     },
     invent: [{
-        item: { type: mongoose.Schema.Types.ObjectId, ref: 'items' },
-        quantity: Number,
-        ench: Number
+        _id: { type: mongoose.Schema.Types.ObjectId, unique: true, auto: true },
+        item: { type: mongoose.Schema.Types.ObjectId, ref: 'items', required: true },
+        quantity: { type: Number, default: 0 },
+        ench: { type: Number, default: 0 }
     }],
     boosters: {
         energyCount: { type: Number, default: 1 },
@@ -115,7 +117,7 @@ const userSchem = new mongoose.Schema({
         mc: { type: Number, default: 0 },
         well: { type: Number, default: 0 },
     },
-    invWeight: { type: Number, default: 50000 },
+    invWeight: { type: Number, default: 30000 },
     exp: { type: Number, default: 0 },
     level: { type: Number, default: 0 },
     energy: { type: Number, default: 100 },

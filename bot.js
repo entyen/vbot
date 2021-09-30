@@ -64,11 +64,16 @@ const buff = require('./mod/buff.js')
 
 app.post('/post', function(request, response){
     response.send('ok');    // echo the result back
-    app.get('/', async (req, res) => {
-        let sloan = []
-        sloan = request.body
-        res.send('test')
-    })
+    // app.get('/', async (req, res) => {
+    //     let sloan = []
+    //     sloan = request.body
+    //     res.send('test')
+    // })
+})
+
+app.post('/users', async (req, res) => {
+    user = await userdb.findOne({id: req.body.user_id})
+    res.send(JSON.stringify(user))
 })
 
 app.get('/users', async (req, res) => {
@@ -525,7 +530,8 @@ userdb.prototype.set = function (field, value, field2) {
 userdb.prototype.add = async function (field, value) {
   let checkPoint
   this[field].find(x => x.item.toString() === value.item) ? checkPoint = true : checkPoint = false
-  if (checkPoint) {
+  let item = await itemdb.findById({_id: value.item})
+  if (item.stack && checkPoint) {
     for (i = 0; i < this[field].length; i++) {
       if (this[field][i].item.toString() === value.item) {
           this[field][i].quantity += value.quantity
