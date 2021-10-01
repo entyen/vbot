@@ -251,7 +251,7 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
         } else
         if (cmba[0] === 'set') {
             if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')
-            let item = await itemdb.findOne({id: 3})
+            let item = await itemdb.findOne({id: 1})
                 ctx.user.add('invent', {
                     item: item._id.toString(),
                     quantity: 1,
@@ -264,6 +264,61 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 ctx.user.invent.find(x => x._id)
                 // console.log(itemId)
                 // ctx.reply(`${itemId.name} ${ctx.user.invent[0].quantity}`)
+        } else
+        if (cmba[0] === 'надеть') {
+            cmba[1] = cmba[1]-1
+            if(!ctx.user.invent[cmba[1]]) { return ctx.reply('Предмет не найден') }
+            let itemId = await itemdb.findById(ctx.user.invent[cmba[1]].item)
+            if (itemId.type > 0) {
+                switch(itemId.type) {
+                    case 0:
+                        eqitem = 'armor'
+                        break
+                    case 1:
+                        eqitem = 'weap'
+                        break
+                    case 2:
+                        eqitem = 'ring'
+                        break
+                    case 3:
+                        eqitem = 'fishRod'
+                        break
+                }
+            } else { return ctx.reply('Неверный слот') }
+            if (ctx.user.equip[eqitem].equiped) { return ctx.reply('Слот уже занят')}
+                ctx.user.equip[eqitem].item = ctx.user.invent[cmba[1]]._id
+                ctx.user.equip[eqitem].equiped = true
+                ctx.user.invent[cmba[1]].equiped = true
+                await ctx.user.save()
+            ctx.reply(`Вы надели ${itemId.name}`)
+        } else
+        if (cmba[0] === 'снять') {
+            cmba[1] = cmba[1]-1
+            if(!ctx.user.invent[cmba[1]]) { return ctx.reply('Предмет не найден') }
+            let itemId = await itemdb.findById(ctx.user.invent[cmba[1]].item)
+            let eqitem = ''
+            if (itemId.type > 0) {
+                switch(itemId.type) {
+                    case 0:
+                        eqitem = 'armor'
+                        break
+                    case 1:
+                        eqitem = 'weap'
+                        break
+                    case 2:
+                        eqitem = 'ring'
+                        break
+                    case 3:
+                        eqitem = 'fishRod'
+                        break
+                }
+            } else { return ctx.reply('Неверный слот') }
+            if (!ctx.user.invent[cmba[1]].equiped) { return ctx.reply('Предмет не надет')}
+                ctx.user.equip[eqitem].item = ctx.user.invent[cmba[1]]._id
+                ctx.user.equip[eqitem].equiped = false
+                ctx.user.invent[cmba[1]].equiped = false
+                await ctx.user.save()
+            ctx.reply(`Вы сняли ${itemId.name}`)
         } else
         if (cmba[0] === 'ench') {
             if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')

@@ -9,6 +9,7 @@ const itemSchem = new mongoose.Schema({
     img: {type: String, required: true},
     weight: {type: Number, required: true},
     stack: { type: Boolean, required: true},
+    type: { type: Number, required: true},
     char: {
         hp: Number,
         mp: Number,
@@ -70,7 +71,8 @@ const userSchem = new mongoose.Schema({
         _id: { type: mongoose.Schema.Types.ObjectId, unique: true, auto: true },
         item: { type: mongoose.Schema.Types.ObjectId, ref: 'items', required: true },
         quantity: { type: Number, default: 0 },
-        ench: { type: Number, default: 0 }
+        ench: { type: Number, default: 0 },
+        equiped: { type: Boolean, default: false }
     }],
     boosters: {
         energyCount: { type: Number, default: 1 },
@@ -97,9 +99,22 @@ const userSchem = new mongoose.Schema({
         m_def: { type: Number, default: 1, min: 0 },
     },
     equip: {
-        armor: { type: Number, default: 0, min: 0 },
-        weap: { type: Number, default: 0, min: 0 },
-        ring: { type: Number, default: 0, min: 0 },
+        armor: { 
+            item: { type: mongoose.Schema.Types.ObjectId, auto: true },
+            equiped: { type: Boolean, default: false }
+        },
+        weap: { 
+            item: { type: mongoose.Schema.Types.ObjectId, auto: true },
+            equiped: { type: Boolean, default: false }
+        },
+        ring: { 
+            item: { type: mongoose.Schema.Types.ObjectId, auto: true },
+            equiped: { type: Boolean, default: false }
+        },
+        fishRod: { 
+            item: { type: mongoose.Schema.Types.ObjectId, auto: true },
+            equiped: { type: Boolean, default: false }
+        },
     },
     stat: {
         str: { type: Number, default: 1 },

@@ -92,7 +92,7 @@ menu.invent = async (ctx, itemdb) => {
     const item = await itemS()
     let inv = ``
     item.forEach((x,y,z) => {
-        inv += `${ctx.user.invent[y].quantity === 1 ? `` : `[${ctx.user.invent[y].quantity}]`} ${item[y].name} ${ctx.user.invent[y].ench === 0 ? `` : `+${ctx.user.invent[y].ench}`}\n`
+        inv += `${ctx.user.invent[y].quantity === 1 ? `` : `[${ctx.user.invent[y].quantity}]`} ${item[y].name} ${ctx.user.invent[y].ench === 0 ? `` : `+${ctx.user.invent[y].ench}`} ${ctx.user.invent[y].equiped ? `(Экипированно)` : ``}\n`
     })
     inv += `\n👜 Ячеек Занято: ${ctx.user.invent.length}/10\n`
 
