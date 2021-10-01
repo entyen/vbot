@@ -53,7 +53,11 @@ menu.profile = (ctx) => {
     text += `${ctx.user.alert ? '🔔' : '🔕'} Уведомления: ${ctx.user.alert ? 'Включены' : 'Выключены'}\n`
     text += `\n📗 Дата регистрации: ${ctx.user.regDate}`
 
-    return ctx.reply(`Профиль\n ${text}`)
+    return ctx.reply(`Профиль\n ${text}`, null, Markup
+        .keyboard([
+            Markup.button('Характеристики', 'secondary', 'char'),
+            Markup.button('Экипировка', 'secondary', 'equip'),
+        ]).inline())
 }
 
 menu.inventory = (ctx) => {
@@ -79,6 +83,40 @@ menu.inventory = (ctx) => {
             Markup.button('Предметы', 'secondary', 'invent'),
         ]).inline()
     )
+}
+
+menu.char = async (ctx, itemdb) => {
+    let inv = ``
+    inv += `\n${lang.hp}: ${ctx.user.char.hp}\n`
+    inv += `${lang.mp}: ${ctx.user.char.mp}\n`
+    inv += `${lang.f_atk}: ${ctx.user.char.f_atk}\n`
+    inv += `${lang.m_atk}: ${ctx.user.char.m_atk}\n`
+    inv += `${lang.f_def}: ${ctx.user.char.f_def}\n`
+    inv += `${lang.m_def}: ${ctx.user.char.m_def}\n`
+    inv += `\n${lang.chr}: ${ctx.user.stat.chr}\n`
+    inv += `${lang.con}: ${ctx.user.stat.con}\n`
+    inv += `${lang.int}: ${ctx.user.stat.int}\n`
+    inv += `${lang.luc}: ${ctx.user.stat.luc}\n`
+    inv += `${lang.str}: ${ctx.user.stat.str}\n`
+
+    return ctx.reply(`Характеристики Персонажа\n ${inv}`)
+}
+
+menu.equip = async (ctx, itemdb, userdb) => {
+    const item = async(n) => {
+        const j = ctx.user.invent.find(x => x._id.toString() === ctx.user.equip[n].item.toString())
+        if (!j) {return `${lang[n]}: Пусто`}
+        if (!j.equiped) {return `${lang[n]}: Пусто`}
+        const fitem = await itemdb.findById(j.item)
+        return `${lang[n]}: ${fitem.name} ${j.ench === 0 ? '' : `+${j.ench}`}`
+    }
+    let inv = ``
+    inv += `\n${await item('fishRod')}\n`
+    inv += `${await item('weap')}\n`
+    inv += `${await item('armor')}\n`
+    inv += `${await item('ring')}\n`
+
+    return ctx.reply(`Экипировка Персонажа\n ${inv}`)
 }
 
 menu.invent = async (ctx, itemdb) => {

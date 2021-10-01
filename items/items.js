@@ -1,10 +1,16 @@
 const mongoose = require('mongoose')
 const { itemSchem } = require('../schema/data.js')
 const itemdb = mongoose.model('items', itemSchem)
+const idgen = (async () => {
+    id = await itemdb.countDocuments()
+    return ++id
+})()
+
+// console.log(idgen)
 
 const items =  [
     // new itemdb ({
-    //     id: 1,
+    //     id: idgen,
     //     name: '🗡️ Меч',
     //     desc: 'Меч',
     //     img: 'photo671833319_457239065',
@@ -12,23 +18,16 @@ const items =  [
     //     stack: false,
     //     type: 1,
     //     char: {
-    //         hp: 0,
-    //         mp: 0,
     //         f_atk: 14,
     //         m_atk: 6,
-    //         f_def: 0,
-    //         m_def: 0,
     //     },
     //     stat: {
     //         str: 3,
     //         int: 1,
-    //         con: 0,
-    //         luc: 0,
-    //         chr: 0,
     //     },
     // }),
     // new itemdb ({
-    //     id: 2, 
+    //     id: idgen, 
     //     name: '🪄 Жезл',
     //     desc: 'Жезл',
     //     img: 'photo671833319_457239065',
@@ -36,47 +35,28 @@ const items =  [
     //     stack: false,
     //     type: 1,
     //     char: {
-    //         hp: 0,
-    //         mp: 0,
     //         f_atk: 6,
     //         m_atk: 14,
-    //         f_def: 0,
-    //         m_def: 0,
     //     },
     //     stat: {
     //         str: 1,
     //         int: 3,
-    //         con: 0,
-    //         luc: 0,
-    //         chr: 0,
     //     },
     // }),
     // new itemdb ({
-    //     id: 3, 
+    //     id: idgen, 
     //     name: '🎣 Удочка',
     //     desc: 'Удочка',
     //     img: 'photo671833319_457239065',
     //     weight: 20,
     //     stack: false,
     //     type: 3,
-    //     char: {
-    //         hp: 0,
-    //         mp: 0,
-    //         f_atk: 0,
-    //         m_atk: 0 ,
-    //         f_def: 0,
-    //         m_def: 0,
-    //     },
     //     stat: {
-    //         str: 0,
-    //         int: 0,
-    //         con: 0,
     //         luc: 1,
-    //         chr: 0,
     //     },
     // }),
     // new itemdb ({
-    //     id: 4, 
+    //     id: idgen, 
     //     name: '⚔️ Дуалы',
     //     desc: 'Дуалы',
     //     img: 'photo671833319_457239065',
@@ -84,23 +64,16 @@ const items =  [
     //     stack: false,
     //     type: 1,
     //     char: {
-    //         hp: 0,
-    //         mp: 0,
     //         f_atk: 14,
     //         m_atk: 6,
-    //         f_def: 0,
-    //         m_def: 0,
     //     },
     //     stat: {
     //         str: 3,
     //         int: 1,
-    //         con: 0,
-    //         luc: 0,
-    //         chr: 0,
     //     },
     // }),
     // new itemdb ({
-    //     id: 5, 
+    //     id: idgen, 
     //     name: '🏹️ Лук',
     //     desc: 'Лук',
     //     img: 'photo671833319_457239065',
@@ -108,44 +81,22 @@ const items =  [
     //     stack: false,
     //     type: 1,
     //     char: {
-    //         hp: 0,
-    //         mp: 0,
     //         f_atk: 14,
     //         m_atk: 6,
-    //         f_def: 0,
-    //         m_def: 0,
     //     },
     //     stat: {
     //         str: 3,
     //         int: 1,
-    //         con: 0,
-    //         luc: 0,
-    //         chr: 0,
     //     },
     // }),
     // new itemdb ({
-    //     id: 6, 
-    //     name: '🎣 Свиток Зачарования Инструмента',
+    //     id: idgen, 
+    //     name: '📜 Свиток Зачарования Инструмента',
     //     desc: 'Свиток Зачарования Инструмента',
     //     img: 'photo671833319_457239065',
     //     weight: 20,
     //     stack: false,
     //     type: -1,
-    //     char: {
-    //         hp: 0,
-    //         mp: 0,
-    //         f_atk: 0,
-    //         m_atk: 0 ,
-    //         f_def: 0,
-    //         m_def: 0,
-    //     },
-    //     stat: {
-    //         str: 0,
-    //         int: 0,
-    //         con: 0,
-    //         luc: 0,
-    //         chr: 0,
-    //     },
     // }),
 ]
 

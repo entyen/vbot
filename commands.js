@@ -266,7 +266,7 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 // ctx.reply(`${itemId.name} ${ctx.user.invent[0].quantity}`)
         } else
         if (cmba[0] === 'надеть') {
-            cmba[1] = cmba[1]-1
+            cmba[1] = --cmba[1]
             if(!ctx.user.invent[cmba[1]]) { return ctx.reply('Предмет не найден') }
             let itemId = await itemdb.findById(ctx.user.invent[cmba[1]].item)
             if (itemId.type > 0) {
@@ -289,11 +289,19 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 ctx.user.equip[eqitem].item = ctx.user.invent[cmba[1]]._id
                 ctx.user.equip[eqitem].equiped = true
                 ctx.user.invent[cmba[1]].equiped = true
+                const massSt = [ 'str', 'int', 'con', 'luc', 'chr' ]
+                for (i = 0; i < massSt.length; i++) {
+                    ctx.user.stat[massSt[i]] += itemId.stat[massSt[i]]
+                }
+                const massCh = [ 'f_atk', 'f_def', 'hp', 'm_atk', 'm_def', 'mp' ]
+                for (i = 0; i < massCh.length; i++) {
+                    ctx.user.char[massCh[i]] += itemId.char[massCh[i]]
+                }
                 await ctx.user.save()
             ctx.reply(`Вы надели ${itemId.name}`)
         } else
         if (cmba[0] === 'снять') {
-            cmba[1] = cmba[1]-1
+            cmba[1] = --cmba[1]
             if(!ctx.user.invent[cmba[1]]) { return ctx.reply('Предмет не найден') }
             let itemId = await itemdb.findById(ctx.user.invent[cmba[1]].item)
             let eqitem = ''
@@ -317,6 +325,14 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 ctx.user.equip[eqitem].item = ctx.user.invent[cmba[1]]._id
                 ctx.user.equip[eqitem].equiped = false
                 ctx.user.invent[cmba[1]].equiped = false
+                const massSt = [ 'str', 'int', 'con', 'luc', 'chr' ]
+                for (i = 0; i < massSt.length; i++) {
+                    ctx.user.stat[massSt[i]] -= itemId.stat[massSt[i]]
+                }
+                const massCh = [ 'f_atk', 'f_def', 'hp', 'm_atk', 'm_def', 'mp' ]
+                for (i = 0; i < massCh.length; i++) {
+                    ctx.user.char[massCh[i]] -= itemId.char[massCh[i]]
+                }
                 await ctx.user.save()
             ctx.reply(`Вы сняли ${itemId.name}`)
         } else
@@ -362,6 +378,10 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 return menu.inventory(ctx)
             case 'invent':
                 return menu.invent(ctx, itemdb)
+            case 'char':
+                return menu.char(ctx, itemdb)
+            case 'equip':
+                return menu.equip(ctx, itemdb, userdb)
             case 'menu':
                 return menu.main(ctx)
             case lang.setting:
