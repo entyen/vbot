@@ -257,7 +257,7 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                     quantity: +cmba[2] || 1,
                     ench: 0
                 })
-            ctx.reply(`Вам выданна ${item.name} в кол-ве ${+cmba[2] || 1}`)
+            ctx.reply(`Вам выдано ${item.name} в кол-ве ${+cmba[2] || 1}`)
         } else
         if (cmba[0] === 'chk') {
             if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')
@@ -342,41 +342,19 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
             if(!ctx.user.invent[cmba[1]]) { return ctx.reply('Предмет не найден') }
             let itemId = await itemdb.findById(ctx.user.invent[cmba[1]].item)
             const itemStat = []
-            let eqitem = ''
-            if (itemId.type > 0) {
-                switch(itemId.type) {
-                    case 0:
-                        eqitem = 'armor'
-                        break
-                    case 1:
-                        eqitem = 'weap'
-                        break
-                    case 2:
-                        eqitem = 'ring'
-                        break
-                    case 3:
-                        eqitem = 'fishRod'
-                        break
-                }
-            } else { return ctx.reply('Неверный слот') }
-                const massSt = Object.keys(itemId.stat)
-                for (i = 0; i < massSt.length; i++) {
-                    itemStat.push(`${itemId.stat[massSt[i]] === 0 ? `` : `\n${lang[massSt[i]]}: ${Math.floor(itemId.stat[massSt[i]] + (ctx.user.invent[cmba[1]].ench*0.1)*itemId.stat[massSt[i]])}`}`)
-                }
-                const massCh = Object.keys(itemId.char)
-                for (i = 0; i < massCh.length; i++) {
-                    itemStat.push(`${itemId.char[massCh[i]] === 0 ? `` : `\n${lang[massCh[i]]}: ${Math.floor(itemId.char[massCh[i]] + (ctx.user.invent[cmba[1]].ench*0.2)*itemId.char[massCh[i]])}`}`)
-                }
-            ctx.reply(`${itemId.name} ${ctx.user.invent[cmba[1]].ench === 0 ? '' : `+${ctx.user.invent[cmba[1]].ench}`}: ${itemStat.join(' ')}`)
-        } else
-        if (cmba[0] === 'ench') {
-            cmba[1] = --cmba[1]
-            let locItem = ctx.user.invent[cmba[1]]
-            if (ctx.cmd) {
-                locItem = ctx.cmd.split('.')[1]
-            } else {
-                locItem = ctx.user.invent[cmba[1]]
+            const massSt = Object.keys(itemId.stat)
+            for (i = 0; i < massSt.length; i++) {
+                itemStat.push(`${itemId.stat[massSt[i]] === 0 ? `` : `\n➔${lang[massSt[i]]}: ${Math.floor(itemId.stat[massSt[i]] + (ctx.user.invent[cmba[1]].ench*0.1)*itemId.stat[massSt[i]])}`}`)
             }
+            const massCh = Object.keys(itemId.char)
+            for (i = 0; i < massCh.length; i++) {
+                itemStat.push(`${itemId.char[massCh[i]] === 0 ? `` : `\n➔${lang[massCh[i]]}: ${Math.floor(itemId.char[massCh[i]] + (ctx.user.invent[cmba[1]].ench*0.2)*itemId.char[massCh[i]])}`}`)
+            }
+            ctx.reply(`${itemId.name}${ctx.user.invent[cmba[1]].ench === 0 ? '' : `+${ctx.user.invent[cmba[1]].ench}`} ${itemStat.join(' ')}`)
+        } else
+        if (cmba[0] === 'зачаровать' || cmba[0] === 'ench') {
+            cmba[1] = --cmba[1]
+            const locItem = ctx.user.invent[cmba[1]]
             if(!locItem) { return ctx.reply('Предмет не найден') }
             let itemId = await itemdb.findById(locItem.item)
             let enchScroll = await itemdb.findOne({id: 6})
@@ -403,7 +381,7 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
             if (locItem.ench >=10) { return ctx.reply('Предмет улучшен до максимума') }
             if (rand > 0 && rand < 100 - (locItem.ench * 9.5)) {
                 await ctx.user.ench('invent', locItem, { item: itemId._id.toString(), ench: 1 })
-                ctx.reply(`${itemId.name} +${locItem.ench + 1}`)
+                ctx.reply(`Предмет ${itemId.name} Успешно зачарован на +${locItem.ench}`)
             } else {
                 await ctx.user.ench('invent', locItem, { item: itemId._id.toString(), ench: -1 })
                 await ctx.user.inc('inv', locItem.ench, 'vinmt')
@@ -479,6 +457,20 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 return market.main(ctx)
             case 'market.buy.items':
                 return market.buyItems(ctx)
+            case 'exchange':
+                return market.exchangeMsg(ctx, 'lumen')
+            case 'exchange.buy':
+                return market.exchangeBuy(ctx, 'lumen', 1)
+            case 'exchange.sell':
+                return market.exchangeSell(ctx, 'lumen', 1)
+            case 'exchange.buy.100':
+                return market.exchangeBuy(ctx, 'lumen', 100)
+            case 'exchange.sell.100':
+                return market.exchangeSell(ctx, 'lumen', 100)
+            case 'exchange.buy.1000':
+                return market.exchangeBuy(ctx, 'lumen', 1000)
+            case 'exchange.sell.1000':
+                return market.exchangeSell(ctx, 'lumen', 1000)
             case 'market.auction.items':
                 return market.auction(ctx)
             case 'auction.rareOre':

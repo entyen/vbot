@@ -13,7 +13,7 @@ market.main = (ctx) => {
             ],
             [
                 Markup.button('Аукцион', 'primary', 'market.auction.items'),
-
+                Markup.button('Биржа Дварфов', 'primary', 'exchange'),
             ],
             [
                 Markup.button(lang.back, 'negative', 'menu'),
@@ -56,6 +56,38 @@ market.auction = (ctx) => {
             ]
         ])
     )
+}
+
+
+market.exchangeMsg = (ctx, type) => {
+    ctx.reply(`${lang[type]}\nЦена покупки ${(ctx.bank.dpi[type]).toFixed(2)}${lang.curr}\nЦена продажи ${(ctx.bank.dpi[type]*0.995).toFixed(2)}${lang.curr}.`, null, Markup
+        .keyboard([
+            [
+                Markup.button('Купить 100', 'default', `${ctx.cmd}.buy.100`),
+                Markup.button('Продать 100', 'default', `${ctx.cmd}.sell.100`),
+            ],
+            [
+                Markup.button('Купить 1k', 'default', `${ctx.cmd}.buy.1000`),
+                Markup.button('Продать 1k', 'default', `${ctx.cmd}.sell.1000`),
+            ]
+        ]).inline()
+    )
+}
+
+market.exchangeBuy = async(ctx, type, count) => {
+    if (ctx.user.balance < ctx.bank.dpi[type] * count) {return ctx.reply('Недостаточно средств')}
+        await ctx.user.dec('balance', (ctx.bank.dpi[type]*count).toFixed(2))
+        await ctx.user.inc('inv', count, type)
+        await ctx.reply(`Вы успешно приобрели ${count} ${lang[type]} за ${(ctx.bank.dpi[type]*count).toFixed(2)} ${lang.curr}`)
+        return
+}
+
+market.exchangeSell = async(ctx, type, count) => {
+    if (ctx.user.inv[type] < count) {return ctx.reply(`Недостаточно ${lang[type]}`)}
+        await ctx.user.inc('balance', ((ctx.bank.dpi[type]*0.995)*count).toFixed(2))
+        await ctx.user.dec('inv', count, type)
+        await ctx.reply(`Вы успешно продали ${count} ${lang[type]} за ${((ctx.bank.dpi[type]*0.995)*count).toFixed(2)}`)
+        return
 }
 
 market.auctionMsg = (ctx, type) => {

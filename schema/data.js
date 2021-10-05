@@ -17,6 +17,8 @@ const itemSchem = new mongoose.Schema({
         m_atk: { type: Number, default: 0},
         f_def: { type: Number, default: 0},
         m_def: { type: Number, default: 0},
+        acc: { type: Number, default: 0 },
+        ev: { type: Number, default: 0 },
     },
     stat: {
         str: { type: Number, default: 0},
@@ -33,7 +35,12 @@ const userSchem = new mongoose.Schema({
     regDate: { type: Date, default: date },
     f_name: String,
     acclvl: { type: Number, default: 0 },
-    balance: { type: Number, default: 0 },
+    balance: { 
+        type: Number, 
+        default: 0,
+        get: v => Math.floor(v),
+        set: v => Math.floor(v),
+     },
     lang: { type: String, default: 'ru' },
     timers: {
         mainWork: { type: Number, default: null },
@@ -61,6 +68,7 @@ const userSchem = new mongoose.Schema({
         rareWood: { type: Number, default: 0 },
         fish: { type: Number, default: 0 },
         rareFish: { type: Number, default: 0 },
+        lumen: { type: Number, default: 0 },
     },
     items: {
         fishingRod: { type: Boolean, default: false },
@@ -99,6 +107,8 @@ const userSchem = new mongoose.Schema({
         m_atk: { type: Number, default: 1, min: 0 },
         f_def: { type: Number, default: 1, min: 0 },
         m_def: { type: Number, default: 1, min: 0 },
+        acc: { type: Number, default: 1, min: 0 },
+        ev: { type: Number, default: 1, min: 0 },
     },
     equip: {
         armor: { 
@@ -172,6 +182,7 @@ const bankSchem = new mongoose.Schema({
         rareOre: { type: Number, default: 0 },
         rareWood: { type: Number, default: 0 },
         rareFish: { type: Number, default: 0 },
+        lumen: { type: Number, default: 0 },
     }
 })
 

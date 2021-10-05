@@ -86,6 +86,17 @@ app.get('/bank', async (req, res) => {
     res.send(`${JSON.stringify(bank)}`)
 })
 
+
+async function slon() {
+    const rounded = function(number){
+        return (+number).toFixed(2)
+    }
+    const rq = await axios.request('https://api.cryptonator.com/api/ticker/xlm-rub')
+    return +rounded(rq.data.ticker.price)
+}
+
+slon()
+
 app.listen(3000, () => { console.loge('Running webhook') })
 //error and warn color
 console.errore = (err) => console.error('\x1b[91m%s\x1b[0m', err)
@@ -245,6 +256,19 @@ energy.addCallback( () => {
                 await user[i].inc('energy', user[i].boosters.energyRegen)
             }
         })
+    })
+})
+
+energy.addCallback( () => {
+    const lumenPrice = async() => {
+            const rounded = function(number){
+                return (+number).toFixed(2)
+            }
+            const rq = await axios.request('https://api.cryptonator.com/api/ticker/xlm-rub')
+        return +rounded(rq.data.ticker.price)
+    }
+    bankdb.findOne({id: 0}).then(async (bank) => {
+        bank.set('dpi', await lumenPrice(), 'lumen')
     })
 })
 

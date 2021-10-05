@@ -83,7 +83,7 @@ keyboardPlot.Lv2 = Markup.keyboard([
 plot.plotUpgradeLv1 = (ctx) => {
     if (ctx.user.plot.size >= 1) return ctx.reply('Участок уже Средний')
     if (ctx.user.plot.size === 0) {
-        ctx.reply(`Улучшить учаток до Среднего\n⚒ На а его строительство требуется:\n${resCheck(ctx, 'sand', 10000)}`, null, build.plotLv1)
+        ctx.reply(`Улучшить учаcток до Среднего\n⚒ На а его строительство требуется:\n${resCheck(ctx, 'sand', 10000)}`, null, build.plotLv1)
     }
     return 
 }
@@ -91,7 +91,7 @@ plot.plotUpgradeLv1 = (ctx) => {
 plot.plotUpgradeLv2 = (ctx) => {
     if (ctx.user.plot.size >= 2) return ctx.reply('Участок уже Большой')
     if (ctx.user.plot.size === 1) {
-        ctx.reply(`Улучшить учаток до Большого\n⚒ На а его строительство требуется:\n${resCheck(ctx, 'sand', 7000)}\n${resCheck(ctx, 'ore', 3000)}\n${resCheck(ctx, 'wood', 7000)}\n${resCheck(ctx, 'rareWood', 2)}\n${moneyCheck(ctx, 'balance', 100000)}`, null, build.plotLv2)
+        ctx.reply(`Улучшить учаcток до Большого\n⚒ На а его строительство требуется:\n${resCheck(ctx, 'sand', 7000)}\n${resCheck(ctx, 'ore', 3000)}\n${resCheck(ctx, 'wood', 7000)}\n${resCheck(ctx, 'rareWood', 2)}\n${moneyCheck(ctx, 'balance', 100000)}`, null, build.plotLv2)
     }
     return 
 }
@@ -163,11 +163,11 @@ plot.trowPotion = async(ctx) => {
 }
 
 const resCheck = (ctx, x, y) => {
-    return `${ctx.user.inv[x] > y ? '✔️' : '❌'} ${lang[x]} ${y}`
+    return `${ctx.user.inv[x] >= y ? '✔️' : '❌'} ${lang[x]} ${y}`
 }
 
 const moneyCheck = (ctx, x, y) => {
-    return `${ctx.user.balance > y ? '✔️' : '❌'} ${lang[x]} ${y}`
+    return `${ctx.user.balance >= y ? '✔️' : '❌'} ${lang[x]} ${y}`
 }
 
 plot.house = (ctx) => {

@@ -63,6 +63,7 @@ menu.profile = (ctx) => {
 menu.inventory = (ctx) => {
     let inv = ``
     inv += `💠 Оргулы: ${ctx.user.balance}\n`
+    inv += `${ctx.user.inv.lumen === 0 ? '' : `${lang.lumen}: ${ctx.user.inv.lumen}\n`}`
     inv += `${ctx.user.inv.vinmt === 0 ? '' : `${lang.vinmt}: ${ctx.user.inv.vinmt}\n`}`
     inv += `${ctx.user.inv.herbs === 0 ? '' : `${lang.herbs}: ${ctx.user.inv.herbs}\n`}`
     inv += `${ctx.user.inv.ore === 0 ? '' : `${lang.ore}: ${ctx.user.inv.ore}\n`}`
@@ -127,7 +128,7 @@ menu.invent = async (ctx, itemdb) => {
     const item = await itemS()
     let inv = ``
     item.forEach((x,y,z) => {
-        inv += `${ctx.user.invent[y].quantity === 1 ? `` : `[${ctx.user.invent[y].quantity}]`} ${item[y].name} ${ctx.user.invent[y].ench === 0 ? `` : `+${ctx.user.invent[y].ench}`} ${ctx.user.invent[y].equiped ? `(Экипированно)` : ``}\n`
+        inv += `[${y+1}] ${item[y].name}${ctx.user.invent[y].quantity === 1 ? `` : `: ${ctx.user.invent[y].quantity}`} ${ctx.user.invent[y].ench === 0 ? `` : `+${ctx.user.invent[y].ench}`} ${ctx.user.invent[y].equiped ? `(Экипированно)` : ``}\n`
     })
     inv += `\n${ctx.user.items.bait === 0 ? '' : `🐛 Наживка: ${ctx.user.items.bait}\n`}`
     inv += `${ctx.user.items.energyPotion === 0 ? '' : `${lang.energyPotion}: ${ctx.user.items.energyPotion}\n`}`
