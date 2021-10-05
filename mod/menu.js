@@ -53,7 +53,7 @@ menu.profile = (ctx) => {
     text += `${ctx.user.alert ? '🔔' : '🔕'} Уведомления: ${ctx.user.alert ? 'Включены' : 'Выключены'}\n`
     text += `\n📗 Дата регистрации: ${ctx.user.regDate}`
 
-    return ctx.reply(`Профиль\n ${text}`, null, Markup
+    return ctx.reply(`Профиль\n${text}`, null, Markup
         .keyboard([
             Markup.button('Характеристики', 'secondary', 'char'),
             Markup.button('Экипировка', 'secondary', 'equip'),
@@ -69,40 +69,37 @@ menu.inventory = (ctx) => {
     inv += `${ctx.user.inv.sand === 0 ? '' : `${lang.sand}: ${ctx.user.inv.sand}\n`}`
     inv += `${ctx.user.inv.wood === 0 ? '' : `${lang.wood}: ${ctx.user.inv.wood}\n`}`
     inv += `${ctx.user.inv.fish === 0 ? '' : `${lang.fish}: ${ctx.user.inv.fish}\n`}`
-    inv += `${ctx.user.inv.rareHerbs === 0 ? '' : `${lang.rareHerbs}: ${ctx.user.inv.rareHerbs}\n`}`
+    inv += `\n${ctx.user.inv.rareHerbs === 0 ? '' : `${lang.rareHerbs}: ${ctx.user.inv.rareHerbs}\n`}`
     inv += `${ctx.user.inv.rareSand === 0 ? '' : `${lang.rareSand}: ${ctx.user.inv.rareSand}\n`}`
     inv += `${ctx.user.inv.rareOre === 0 ? '' : `${lang.rareOre}: ${ctx.user.inv.rareOre}\n`}`
     inv += `${ctx.user.inv.rareWood === 0 ? '' : `${lang.rareWood}: ${ctx.user.inv.rareWood}\n`}`
     inv += `${ctx.user.inv.rareFish === 0 ? '' : `${lang.rareFish}: ${ctx.user.inv.rareFish}\n`}`
-    inv += `\n${ctx.user.items.bait === 0 ? '' : `🐛 Наживка: ${ctx.user.items.bait}\n`}`
-    inv += `${ctx.user.items.energyPotion === 0 ? '' : `${lang.energyPotion}: ${ctx.user.items.energyPotion}\n`}`
     inv += `\n⚖️ Вес: ${ctx.user.currWeight.toFixed(0)}/${ctx.user.invWeight}\n`
 
-    return ctx.reply(`Склад Ресурсов\n ${inv}`, null, Markup
+    return ctx.reply(`Склад Ресурсов\n${inv}`, null, Markup
         .keyboard([
             Markup.button('Предметы', 'secondary', 'invent'),
         ]).inline()
     )
 }
 
-menu.char = async (ctx, itemdb) => {
+menu.char = async (ctx) => {
     let inv = ``
-    inv += `\n${lang.hp}: ${ctx.user.char.hp}\n`
-    inv += `${lang.mp}: ${ctx.user.char.mp}\n`
-    inv += `${lang.f_atk}: ${ctx.user.char.f_atk}\n`
-    inv += `${lang.m_atk}: ${ctx.user.char.m_atk}\n`
-    inv += `${lang.f_def}: ${ctx.user.char.f_def}\n`
-    inv += `${lang.m_def}: ${ctx.user.char.m_def}\n`
-    inv += `\n${lang.chr}: ${ctx.user.stat.chr}\n`
-    inv += `${lang.con}: ${ctx.user.stat.con}\n`
-    inv += `${lang.int}: ${ctx.user.stat.int}\n`
-    inv += `${lang.luc}: ${ctx.user.stat.luc}\n`
-    inv += `${lang.str}: ${ctx.user.stat.str}\n`
-
-    return ctx.reply(`Характеристики Персонажа\n ${inv}`)
+    const massCh = Object.keys(ctx.user.char)
+    inv += `${lang[massCh[2]]}: ${ctx.user.char[massCh[2]]} из ${ctx.user.char[massCh[0]]}\n`
+    inv += `${lang[massCh[3]]}: ${ctx.user.char[massCh[3]]} из ${ctx.user.char[massCh[1]]}\n`
+    for (i=4; i < massCh.length; i++) {
+        inv += `${lang[massCh[i]]}: ${ctx.user.char[massCh[i]]}\n`
+    }
+    inv += '\n'
+    const massSt = Object.keys(ctx.user.stat)
+    for (i=0; i < massSt.length; i++) {
+        inv += `${lang[massSt[i]]}: ${ctx.user.stat[massSt[i]]}\n`
+    }
+    return ctx.reply(`Характеристики Персонажа\n\n${inv}`)
 }
 
-menu.equip = async (ctx, itemdb, userdb) => {
+menu.equip = async (ctx, itemdb) => {
     const item = async(n) => {
         const j = ctx.user.invent.find(x => x._id.toString() === ctx.user.equip[n].item.toString())
         if (!j) {return `${lang[n]}: Пусто`}
@@ -116,7 +113,7 @@ menu.equip = async (ctx, itemdb, userdb) => {
     inv += `${await item('armor')}\n`
     inv += `${await item('ring')}\n`
 
-    return ctx.reply(`Экипировка Персонажа\n ${inv}`)
+    return ctx.reply(`Экипировка Персонажа\n${inv}`)
 }
 
 menu.invent = async (ctx, itemdb) => {
@@ -132,9 +129,11 @@ menu.invent = async (ctx, itemdb) => {
     item.forEach((x,y,z) => {
         inv += `${ctx.user.invent[y].quantity === 1 ? `` : `[${ctx.user.invent[y].quantity}]`} ${item[y].name} ${ctx.user.invent[y].ench === 0 ? `` : `+${ctx.user.invent[y].ench}`} ${ctx.user.invent[y].equiped ? `(Экипированно)` : ``}\n`
     })
+    inv += `\n${ctx.user.items.bait === 0 ? '' : `🐛 Наживка: ${ctx.user.items.bait}\n`}`
+    inv += `${ctx.user.items.energyPotion === 0 ? '' : `${lang.energyPotion}: ${ctx.user.items.energyPotion}\n`}`
     inv += `\n👜 Ячеек Занято: ${ctx.user.invent.length}/10\n`
 
-    return ctx.reply(`Инвентарь Предметов\n ${inv}`, null, Markup
+    return ctx.reply(`Инвентарь Предметов\n${inv}`, null, Markup
         .keyboard([
             Markup.button('Ресурсы', 'secondary', 'inventory'),
         ]).inline()
@@ -179,9 +178,9 @@ menu.buffs = (ctx) => {
     buffs += buffTime(ctx.user.buffs.rate9st, 'Rate9St', 'Rate9StMsg')
     buffs += buffTime(ctx.user.buffs.energyWell, 'energyWell', 'energyWellMsg')
     buffs += buffTime(ctx.user.buffs.newby, 'newBy', 'newByMsg')
-    buffs += `\n ${buffTime(ctx.user.buffs.vip, 'Vip', 'VipMsg')}`
+    buffs += `\n${buffTime(ctx.user.buffs.vip, 'Vip', 'VipMsg')}`
 
-    return ctx.reply(`${cmba.join().replace(/,/g, ' ').replace(cmba[0], '')} ${buffs}`)
+    return ctx.reply(`${cmba.join().replace(/,/g, ' ').replace(cmba[0], '')}${buffs}`)
 }
 
 module.exports = { menu }

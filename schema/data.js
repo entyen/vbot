@@ -11,8 +11,8 @@ const itemSchem = new mongoose.Schema({
     stack: { type: Boolean, required: true},
     type: { type: Number, required: true},
     char: {
-        hp: { type: Number, default: 0},
-        mp: { type: Number, default: 0},
+        hpMax: { type: Number, default: 0},
+        mpMax: { type: Number, default: 0},
         f_atk: { type: Number, default: 0},
         m_atk: { type: Number, default: 0},
         f_def: { type: Number, default: 0},
@@ -71,7 +71,7 @@ const userSchem = new mongoose.Schema({
         _id: { type: mongoose.Schema.Types.ObjectId, unique: true, auto: true },
         item: { type: mongoose.Schema.Types.ObjectId, ref: 'items', required: true },
         quantity: { type: Number, default: 0 },
-        ench: { type: Number, default: 0 },
+        ench: { type: Number, default: 0, min: -1, max: 20 },
         equiped: { type: Boolean, default: false }
     }],
     boosters: {
@@ -91,6 +91,8 @@ const userSchem = new mongoose.Schema({
         energyWell: { type: Number, default: null },
     },
     char: {
+        hpMax: { type: Number, default: 100, min: 0 },
+        mpMax: { type: Number, default: 100, min: 0 },
         hp: { type: Number, default: 100, min: 0 },
         mp: { type: Number, default: 100, min: 0 },
         f_atk: { type: Number, default: 1, min: 0 },

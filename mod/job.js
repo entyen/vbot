@@ -145,7 +145,7 @@ class Job {
         this.ctx.user.exp = this.ctx.user.exp + 1
         await this.ctx.user.save()
         await this.ctx.user.inc('items', bait, 'bait')
-        await this.cb.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 🍀' : ''} ${rareBait === 10 ? `и ${bait} 🐛` : ''} у вас еще ${this.ctx.user.energy} ⚡`)
+        await this.cb.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 ☘️' : ''} ${rareBait === 10 ? `и ${bait} 🐛` : ''} у вас еще ${this.ctx.user.energy} ⚡`)
     }
 
     async collectOre() {
@@ -331,7 +331,7 @@ class Job {
                 await this.ctx.user.dec('items', 1, 'bait')
                 await this.ctx.user.inc('inv', earn, 'vinmt')
                 await this.ctx.user.inc('inv', 1, reward)
-                await this.cb.reply(`Вы поймали редкий сундук ${earn} ${lang.vinmt} ${rare < 2000 ? `и 1 🐡` : 'и 1 🍀'}у вас еще ${this.ctx.user.items.bait} наживки.`)
+                await this.cb.reply(`Вы поймали редкий сундук ${earn} ${lang.vinmt} ${rare < 2000 ? `и 1 🐡` : 'и 1 ☘️'}у вас еще ${this.ctx.user.items.bait} наживки.`)
             })
         } catch(e) {console.log(e)}
     }

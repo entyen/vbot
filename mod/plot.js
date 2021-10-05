@@ -74,7 +74,7 @@ keyboardPlot.Lv2 = Markup.keyboard([
             Markup.button('Лес', 'secondary', 'plot.forest'),
         ],
         [
-            Markup.button('Улучшить', 'positive', 'plot.upgrade.Lv3'),
+            // Markup.button('Улучшить', 'positive', 'plot.upgrade.Lv3'),
             Markup.button(lang.back, 'negative', 'menu'),
         ],
 ])
@@ -84,6 +84,14 @@ plot.plotUpgradeLv1 = (ctx) => {
     if (ctx.user.plot.size >= 1) return ctx.reply('Участок уже Средний')
     if (ctx.user.plot.size === 0) {
         ctx.reply(`Улучшить учаток до Среднего\n⚒ На а его строительство требуется:\n${resCheck(ctx, 'sand', 10000)}`, null, build.plotLv1)
+    }
+    return 
+}
+
+plot.plotUpgradeLv2 = (ctx) => {
+    if (ctx.user.plot.size >= 2) return ctx.reply('Участок уже Большой')
+    if (ctx.user.plot.size === 1) {
+        ctx.reply(`Улучшить учаток до Большого\n⚒ На а его строительство требуется:\n${resCheck(ctx, 'sand', 7000)}\n${resCheck(ctx, 'ore', 3000)}\n${resCheck(ctx, 'wood', 7000)}\n${resCheck(ctx, 'rareWood', 2)}\n${moneyCheck(ctx, 'balance', 100000)}`, null, build.plotLv2)
     }
     return 
 }
@@ -98,9 +106,21 @@ plot.buildWell = async(ctx) => {
     return
 }
 
+plot.buildHouse = async(ctx) => {
+    if (ctx.user.plot.house >= 1) return ctx.reply('Уже есть дом')
+    if (ctx.user.inv.ore < 2000 || ctx.user.inv.sand < 1000 || ctx.user.inv.wood < 2000 || ctx.user.inv.rareSand < 1 || ctx.user.balance < 10000 ) return ctx.reply('Недостаточно средств')
+        await ctx.user.dec('inv', 2000, 'ore')
+        await ctx.user.dec('inv', 1000, 'sand')
+        await ctx.user.dec('inv', 2000, 'wood')
+        await ctx.user.dec('inv', 1, 'rareSand')
+        await ctx.user.dec('balance', 10000)
+        await ctx.user.set('plot', 1, 'house')
+        await ctx.reply('Теперь у вас есть дом')
+    return
+}
+
 plot.buildWh = async(ctx) => {
     if (ctx.user.plot.wh >= 1) return ctx.reply('Уже есть склад')
-    console.log(ctx.user.inv.wood)
     if (ctx.user.inv.ore < 1500 || ctx.user.inv.sand < 2000 || ctx.user.inv.wood < 7000) return ctx.reply('Недостаточно средств')
         await ctx.user.dec('inv', 1500, 'ore')
         await ctx.user.dec('inv', 2000, 'sand')
@@ -120,6 +140,19 @@ plot.plotBuildLv1 = async(ctx) => {
     return
 }
 
+plot.plotBuildLv2 = async(ctx) => {
+    if (ctx.user.plot.size >= 2) return ctx.reply('Ваш участок уже Большой')
+    if (ctx.user.inv.ore < 3000 || ctx.user.inv.sand < 7000 || ctx.user.inv.wood < 7000 || ctx.user.inv.rareWood < 2 || ctx.user.balance < 100000) return ctx.reply('Недостаточно средств')
+        await ctx.user.dec('inv', 3000, 'ore')
+        await ctx.user.dec('inv', 7000, 'sand')
+        await ctx.user.dec('inv', 7000, 'wood')
+        await ctx.user.dec('inv', 2, 'rareWood')
+        await ctx.user.dec('balance', 100000)
+        await ctx.user.set('plot', 2, 'size')
+        await ctx.reply('Теперь ваш участок Средний', null, keyboardPlot.Lv1 )
+    return
+}
+
 plot.trowPotion = async(ctx) => {
     if (ctx.user.buffs.energyWell >= ctx.timestamp) { return ctx.reply( '⚡ Колодец уже активен' ) }
     if (ctx.user.items.energyPotion < 1) return ctx.reply('Недостаточно Зелий')
@@ -133,9 +166,16 @@ const resCheck = (ctx, x, y) => {
     return `${ctx.user.inv[x] > y ? '✔️' : '❌'} ${lang[x]} ${y}`
 }
 
+const moneyCheck = (ctx, x, y) => {
+    return `${ctx.user.balance > y ? '✔️' : '❌'} ${lang[x]} ${y}`
+}
+
 plot.house = (ctx) => {
     if (ctx.user.plot.house === 0) {
-        ctx.reply(`🏠 Дом позволит вам заниматся созданием предметов\n⚒ На его строительство требуется:`)
+        ctx.reply(`🏠 Дом позволит вам заниматся созданием предметов\n⚒ На его строительство требуется:\n${resCheck(ctx, 'ore', 2000)}\n︎${resCheck(ctx, 'sand', 1000)}\n︎${resCheck(ctx, 'wood', 2000)}\n︎${resCheck(ctx, 'rareSand', 1)}\n${moneyCheck(ctx, 'balance', 10000)}`, null, build.house)
+    }
+    if (ctx.user.plot.house === 1) {
+        ctx.reply(`🏠 Дом ${ctx.user.plot.wh}ур:`)
     }
     return 
 }
@@ -183,9 +223,21 @@ build.wh = Markup.keyboard(
         ],
 ).inline()
 
+build.house = Markup.keyboard(
+        [
+            Markup.button('Построить', 'secondary', 'build.house'),
+        ],
+).inline()
+
 build.plotLv1 = Markup.keyboard(
         [
             Markup.button('Улучшить участок до Среднего', 'default', 'plot.build.Lv1'),
+        ]
+).inline()
+
+build.plotLv2 = Markup.keyboard(
+        [
+            Markup.button('Улучшить участок до Большого', 'default', 'plot.build.Lv2'),
         ]
 ).inline()
 

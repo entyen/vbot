@@ -101,8 +101,8 @@ utils.smChat = async (chat, msg) => {
     })
 }
 utils.rand = (min, max) => {
-    const rand = math.random() * (max - min) + min
-    return rand.tofixed(1)
+    const rand = Math.random() * (max - min) + min
+    return Math.floor(rand)
 }
 
 //middlewere for bot chek user in database or not create user
@@ -237,7 +237,7 @@ energy.addCallback( () => {
                 if (user[i].alert) {
                     if (!user[i].timers.eFullAlert) {
                         await user[i].set('timers', true, 'eFullAlert')
-                        await bot.sendMessage(user[i].id, `⚡ Энергия полная, вперед тратить. 🥳\n Если вы не хотите получать это уведомление вы можете отключить его в Настройках => Уведомления`)
+                        await bot.sendMessage(user[i].id, `⚡ Энергия полная, вперед тратить. 🥳\nЕсли вы не хотите получать это уведомление вы можете отключить его в Настройках => Уведомления`)
                     }
                 }
             } else {
@@ -304,8 +304,11 @@ updater.addCallback(async () => {
         const userTwoSt = await userdb.findOne({ id: resultMass[3] })
         const userTreeSt = await userdb.findOne({ id: resultMass[6] })
         await userOneSt.set('buffs', (+timestamp + (31*60*1000)),'rate1st')
+        await userOneSt.dec('balance', 500)
         await userTwoSt.set('buffs', (+timestamp + (31*60*1000)),'rate2st')
+        await userTwoSt.dec('balance', 300)
         await userTreeSt.set('buffs', (+timestamp + (31*60*1000)),'rate3st')
+        await userTreeSt.dec('balance', 150)
         const userFourSt = await userdb.findOne({ id: resultMass[9] })
         const userFiveSt = await userdb.findOne({ id: resultMass[12] })
         const userSixSt = await userdb.findOne({ id: resultMass[15] })
@@ -542,6 +545,20 @@ userdb.prototype.add = async function (field, value) {
     }
   } else {
     this[field].push(value)
+  }
+  return this.save()
+}
+
+userdb.prototype.ench = async function (field, locItem, value) {
+  let item = await itemdb.findById({_id: value.item})
+  if (!item.stack) {
+        locItem.ench += 1
+    if (value.ench < 0) {
+        const idx = this[field].findIndex(x => x._id === locItem._id)
+        this[field].splice(idx, 1)
+    }
+  } else {
+      return null
   }
   return this.save()
 }

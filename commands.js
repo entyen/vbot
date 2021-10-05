@@ -251,12 +251,13 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
         } else
         if (cmba[0] === 'set') {
             if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')
-            let item = await itemdb.findOne({id: 1})
+            let item = await itemdb.findOne({id: +cmba[1]})
                 ctx.user.add('invent', {
                     item: item._id.toString(),
-                    quantity: 1,
+                    quantity: +cmba[2] || 1,
                     ench: 0
                 })
+            ctx.reply(`Вам выданна ${item.name} в кол-ве ${+cmba[2] || 1}`)
         } else
         if (cmba[0] === 'chk') {
             if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')
@@ -289,16 +290,16 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 ctx.user.equip[eqitem].item = ctx.user.invent[cmba[1]]._id
                 ctx.user.equip[eqitem].equiped = true
                 ctx.user.invent[cmba[1]].equiped = true
-                const massSt = [ 'str', 'int', 'con', 'luc', 'chr' ]
+                const massSt = Object.keys(itemId.stat)
                 for (i = 0; i < massSt.length; i++) {
-                    ctx.user.stat[massSt[i]] += itemId.stat[massSt[i]]
+                    ctx.user.stat[massSt[i]] += Math.floor(itemId.stat[massSt[i]] + (ctx.user.invent[cmba[1]].ench*0.1)*itemId.stat[massSt[i]])
                 }
-                const massCh = [ 'f_atk', 'f_def', 'hp', 'm_atk', 'm_def', 'mp' ]
+                const massCh = Object.keys(itemId.char)
                 for (i = 0; i < massCh.length; i++) {
-                    ctx.user.char[massCh[i]] += itemId.char[massCh[i]]
+                    ctx.user.char[massCh[i]] += Math.floor(itemId.char[massCh[i]] + (ctx.user.invent[cmba[1]].ench*0.2)*itemId.char[massCh[i]])
                 }
                 await ctx.user.save()
-            ctx.reply(`Вы надели ${itemId.name}`)
+            ctx.reply(`Вы надели ${itemId.name} ${ctx.user.invent[cmba[1]].ench === 0 ? '' : `+${ctx.user.invent[cmba[1]].ench}`}`)
         } else
         if (cmba[0] === 'снять') {
             cmba[1] = --cmba[1]
@@ -325,23 +326,89 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 ctx.user.equip[eqitem].item = ctx.user.invent[cmba[1]]._id
                 ctx.user.equip[eqitem].equiped = false
                 ctx.user.invent[cmba[1]].equiped = false
-                const massSt = [ 'str', 'int', 'con', 'luc', 'chr' ]
+                const massSt = Object.keys(itemId.stat)
                 for (i = 0; i < massSt.length; i++) {
-                    ctx.user.stat[massSt[i]] -= itemId.stat[massSt[i]]
+                    ctx.user.stat[massSt[i]] -= Math.floor(itemId.stat[massSt[i]] + (ctx.user.invent[cmba[1]].ench*0.1)*itemId.stat[massSt[i]])
                 }
-                const massCh = [ 'f_atk', 'f_def', 'hp', 'm_atk', 'm_def', 'mp' ]
+                const massCh = Object.keys(itemId.char)
                 for (i = 0; i < massCh.length; i++) {
-                    ctx.user.char[massCh[i]] -= itemId.char[massCh[i]]
+                    ctx.user.char[massCh[i]] -= Math.floor(itemId.char[massCh[i]] + (ctx.user.invent[cmba[1]].ench*0.2)*itemId.char[massCh[i]])
                 }
                 await ctx.user.save()
-            ctx.reply(`Вы сняли ${itemId.name}`)
+            ctx.reply(`Вы сняли ${itemId.name} ${ctx.user.invent[cmba[1]].ench === 0 ? '' : `+${ctx.user.invent[cmba[1]].ench}`}`)
+        } else
+        if (cmba[0] === 'предмет') {
+            cmba[1] = --cmba[1]
+            if(!ctx.user.invent[cmba[1]]) { return ctx.reply('Предмет не найден') }
+            let itemId = await itemdb.findById(ctx.user.invent[cmba[1]].item)
+            const itemStat = []
+            let eqitem = ''
+            if (itemId.type > 0) {
+                switch(itemId.type) {
+                    case 0:
+                        eqitem = 'armor'
+                        break
+                    case 1:
+                        eqitem = 'weap'
+                        break
+                    case 2:
+                        eqitem = 'ring'
+                        break
+                    case 3:
+                        eqitem = 'fishRod'
+                        break
+                }
+            } else { return ctx.reply('Неверный слот') }
+                const massSt = Object.keys(itemId.stat)
+                for (i = 0; i < massSt.length; i++) {
+                    itemStat.push(`${itemId.stat[massSt[i]] === 0 ? `` : `\n${lang[massSt[i]]}: ${Math.floor(itemId.stat[massSt[i]] + (ctx.user.invent[cmba[1]].ench*0.1)*itemId.stat[massSt[i]])}`}`)
+                }
+                const massCh = Object.keys(itemId.char)
+                for (i = 0; i < massCh.length; i++) {
+                    itemStat.push(`${itemId.char[massCh[i]] === 0 ? `` : `\n${lang[massCh[i]]}: ${Math.floor(itemId.char[massCh[i]] + (ctx.user.invent[cmba[1]].ench*0.2)*itemId.char[massCh[i]])}`}`)
+                }
+            ctx.reply(`${itemId.name} ${ctx.user.invent[cmba[1]].ench === 0 ? '' : `+${ctx.user.invent[cmba[1]].ench}`}: ${itemStat.join(' ')}`)
         } else
         if (cmba[0] === 'ench') {
-            if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')
-            let itemId = await itemdb.findById(ctx.user.invent[cmba[1]].item)
-                console.log(ctx.user.invent.find(x => x._id))
-                console.log(itemId)
-                // ctx.reply(`${itemId.name} ${ctx.user.invent[0].quantity}`)
+            cmba[1] = --cmba[1]
+            let locItem = ctx.user.invent[cmba[1]]
+            if (ctx.cmd) {
+                locItem = ctx.cmd.split('.')[1]
+            } else {
+                locItem = ctx.user.invent[cmba[1]]
+            }
+            if(!locItem) { return ctx.reply('Предмет не найден') }
+            let itemId = await itemdb.findById(locItem.item)
+            let enchScroll = await itemdb.findOne({id: 6})
+            const eScroll = ctx.user.invent.find(x => x.item.toString() === enchScroll._id.toString())
+            if (!eScroll || eScroll.quantity < 0 ) { return ctx.reply('Недостаточно свитков для зачарования') }
+                await ctx.user.add('invent', { item: enchScroll._id.toString(), quantity: -1 })
+            if (itemId.type > 0) {
+                switch(itemId.type) {
+                    case 0:
+                        eqitem = 'armor'
+                        break
+                    case 1:
+                        eqitem = 'weap'
+                        break
+                    case 2:
+                        eqitem = 'ring'
+                        break
+                    case 3:
+                        eqitem = 'fishRod'
+                        break
+                }
+            } else { return ctx.reply('Неверный предмет') }
+            const rand = utils.rand(0, 100)
+            if (locItem.ench >=10) { return ctx.reply('Предмет улучшен до максимума') }
+            if (rand > 0 && rand < 100 - (locItem.ench * 9.5)) {
+                await ctx.user.ench('invent', locItem, { item: itemId._id.toString(), ench: 1 })
+                ctx.reply(`${itemId.name} +${locItem.ench + 1}`)
+            } else {
+                await ctx.user.ench('invent', locItem, { item: itemId._id.toString(), ench: -1 })
+                await ctx.user.inc('inv', locItem.ench, 'vinmt')
+                ctx.reply(`Предмет ${itemId.name} ${locItem.ench === 0 ? '' : `+${locItem.ench}`} сломан: вы получаете ${locItem.ench} ${lang.vinmt}`)
+            }
         } else
         if (cmba[0] === 'stop') {
             if (ctx.user.acclvl < 7) return ctx.reply('Нет прав использовать данную команду')
@@ -379,9 +446,9 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
             case 'invent':
                 return menu.invent(ctx, itemdb)
             case 'char':
-                return menu.char(ctx, itemdb)
+                return menu.char(ctx)
             case 'equip':
-                return menu.equip(ctx, itemdb, userdb)
+                return menu.equip(ctx, itemdb)
             case 'menu':
                 return menu.main(ctx)
             case lang.setting:
@@ -432,6 +499,18 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 return market.auctionBuy(ctx, 'rareFish')
             case 'auction.rareFish.sell':
                 return market.auctionSell(ctx, 'rareFish', 100)
+            case 'auction.rareWood':
+                return market.auctionMsg(ctx, 'rareWood')
+            case 'auction.rareWood.buy':
+                return market.auctionBuy(ctx, 'rareWood')
+            case 'auction.rareWood.sell':
+                return market.auctionSell(ctx, 'rareWood', 10)
+            case 'auction.rareSand':
+                return market.auctionMsg(ctx, 'rareSand')
+            case 'auction.rareSand.buy':
+                return market.auctionBuy(ctx, 'rareSand')
+            case 'auction.rareSand.sell':
+                return market.auctionSell(ctx, 'rareSand', 10)
             case 'energyPotion':
                 ctx.reply(`${lang.energyPotion} стоит 6 500 ${lang.curr} восстанавливает 25 ⚡.`, null, Markup
                     .keyboard(
@@ -664,18 +743,20 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 return plot.buildWh(ctx)
             case 'plot.house':
                 return plot.house(ctx)
+            case 'build.house':
+                return plot.buildHouse(ctx)
             case 'plot.temple':
                 return plot.temple(ctx)
+            case 'build.temple':
+                return plot.buildTemple(ctx)
             case 'plot.upgrade.Lv1':
                 return plot.plotUpgradeLv1(ctx)
             case 'plot.build.Lv1':
                 return plot.plotBuildLv1(ctx)
             case 'plot.upgrade.Lv2':
-                //TODO
-                return ctx.reply(lang.inDev)
+                return plot.plotUpgradeLv2(ctx)
             case 'plot.build.Lv2':
-                //TODO
-                return ctx.reply(lang.inDev)
+                return plot.plotBuildLv2(ctx)
             case 'plot.upgrade.Lv3':
                 //TODO
                 return ctx.reply(lang.inDev)
