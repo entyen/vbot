@@ -86,17 +86,6 @@ app.get('/bank', async (req, res) => {
     res.send(`${JSON.stringify(bank)}`)
 })
 
-
-async function slon() {
-    const rounded = function(number){
-        return (+number).toFixed(2)
-    }
-    const rq = await axios.request('https://api.cryptonator.com/api/ticker/xlm-rub')
-    return +rounded(rq.data.ticker.price)
-}
-
-slon()
-
 app.listen(3000, () => { console.loge('Running webhook') })
 //error and warn color
 console.errore = (err) => console.error('\x1b[91m%s\x1b[0m', err)
@@ -114,6 +103,15 @@ utils.smChat = async (chat, msg) => {
 utils.rand = (min, max) => {
     const rand = Math.random() * (max - min) + min
     return Math.floor(rand)
+}
+
+utils.skillLeveling = async (name, ctx) => {
+    if (ctx.user.skilsExp[name] >= 20 * (ctx.user.skils[name] + 1)) {
+        ctx.user.skilsExp[name] = 0
+        ctx.user.skils[name] = ctx.user.skils[name] + 1
+        await ctx.user.save()
+        await ctx.reply(`Уровень навыка ${lang.skil[name]} теперь ${ctx.user.skils[name]} 🎉`)
+    }
 }
 
 //middlewere for bot chek user in database or not create user
@@ -172,6 +170,11 @@ bot.use(async (ctx, next) => {
             await ctx.user.inc('level', 1)
             await ctx.reply(`Поздравляю вы повысили уровень до ${ctx.user.level} 🎉`)
         }
+
+        await utils.skillLeveling('harv', ctx)
+        await utils.skillLeveling('dig', ctx)
+        await utils.skillLeveling('log', ctx)
+        await utils.skillLeveling('mine', ctx)
     }
 
     if (ctx.message.peer_id === tea.REPORTCHAT) { 
@@ -194,8 +197,17 @@ bot.use(async (ctx, next) => {
                         ctx.reply(`${result}`)
                     })
                     return
+                }
+            }
+            if (ctx.message.text.split(' ')[0] === '[club206762312|@vinmt]') {
+                const command = ctx.message.text.split(' ')[1].toLowerCase()
+                if (command === 'pris' || command === 'курс') {
+                    bankdb.find({id: 0}).then(bank=> {
+                        ctx.reply(`${lang.lumen}\nЦена покупки ${(bank[0].dpi.lumen).toFixed(2)}${lang.curr}\nЦена продажи ${(bank[0].dpi.lumen*0.995).toFixed(2)}${lang.curr}.`)
+                    })
+                    return
                 } else {
-                    await ctx.reply('Простите но в публичных чатах доступна только команда \'Рейтинг\'')
+                    await ctx.reply('Простите но в публичных чатах доступны только команды \'Рейтинг\'\n\'Курс\'')
                 }
             }
         } catch (e) {
@@ -259,18 +271,27 @@ energy.addCallback( () => {
     })
 })
 
-energy.addCallback( () => {
-    const lumenPrice = async() => {
-            const rounded = function(number){
-                return (+number).toFixed(2)
-            }
-            const rq = await axios.request('https://api.cryptonator.com/api/ticker/xlm-rub')
-        return +rounded(rq.data.ticker.price)
-    }
+const minute = new CronJob('*/1 * * * *', null, true, 'Europe/Moscow')
+minute.addCallback( () => {
     bankdb.findOne({id: 0}).then(async (bank) => {
-        bank.set('dpi', await lumenPrice(), 'lumen')
+            const rq = await axios.request('https://api.cryptonator.com/api/ticker/xlm-rub')
+                if(!rq.data.ticker) return
+	            if(!rq.data.ticker.price) return
+            const price = Math.round((rq.data.ticker.price)*100)/100
+                bank.set('dpi', price, 'lumen')
     })
 })
+
+// minute.addCallback( () => {
+//     bankdb.findOne({id: 0}).then(bank => {
+//         const url = 'https://discord.com/api/webhooks/897917686229651496/akTYmU8MPSgvBNC6ytAfZ3dWiJVpwJYsBAoc4s1bVMxkaTMjNCTywEkIQVfRXKBOpA4w'
+//         axios.post(url, {
+//             content: `Цена Люменов: ${bank.dpi.lumen}`,
+//             username: 'Vinteum',
+//             avatar_url: 'https://sun9-71.userapi.com/impg/cxeIzvGRLvl2XCe744iNh16_6iZonzb3z9rX_w/EMyauWyStxo.jpg?size=400x400&quality=95&sign=97ffe778f26eb81ae86d6b0415856cf2&type=album'
+//         })
+//     })
+// })
 
 //buff check
 setInterval( () => {
@@ -329,10 +350,13 @@ updater.addCallback(async () => {
         const userTreeSt = await userdb.findOne({ id: resultMass[6] })
         await userOneSt.set('buffs', (+timestamp + (31*60*1000)),'rate1st')
         await userOneSt.dec('balance', 500)
+        await bank.inc('tax', 500)
         await userTwoSt.set('buffs', (+timestamp + (31*60*1000)),'rate2st')
         await userTwoSt.dec('balance', 300)
+        await bank.inc('tax', 300)
         await userTreeSt.set('buffs', (+timestamp + (31*60*1000)),'rate3st')
         await userTreeSt.dec('balance', 150)
+        await bank.inc('tax', 150)
         const userFourSt = await userdb.findOne({ id: resultMass[9] })
         const userFiveSt = await userdb.findOne({ id: resultMass[12] })
         const userSixSt = await userdb.findOne({ id: resultMass[15] })
@@ -527,6 +551,33 @@ class photoGroupWiget {
 const photoWiget = new photoGroupWiget()
 // photoWiget.testJob('24x24', './stN.png')
 
+bankdb.prototype.inc = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] += +value
+  } else {
+    this[field] += +value
+  }
+  return this.save()
+}
+
+bankdb.prototype.dec = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] -= +value
+  } else {
+    this[field] -= +value
+  }
+  return this.save()
+}
+
+bankdb.prototype.set = function (field, value, field2) {
+  if (field2) {
+    this[field][field2] = value
+  } else {
+    this[field] = value
+  }
+  return this.save()
+}
+
 userdb.prototype.inc = function (field, value, field2) {
   if (field2) {
     this[field][field2] += +value
@@ -587,32 +638,6 @@ userdb.prototype.ench = async function (field, locItem, value) {
   return this.save()
 }
 
-bankdb.prototype.inc = function (field, value, field2) {
-  if (field2) {
-    this[field][field2] += +value
-  } else {
-    this[field] += +value
-  }
-  return this.save()
-}
-
-bankdb.prototype.dec = function (field, value, field2) {
-  if (field2) {
-    this[field][field2] -= +value
-  } else {
-    this[field] -= +value
-  }
-  return this.save()
-}
-
-bankdb.prototype.set = function (field, value, field2) {
-  if (field2) {
-    this[field][field2] = value
-  } else {
-    this[field] = value
-  }
-  return this.save()
-}
 
 process.on('uncaughtException', function (err) {
   console.errore(err);

@@ -98,9 +98,9 @@ plot.plotUpgradeLv2 = (ctx) => {
 
 plot.buildWell = async(ctx) => {
     if (ctx.user.plot.well >= 1) return ctx.reply('Уже есть колодец')
-    if (ctx.user.inv.ore < 3000 || ctx.user.inv.rareOre < 2) return ctx.reply('Недостаточно средств')
+    if (ctx.user.inv.ore < 3000 || ctx.user.inv.rareOre < 1) return ctx.reply('Недостаточно средств')
         await ctx.user.dec('inv', 3000, 'ore')
-        await ctx.user.dec('inv', 2, 'rareOre')
+        await ctx.user.dec('inv', 1, 'rareOre')
         await ctx.user.set('plot', 1, 'well')
         await ctx.reply('Теперь у вас есть колодец')
     return
@@ -108,11 +108,10 @@ plot.buildWell = async(ctx) => {
 
 plot.buildHouse = async(ctx) => {
     if (ctx.user.plot.house >= 1) return ctx.reply('Уже есть дом')
-    if (ctx.user.inv.ore < 2000 || ctx.user.inv.sand < 1000 || ctx.user.inv.wood < 2000 || ctx.user.inv.rareSand < 1 || ctx.user.balance < 10000 ) return ctx.reply('Недостаточно средств')
+    if (ctx.user.inv.ore < 2000 || ctx.user.inv.sand < 1000 || ctx.user.inv.wood < 2000 || ctx.user.balance < 10000 ) return ctx.reply('Недостаточно средств')
         await ctx.user.dec('inv', 2000, 'ore')
         await ctx.user.dec('inv', 1000, 'sand')
         await ctx.user.dec('inv', 2000, 'wood')
-        await ctx.user.dec('inv', 1, 'rareSand')
         await ctx.user.dec('balance', 10000)
         await ctx.user.set('plot', 1, 'house')
         await ctx.reply('Теперь у вас есть дом')
@@ -172,10 +171,10 @@ const moneyCheck = (ctx, x, y) => {
 
 plot.house = (ctx) => {
     if (ctx.user.plot.house === 0) {
-        ctx.reply(`🏠 Дом позволит вам заниматся созданием предметов\n⚒ На его строительство требуется:\n${resCheck(ctx, 'ore', 2000)}\n︎${resCheck(ctx, 'sand', 1000)}\n︎${resCheck(ctx, 'wood', 2000)}\n︎${resCheck(ctx, 'rareSand', 1)}\n${moneyCheck(ctx, 'balance', 10000)}`, null, build.house)
+        ctx.reply(`🏠 Дом позволит вам заниматся созданием предметов\n⚒ На его строительство требуется:\n${resCheck(ctx, 'ore', 2000)}\n︎${resCheck(ctx, 'sand', 1000)}\n︎${resCheck(ctx, 'wood', 2000)}\n${moneyCheck(ctx, 'balance', 10000)}`, null, build.house)
     }
     if (ctx.user.plot.house === 1) {
-        ctx.reply(`🏠 Дом ${ctx.user.plot.wh}ур:`)
+        ctx.reply(`🏠 Дом ${ctx.user.plot.wh}ур:`, null, craft.house)
     }
     return 
 }
@@ -199,7 +198,7 @@ plot.wh = (ctx) => {
 
 plot.well = (ctx) => {
     if (ctx.user.plot.well === 0) {
-        ctx.reply(`🕳 Колодец позволит вам\n получать Эффект Восстановление Энергии\n⚒ На а его строительство требуется:\n${resCheck(ctx, 'ore', 3000)}\n${resCheck(ctx, 'rareOre', 2)}`, null, build.well)
+        ctx.reply(`🕳 Колодец позволит вам\n получать Эффект Восстановление Энергии\n⚒ На а его строительство требуется:\n${resCheck(ctx, 'ore', 3000)}\n${resCheck(ctx, 'rareOre', 1)}`, null, build.well)
     }else 
     if (ctx.user.buffs.energyWell >= ctx.timestamp) {
         ctx.reply(`🕳 Колодец: \n Заряжен и вы получаете +1 к регенерации Энергии ⚡`)
@@ -246,5 +245,21 @@ const trowPotionWell = Markup.keyboard([
             Markup.button('Бросить', 'secondary', 'trow.potion.well'),
         ],
 ]).inline()
+
+const craft = {}
+
+craft.house = Markup.keyboard([
+        [
+            Markup.button('Создать', 'secondary', 'craft.att'),
+        ],
+        [
+            Markup.button('Меч 1ур', 'secondary', 'craft.sword'),
+            Markup.button('Жезл 1ур', 'secondary', 'craft.wand'),
+            Markup.button('Лук 1ур', 'secondary', 'craft.bow'),
+        ],
+        [
+            Markup.button(lang.back, 'negative', 'menu'),
+        ]
+])
 
 module.exports = { plot }

@@ -43,7 +43,8 @@ const userSchem = new mongoose.Schema({
      },
     lang: { type: String, default: 'ru' },
     timers: {
-        mainWork: { type: Number, default: null },
+        mainWork: { type: String, default: null },
+        timeWork: { type: Number, default: 0 },
         hasWorked: { type: Boolean, default: false },
         bonus: { type: Boolean, default: false },
         eFullAlert: { type: Boolean, default: true },
@@ -55,6 +56,20 @@ const userSchem = new mongoose.Schema({
         buffRate3St: { type: Boolean, default: true },
         buffRate9St: { type: Boolean, default: true },
         buffEnergyWell: { type: Boolean, default: true },
+    },
+    skils: {
+        harv: { type: Number, default: 0 },
+        log: { type: Number, default: 0 },
+        mine: { type: Number, default: 0 },
+        dig: { type: Number, default: 0 },
+        fish: { type: Number, default: 0 }
+    },
+    skilsExp: {
+        harv: { type: Number, default: 0 },
+        log: { type: Number, default: 0 },
+        mine: { type: Number, default: 0 },
+        dig: { type: Number, default: 0 },
+        fish: { type: Number, default: 0 }
     },
     inv: {
         vinmt: { type: Number, default: 0 },
@@ -157,6 +172,7 @@ const bankSchem = new mongoose.Schema({
     id: {type: Number, required: true, unique: true}, 
     name: String,
     balance: { type: Number, default: 0 },
+    tax: { type: Number, default: 0 },
     inv: {
         vinmt: { type: Number, default: 0 },
         herbs: { type: Number, default: 0 },

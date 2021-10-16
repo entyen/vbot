@@ -425,6 +425,8 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 return menu.invent(ctx, itemdb)
             case 'char':
                 return menu.char(ctx)
+            case 'craftSkils':
+                return menu.craftSkils(ctx)
             case 'equip':
                 return menu.equip(ctx, itemdb)
             case 'menu':

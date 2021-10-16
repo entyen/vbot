@@ -57,6 +57,7 @@ menu.profile = (ctx) => {
         .keyboard([
             Markup.button('Характеристики', 'secondary', 'char'),
             Markup.button('Экипировка', 'secondary', 'equip'),
+            Markup.button('Ремесла', 'secondary', 'craftSkils'),
         ]).inline())
 }
 
@@ -82,6 +83,15 @@ menu.inventory = (ctx) => {
             Markup.button('Предметы', 'secondary', 'invent'),
         ]).inline()
     )
+}
+
+menu.craftSkils = async (ctx) => {
+    let inv = ``
+    const massSt = Object.keys(ctx.user.skils)
+    for (i=0; i < massSt.length; i++) {
+        inv += `${lang.skil[massSt[i]]}: ${ctx.user.skils[massSt[i]]} [${ctx.user.skilsExp[massSt[i]]}/${20 * (ctx.user.skils[massSt[i]] + 1)}]\n`
+    }
+    return ctx.reply(`Ремесла\n\n${inv}`)
 }
 
 menu.char = async (ctx) => {

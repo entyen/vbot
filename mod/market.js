@@ -60,8 +60,12 @@ market.auction = (ctx) => {
 
 
 market.exchangeMsg = (ctx, type) => {
-    ctx.reply(`${lang[type]}\nЦена покупки ${(ctx.bank.dpi[type]).toFixed(2)}${lang.curr}\nЦена продажи ${(ctx.bank.dpi[type]*0.995).toFixed(2)}${lang.curr}.`, null, Markup
+    ctx.reply(`${lang[type]}\nЦена покупки ${(ctx.bank.dpi[type]).toFixed(2)}${lang.curr}\nЦена продажи ${(ctx.bank.dpi[type]*0.995).toFixed(2)}${lang.curr}\n
+    У вас ${ctx.user.inv[type]}${lang[type]} это ${Math.round(ctx.user.inv[type]*(ctx.bank.dpi[type]*0.995).toFixed(2))}${lang.curr}`, null, Markup
         .keyboard([
+            [
+                Markup.button('Обновить цену', 'positive', `${ctx.cmd}`),
+            ],
             [
                 Markup.button('Купить 100', 'default', `${ctx.cmd}.buy.100`),
                 Markup.button('Продать 100', 'default', `${ctx.cmd}.sell.100`),
@@ -69,8 +73,11 @@ market.exchangeMsg = (ctx, type) => {
             [
                 Markup.button('Купить 1k', 'default', `${ctx.cmd}.buy.1000`),
                 Markup.button('Продать 1k', 'default', `${ctx.cmd}.sell.1000`),
+            ],
+            [
+                Markup.button(lang.back, 'negative', lang.market),
             ]
-        ]).inline()
+        ])
     )
 }
 

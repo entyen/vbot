@@ -30,36 +30,42 @@ class Job {
         const lvlx = 1 + (0.01 * this.ctx.user.boosters.harvest)
 
         this.jobs = {
+            leave: {
+                id: 'leaveJob',
+                energy: 1,
+                level: 1,
+                lvlx: lvlx,
+            },
             herb: {
                 id: lang.field,
                 energy: 1,
                 level: 1,
-                lvlx: lvlx,
+                lvlx: lvlx + (0.1 * this.ctx.user.skils.harv)
             },
             ore: {
                 id: lang.mine,
                 energy: 1,
                 level: 1,
-                lvlx: lvlx,
+                lvlx: lvlx + (0.1 * this.ctx.user.skils.mine)
             },
             sand: {
                 id: lang.beach,
                 energy: 1,
                 level: 1,
-                lvlx: lvlx,
+                lvlx: lvlx + (0.1 * this.ctx.user.skils.dig)
             },
             forest: {
                 id: lang.forest,
                 energy: 1,
                 level: 1,
-                lvlx: lvlx,
+                lvlx: lvlx + (0.1 * this.ctx.user.skils.log)
             },
             fishing: {
                 id: lang.fishing,
                 energy: 4,
                 energyX: 1,
                 level: 4,
-                lvlx: 1,
+                lvlx: lvlx + (0.01 * this.ctx.user.skils.fish),
                 places: {
                     baikal: {
                         id: 'baikal',
@@ -114,16 +120,28 @@ class Job {
         if (this.ctx.user.level < 0) {
             await this.cb.reply('Ваш уровень слишком низкий. Извините, на данный момент вы не можете работать')
             return false
-        } else if (this.ctx.user.currWeight > this.ctx.user.invWeight) {
+        }
+         else if (this.ctx.user.currWeight > this.ctx.user.invWeight) {
             await this.cb.reply('Инвентарь перегружен разгрузитесь и возвращайтесь')
             return false
-        } else if ([this.jobs.fishing.id, this.jobs.fishing.places.baikal.id, this.jobs.fishing.places.hafen.id].includes(this.ctx.cmd) && this.ctx.user.level < this.jobs.fishing.level) {
+        }
+         else if ([this.jobs.fishing.id, this.jobs.fishing.places.baikal.id, this.jobs.fishing.places.hafen.id].includes(this.ctx.cmd) && this.ctx.user.level < this.jobs.fishing.level) {
             return await this.cb.reply(`Простите, но рыбалка доступна с ${this.jobs.fishing.level} уровня.`)
-        } else if ([this.jobs.fishing.places.baikal.id, this.jobs.fishing.places.hafen.id].includes(this.ctx.cmd) && this.ctx.user.energy < this.jobs.fishing.energy) {
+        }
+         else if ([this.jobs.fishing.places.baikal.id, this.jobs.fishing.places.hafen.id].includes(this.ctx.cmd) && this.ctx.user.energy < this.jobs.fishing.energy) {
             return await this.cb.reply(`Вы устали, у вас ${this.ctx.user.energy} энергии ⏳ отдохните и возвращайтесь.`)
         }
-
+        else if ([this.jobs.herb.id, this.jobs.ore.id, this.jobs.forest.id, this.jobs.sand.id].includes(this.ctx.cmd) && this.ctx.user.timers.hasWorked) {
+            return await this.cb.reply(`Вы уже работаете ${lang[this.ctx.user.timers.mainWork]}ом`)
+        }
         return true
+    }
+
+    async stopJob() {
+        await this.ctx.user.set('timers', null, 'mainWork')
+        await this.ctx.user.set('timers', false, 'hasWorked')
+        // clearInterval(this)
+        await this.cb.reply(`🌿 Вы уволились с работы Травника 🌿`)
     }
 
     async collectHerbs() {
@@ -132,16 +150,38 @@ class Job {
             return
         }
 
-        this.ctx.user.energy = this.ctx.user.energy - this.jobs.herb.energy
+        await this.ctx.user.dec('energy', this.jobs.herb.energy)
+
+        // const herbJob = async () => {
+        //         const earn = Math.round(randCurr(8, 23) * this.jobs.herb.lvlx)
+        //         let bait = 0
+        //         const rare = randCurr(0, 200)
+        //         const rareBait = randCurr(0, 50)
+        //         rare === 27 ? this.ctx.user.inv.rareHerbs = this.ctx.user.inv.rareHerbs + 1 : null
+        //         rareBait === 10 ? bait = 5 : bait = 0
+        //         this.ctx.user.inv.herbs = this.ctx.user.inv.herbs + earn
+        //         this.ctx.user.exp = this.ctx.user.exp + 1
+        //         await this.ctx.user.save()
+        //         await this.ctx.user.inc('items', bait, 'bait')
+        //         await this.ctx.reply(`Вы отыскали немного трав в поле и собрали ${earn} 🌿 ${rare === 27 ? 'и 1 ☘️' : ''} ${rareBait === 10 ? `и ${bait} 🐛` : ''} у вас еще ${this.ctx.user.energy} ⚡`)
+        //         return
+        // }
+
+        // await this.ctx.user.set('timers', this.ctx.timestamp, 'timeWork')
+        // await this.ctx.user.set('timers', 'Herbalist', 'mainWork')
+        // await this.ctx.user.set('timers', true, 'hasWorked')
+        // const workerId = setInterval(herbJob, 5000)
+        // console.log(workerId)
+        // await this.cb.reply(`🌿 Вы устроились на работу Травником 🌿`)
 
         const earn = Math.round(randCurr(8, 23) * this.jobs.herb.lvlx)
-
         let bait = 0
         const rare = randCurr(0, 200)
         const rareBait = randCurr(0, 50)
         rare === 27 ? this.ctx.user.inv.rareHerbs = this.ctx.user.inv.rareHerbs + 1 : null
         rareBait === 10 ? bait = 5 : bait = 0
         this.ctx.user.inv.herbs = this.ctx.user.inv.herbs + earn
+        this.ctx.user.skilsExp.harv = this.ctx.user.skilsExp.harv + 1
         this.ctx.user.exp = this.ctx.user.exp + 1
         await this.ctx.user.save()
         await this.ctx.user.inc('items', bait, 'bait')
@@ -161,6 +201,7 @@ class Job {
         const rare = randCurr(0, 400)
         rare === 277 ? this.ctx.user.inv.rareOre = this.ctx.user.inv.rareOre + 1 : null
         this.ctx.user.inv.ore = this.ctx.user.inv.ore + earn
+        this.ctx.user.skilsExp.mine = this.ctx.user.skilsExp.mine + 1
         this.ctx.user.exp = this.ctx.user.exp + 1
         await this.ctx.user.save()
         await this.cb.reply(`Вы направились в горную шахту и добыли ${earn} ⛰ ${rare === 277 ? 'и 1 💎' : ''} у вас еще ${this.ctx.user.energy} ⚡`)
@@ -179,6 +220,7 @@ class Job {
         const rare = randCurr(0, 1000)
         rare === 277 ? this.ctx.user.inv.rareSand = this.ctx.user.inv.rareSand + 1 : null
         this.ctx.user.inv.sand = this.ctx.user.inv.sand + earn
+        this.ctx.user.skilsExp.dig = this.ctx.user.skilsExp.dig + 1
         this.ctx.user.exp = this.ctx.user.exp + 1
         await this.ctx.user.save()
         await this.cb.reply(`Вы направились на пляж и откопали ${earn} 🏝 ${rare === 277 ? 'и 1 🏺' : ''} у вас еще ${this.ctx.user.energy} ⚡`)
@@ -196,6 +238,7 @@ class Job {
         const rare = randCurr(0, 800)
         rare === 277 ? this.ctx.user.inv.rareWood = this.ctx.user.inv.rareWood + 1 : null
         this.ctx.user.inv.wood = this.ctx.user.inv.wood + earn
+        this.ctx.user.skilsExp.log = this.ctx.user.skilsExp.log + 1
         this.ctx.user.exp = this.ctx.user.exp + 1
         await this.ctx.user.save()
         await this.cb.reply(`Вы направились в лес и нарубили ${earn} 🌲 ${rare === 277 ? 'и 1 🌰' : ''} у вас еще ${this.ctx.user.energy} ⚡`)
@@ -234,6 +277,7 @@ class Job {
         if (this.ctx.user.items.bait === 0) {return this.cb.reply('У вас нет наживки 🐛')}
         await this.ctx.user.dec('energy', this.jobs.fishing.energy)
         await this.ctx.user.inc('exp', this.jobs.fishing.energy)
+        await this.ctx.user.inc('skilsExp', 1, 'fish')
         await this.cb.reply(`Вы закинули удочку у вас еще ${this.ctx.user.energy} энергии.`)
         let massFish = []
         let buttonMass = []
@@ -350,6 +394,8 @@ class Job {
         }
 
         switch (this.ctx.cmd) {
+            case this.jobs.leave.id:
+                return await this.stopJob()
             case this.jobs.herb.id:
                 return await this.collectHerbs()
             case this.jobs.ore.id:
@@ -412,6 +458,16 @@ class Job {
                     }, color: 'primary',
                 }),
             ],
+            // [
+            //     Markup.button({
+            //         action: {
+            //             type: 'callback',
+            //             label: 'Уволиться',
+            //             payload: JSON.stringify({cmd: 'leaveJob'})
+            //         }, color: 'default',
+            //     }),
+
+            // ],
             [
                 Markup.button({
                     action: {
