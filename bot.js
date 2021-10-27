@@ -106,9 +106,9 @@ utils.rand = (min, max) => {
 }
 
 utils.skillLeveling = async (name, ctx) => {
-    if (ctx.user.skilsExp[name] >= 20 * (ctx.user.skils[name] + 1)) {
-        ctx.user.skilsExp[name] = 0
-        ctx.user.skils[name] = ctx.user.skils[name] + 1
+    if (ctx.user.skilsExp[name] >= 20 * (ctx.user.skils[name] + 1) && ctx.user.skils[name] <= 19) {
+        ctx.user.skilsExp[name] -= 20 * (ctx.user.skils[name] + 1)
+        ctx.user.skils[name] += 1
         await ctx.user.save()
         await ctx.reply(`Уровень навыка ${lang.skil[name]} теперь ${ctx.user.skils[name]} 🎉`)
     }
@@ -166,15 +166,17 @@ bot.use(async (ctx, next) => {
             ctx.user.acclvl == 7 ? lang.dev : ctx.user.acclvl == 6 ? lang.adm : ctx.user.acclvl == 5 ? lang.moder : ctx.user.acclvl
 
         if (ctx.user.exp >= 100 * (ctx.user.level + 1)) {
-            await ctx.user.set('exp', 0)
+            await ctx.user.dec('exp', 100 * (ctx.user.level + 1))
+            await ctx.user.inc('boosters', 0.1, 'energyCount')
             await ctx.user.inc('level', 1)
-            await ctx.reply(`Поздравляю вы повысили уровень до ${ctx.user.level} 🎉`)
+            await ctx.reply(`Поздравляю вы повысили уровень до ${ctx.user.level} 🎉 +10 Макс⚡`)
         }
 
         await utils.skillLeveling('harv', ctx)
         await utils.skillLeveling('dig', ctx)
         await utils.skillLeveling('log', ctx)
         await utils.skillLeveling('mine', ctx)
+        await utils.skillLeveling('fish', ctx)
     }
 
     if (ctx.message.peer_id === tea.REPORTCHAT) { 
@@ -256,7 +258,7 @@ const energy = new CronJob('*/3 * * * *', null, true, 'Europe/Moscow')
 energy.addCallback( () => {
     userdb.find({_bm: 1}).then(user => {
         user.forEach( async (x,i,z) => {
-            if (user[i].energy >= (100 * user[i].boosters.energyCount)) {
+            if (user[i].energy >= Math.round(100 * user[i].boosters.energyCount)) {
                 if (user[i].alert) {
                     if (!user[i].timers.eFullAlert) {
                         await user[i].set('timers', true, 'eFullAlert')

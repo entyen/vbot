@@ -246,6 +246,8 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
             let allUser = await userdb.find({})
                 allUser.forEach( async (x,y,z) => {
                     await allUser[y].set('__v', 0)
+                    // console.log(allUser[y].level)
+                    // await allUser[y].inc('boosters', 0.1 * allUser[y].level, 'energyCount')
                 })
                 ctx.reply(`Обновлено ${allUser.length} пользователей`)
         } else
@@ -454,7 +456,9 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                     return menu.setting(ctx)
                 }
             case lang.crafts:
-                return await ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Job.getKeyboard())
+                return ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Job.getKeyboard())
+            case lang.x10harv:
+                return ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Job.getKeyboardX())
             case lang.market:
                 return market.main(ctx)
             case 'market.buy.items':

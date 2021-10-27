@@ -48,7 +48,7 @@ menu.profile = (ctx) => {
     text += `👤 Статус Аккаунта: ${ctx.user._acclvl}\n`
     text += `🌟 Уровень: ${ctx.user.level} [${ctx.user.exp}/${100*(ctx.user.level+1)}]\n`
     text += `🧤 Раса: ${ctx.user.race === 0 ? 'Без Расы': ctx.user.race === 1 ? lang.alv: ctx.user.race === 2 ? lang.elven: ctx.user.race === 3 ? lang.darkElven: ctx.user.race === 4 ? lang.dwarf : null}\n`
-    text += `⚡ Очки Энергии: ${ctx.user.energy} из ${100 * ctx.user.boosters.energyCount}\n`
+    text += `⚡ Очки Энергии: ${ctx.user.energy} из ${Math.round(100 * ctx.user.boosters.energyCount)}\n`
     text += `⚡ Восстановление Энергии: ${ctx.user.boosters.energyRegen} в 3 минуты\n`
     text += `${ctx.user.alert ? '🔔' : '🔕'} Уведомления: ${ctx.user.alert ? 'Включены' : 'Выключены'}\n`
     text += `\n📗 Дата регистрации: ${ctx.user.regDate}`
@@ -64,7 +64,6 @@ menu.profile = (ctx) => {
 menu.inventory = (ctx) => {
     let inv = ``
     inv += `💠 Оргулы: ${ctx.user.balance}\n`
-    inv += `${ctx.user.inv.lumen === 0 ? '' : `${lang.lumen}: ${ctx.user.inv.lumen}\n`}`
     inv += `${ctx.user.inv.vinmt === 0 ? '' : `${lang.vinmt}: ${ctx.user.inv.vinmt}\n`}`
     inv += `${ctx.user.inv.herbs === 0 ? '' : `${lang.herbs}: ${ctx.user.inv.herbs}\n`}`
     inv += `${ctx.user.inv.ore === 0 ? '' : `${lang.ore}: ${ctx.user.inv.ore}\n`}`

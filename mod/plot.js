@@ -253,9 +253,9 @@ craft.house = Markup.keyboard([
             Markup.button('Создать', 'secondary', 'craft.att'),
         ],
         [
-            Markup.button('Меч 1ур', 'secondary', 'craft.sword'),
-            Markup.button('Жезл 1ур', 'secondary', 'craft.wand'),
-            Markup.button('Лук 1ур', 'secondary', 'craft.bow'),
+            Markup.button('Меч', 'secondary', 'craft.sword'),
+            Markup.button('Жезл', 'secondary', 'craft.wand'),
+            Markup.button('Лук', 'secondary', 'craft.bow'),
         ],
         [
             Markup.button(lang.back, 'negative', 'menu'),
