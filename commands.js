@@ -27,34 +27,34 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
         }
         ctx.message.createdTimestamp = ctx.timestamp
         if(usersMap.has(ctx.message.peer_id)) {
-        const userData = usersMap.get(ctx.message.peer_id);
-        const { lastMessage, timer } = userData;
-        const difference = ctx.message.createdTimestamp - lastMessage.createdTimestamp;
-        let msgCount = userData.msgCount
-        cb(`Подождите немного ${difference} ms`)
+            const userData = usersMap.get(ctx.message.peer_id);
+            const { lastMessage, timer } = userData;
+            const difference = ctx.message.createdTimestamp - lastMessage.createdTimestamp;
+            let msgCount = userData.msgCount
+            cb(`Подождите немного ${difference} ms`)
 
-        if(difference > DIFF) {
-            clearTimeout(timer)
-            console.log('Cleared Timeout')
-            userData.msgCount = 1
-            userData.lastMessage = ctx.message
-            userData.timer = setTimeout(() => {
-                usersMap.delete(ctx.message.peer_id)
-                console.log('Removed from map.')
-            }, TIME)
-            usersMap.set(ctx.message.peer_id, userData)
-        }
-        else {
-            ++msgCount
-            if(parseInt(msgCount) === LIMIT) {
-
-               console.log(`Warning: Spamming forbidden.`)
-               
-            } else {
-                userData.msgCount = msgCount;
+            if(difference > DIFF) {
+                clearTimeout(timer)
+                console.log('Cleared Timeout')
+                userData.msgCount = 1
+                userData.lastMessage = ctx.message
+                userData.timer = setTimeout(() => {
+                    usersMap.delete(ctx.message.peer_id)
+                    console.log('Removed from map.')
+                }, TIME)
                 usersMap.set(ctx.message.peer_id, userData)
             }
-        }
+            else {
+                ++msgCount
+                if(parseInt(msgCount) === LIMIT) {
+                
+                   console.log(`Warning: Spamming forbidden.`)
+                
+                } else {
+                    userData.msgCount = msgCount;
+                    usersMap.set(ctx.message.peer_id, userData)
+                }
+            }
         }
         else {
             let fn = setTimeout(async () => {
@@ -459,6 +459,8 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 return ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Job.getKeyboard())
             case lang.x10harv:
                 return ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Job.getKeyboardX())
+            case lang.x100harv:
+                return ctx.reply(`Выбирете направление вашего дальнейшего пути! У вас ${ctx.user.energy}⚡`, null, Job.getKeyboardX1())
             case lang.market:
                 return market.main(ctx)
             case 'market.buy.items':

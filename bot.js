@@ -350,15 +350,21 @@ updater.addCallback(async () => {
         const userOneSt = await userdb.findOne({ id: resultMass[0] })
         const userTwoSt = await userdb.findOne({ id: resultMass[3] })
         const userTreeSt = await userdb.findOne({ id: resultMass[6] })
-        await userOneSt.set('buffs', (+timestamp + (31*60*1000)),'rate1st')
-        await userOneSt.dec('balance', 500)
-        await bank.inc('tax', 500)
-        await userTwoSt.set('buffs', (+timestamp + (31*60*1000)),'rate2st')
-        await userTwoSt.dec('balance', 300)
-        await bank.inc('tax', 300)
-        await userTreeSt.set('buffs', (+timestamp + (31*60*1000)),'rate3st')
-        await userTreeSt.dec('balance', 150)
-        await bank.inc('tax', 150)
+        if (userOneSt.balance > 1000) {
+            await userOneSt.set('buffs', (+timestamp + (31*60*1000)),'rate1st')
+            await userOneSt.dec('balance', 500)
+            await bank.inc('tax', 500)
+        }
+        if (userTwoSt.balance > 1000) {
+            await userTwoSt.set('buffs', (+timestamp + (31*60*1000)),'rate2st')
+            await userTwoSt.dec('balance', 250)
+            await bank.inc('tax', 250)
+        }
+        if (userTreeSt.balance > 1000) {
+            await userTreeSt.set('buffs', (+timestamp + (31*60*1000)),'rate3st')
+            await userTreeSt.dec('balance', 100)
+            await bank.inc('tax', 100)
+        }
         const userFourSt = await userdb.findOne({ id: resultMass[9] })
         const userFiveSt = await userdb.findOne({ id: resultMass[12] })
         const userSixSt = await userdb.findOne({ id: resultMass[15] })
