@@ -176,7 +176,7 @@ module.exports = async(bot, utils, lang, userdb, itemdb, bp) => {
                 ctx.reply('‼️ Что-то не так.')
             }
         } else
-        if (cmba[0] === 'race' || cmba[0] === 'раса') {
+        if (cmba[0] === 'race' || cmba[0] === 'расса') {
             if (cmba[0] && cmba[1] === undefined) {
                 await ctx.reply( `На выбор доступны 4 расы:\n 1. Альв\n 2. Эльф\n 3. Темный Эльф\n 4. Дфарф\n\n Введите ${cmba[0]} "Цифра"\n ️️‼️ Внимание выбрать можно только 1 раз` )
             } else

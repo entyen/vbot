@@ -11,6 +11,8 @@ let lang = JSON.parse(fs.readFileSync(`./lang/ru.json`, 'utf-8'))
 
 //vk api connect
 const axios = require('axios')
+const axiosCloudflare = require('axios-cloudflare')
+axiosCloudflare(axios)
 const VkBot = require('node-vk-bot-api')
 const api = require('node-vk-bot-api/lib/api')
 const Markup = require('node-vk-bot-api/lib/markup')
@@ -134,8 +136,9 @@ bot.use(async (ctx, next) => {
             })
             ctx.user = await userdb.findOne({id: user_id})
             const newByBuffTime = +(ctx.user.buffs.newby-ctx.timestamp)/1000/60/60/24
-            await bot.sendMessage([tea.OWNER, tea.OWNER1], `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
+            await bot.sendMessage([tea.OWNER], `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`)
             await ctx.reply(`Вы получили ${lang.newBy} на ${Math.round(newByBuffTime)} Дней \nПроверить эффекты на себе можно в Настройках`, null, Markup.keyboard([[Markup.button('Меню', 'default', 'menu')]]))
+            return
         }
 
         if (ctx.message.type === 'message_deny') {
@@ -276,11 +279,15 @@ energy.addCallback( () => {
 const minute = new CronJob('*/1 * * * *', null, true, 'Europe/Moscow')
 minute.addCallback( () => {
     bankdb.findOne({id: 0}).then(async (bank) => {
+            try {
             const rq = await axios.request('https://api.cryptonator.com/api/ticker/xlm-rub')
                 if(!rq.data.ticker) return
 	            if(!rq.data.ticker.price) return
             const price = Math.round((rq.data.ticker.price)*100)/100
                 bank.set('dpi', price, 'lumen')
+            } catch (e) {
+                return
+            }
     })
 })
 
@@ -350,20 +357,20 @@ updater.addCallback(async () => {
         const userOneSt = await userdb.findOne({ id: resultMass[0] })
         const userTwoSt = await userdb.findOne({ id: resultMass[3] })
         const userTreeSt = await userdb.findOne({ id: resultMass[6] })
-        if (userOneSt.balance > 1000) {
+        if (userOneSt.balance > 100) {
             await userOneSt.set('buffs', (+timestamp + (31*60*1000)),'rate1st')
-            await userOneSt.dec('balance', 500)
-            await bank.inc('tax', 500)
+            await userOneSt.dec('balance', 50)
+            await bank.inc('tax', 50)
         }
-        if (userTwoSt.balance > 1000) {
+        if (userTwoSt.balance > 100) {
             await userTwoSt.set('buffs', (+timestamp + (31*60*1000)),'rate2st')
-            await userTwoSt.dec('balance', 250)
-            await bank.inc('tax', 250)
+            await userTwoSt.dec('balance', 25)
+            await bank.inc('tax', 25)
         }
-        if (userTreeSt.balance > 1000) {
+        if (userTreeSt.balance > 100) {
             await userTreeSt.set('buffs', (+timestamp + (31*60*1000)),'rate3st')
-            await userTreeSt.dec('balance', 100)
-            await bank.inc('tax', 100)
+            await userTreeSt.dec('balance', 10)
+            await bank.inc('tax', 10)
         }
         const userFourSt = await userdb.findOne({ id: resultMass[9] })
         const userFiveSt = await userdb.findOne({ id: resultMass[12] })

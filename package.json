@@ -4,6 +4,7 @@
   "description": "",
   "main": "bot.js",
   "dependencies": {
+    "axios-cloudflare": "^1.0.2",
     "bluebird": "^3.7.2",
     "cron": "^1.8.2",
     "express": "^4.17.1",
