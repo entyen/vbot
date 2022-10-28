@@ -174,7 +174,8 @@ plot.house = (ctx) => {
         ctx.reply(`🏠 Дом позволит вам заниматся созданием предметов\n⚒ На его строительство требуется:\n${resCheck(ctx, 'ore', 2000)}\n︎${resCheck(ctx, 'sand', 1000)}\n︎${resCheck(ctx, 'wood', 2000)}\n${moneyCheck(ctx, 'balance', 10000)}`, null, build.house)
     }
     if (ctx.user.plot.house === 1) {
-        ctx.reply(`🏠 Дом ${ctx.user.plot.wh}ур:`, null, craft.house)
+        ctx.reply(`🏠 Дом ${ctx.user.plot.wh}ур:`)
+        // ctx.reply(`🏠 Дом ${ctx.user.plot.wh}ур:`, null, craft.house)
     }
     return 
 }
