@@ -97,8 +97,8 @@ market.exchangeSell = async(ctx, type, count) => {
         return
 }
 
-market.auctionMsg = (ctx, type) => {
-    return ctx.reply(`${lang[type]}\nНа складе ${ctx.bank.inv[type]}\nЦена покупки ${ctx.bank.dpi[type]}${lang.curr}\nЦена продажи ${ctx.bank.dpi[type]*0.8}${lang.curr}.`, null, Markup
+market.auctionMsg = (ctx, type, max) => {
+    return ctx.reply(`[${lang[type]}]\n📦 На складе: ${ctx.bank.inv[type]} из ${max}\n📥 Цена покупки: ${ctx.bank.dpi[type]}${lang.curr}\n📤 Цена продажи: ${ctx.bank.dpi[type]*0.8}${lang.curr}.`, null, Markup
         .keyboard(
             [
                 Markup.button('Купить', 'default', `${ctx.cmd}.buy`),

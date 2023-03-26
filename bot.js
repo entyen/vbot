@@ -54,12 +54,12 @@ const items = require("./items/items.js");
 (async function createItem() {
   for (i = 0; i < items.length; i++) {
     const itemInDb = await itemdb.findOne({ id: items[i].id });
-    if(!itemInDb) return
+    if (!itemInDb) return;
     if (itemInDb.id != items[i].id) {
       await items[i].save();
     }
   }
-})()
+})();
 
 //modules
 const commands = require("./commands.js");
@@ -74,13 +74,40 @@ app.post("/post", function (request, response) {
   // })
 });
 
-app.post("/users", async (req, res) => {
-  user = await userdb.findOne({ id: req.body.user_id });
-  res.send(JSON.stringify(user));
+const CryptoJS = require("crypto-js");
+
+const crypto = {};
+
+crypto.enc = (plaintext) => {
+  const encrypted = CryptoJS.AES.encrypt(plaintext, tea.HASH_KEY).toString();
+  const wordArray = CryptoJS.enc.Base64.parse(encrypted);
+  return CryptoJS.enc.Hex.stringify(wordArray);
+};
+
+crypto.dec = (cipher) => {
+  const wordArray = CryptoJS.enc.Hex.parse(cipher);
+  const toDecrypt = CryptoJS.enc.Base64.stringify(wordArray);
+  return CryptoJS.AES.decrypt(toDecrypt, tea.HASH_KEY).toString(
+    CryptoJS.enc.Utf8
+  );
+};
+
+app.post(`/user:id`, async (req, res) => {
+  const id = req.params.id.slice(1);
+  const decId = crypto.dec(id);
+  const user = await userdb.findById(decId).catch((err) => {});
+  if (!user) {
+    res.setHeader("Content-Type", "application/json");
+    res.status(500).send(JSON.stringify({ error: "User not found" }));
+    return;
+  }
+  res.setHeader("Content-Type", "application/json");
+  res.status(200).send(JSON.stringify(user));
 });
 
 app.get("/users", async (req, res) => {
   user = await userdb.find({});
+  res.setHeader("Content-Type", "application/json");
   res.send(`${JSON.stringify(user)}`);
 });
 
@@ -90,7 +117,7 @@ app.get("/bank", async (req, res) => {
 });
 
 app.listen(3000, () => {
-  console.loge("Running webhook");
+  console.loge(`Server started on port ${3000}`);
 });
 //error and warn color
 console.errore = (err) => console.error("\x1b[91m%s\x1b[0m", err);
@@ -133,29 +160,31 @@ bot.use(async (ctx, next) => {
     ctx.bank = await bankdb.findOne({ id: 0 });
 
     if (!ctx.user) {
-      const response = await bot.execute("users.get", {
-        user_ids: user_id,
-      });
-      const uidgen = await userdb.countDocuments();
-      await userdb.create({
-        id: user_id,
-        uid: uidgen,
-        f_name: response[0].first_name,
-      });
-      ctx.user = await userdb.findOne({ id: user_id });
-      const newByBuffTime =
-        +(ctx.user.buffs.newby - ctx.timestamp) / 1000 / 60 / 60 / 24;
-      await bot.sendMessage(
-        [tea.OWNER],
-        `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`
-      );
-      await ctx.reply(
-        `Вы получили ${lang.newBy} на ${Math.round(
-          newByBuffTime
-        )} Дней \nПроверить эффекты на себе можно в Настройках`,
-        null,
-        Markup.keyboard([[Markup.button("Меню", "default", "menu")]])
-      );
+      ctx.reply("Бот преехал\nСсылка на бота: https://t.me/Vinteum_bot?start");
+      // const response = await bot.execute("users.get", {
+      //   user_ids: user_id,
+      // });
+      // const uidgen = await userdb.countDocuments();
+      // await userdb.create({
+      //   id: user_id,
+      //   uid: uidgen,
+      //   f_name: response[0].first_name,
+      //   _bm: 1,
+      // });
+      // ctx.user = await userdb.findOne({ id: user_id });
+      // const newByBuffTime =
+      //   +(ctx.user.buffs.newby - ctx.timestamp) / 1000 / 60 / 60 / 24;
+      // await bot.sendMessage(
+      //   [tea.OWNER],
+      //   `Новый Пользователь UID:${ctx.user.uid} Name:${ctx.user.f_name} @id${ctx.user.id}`
+      // );
+      // await ctx.reply(
+      //   `Вы получили ${lang.newby} на ${Math.round(
+      //     newByBuffTime
+      //   )} Дней \nПроверить эффекты на себе можно в Профиле`,
+      //   null,
+      //   Markup.keyboard([[Markup.button("Меню", "default", "menu")]])
+      // );
       return;
     }
 
@@ -303,7 +332,7 @@ bot.use(async (ctx, next) => {
   return await next();
 });
 
-commands(bot, utils, lang, userdb, itemdb, bp);
+commands(bot, utils, lang, userdb, itemdb, bp, crypto);
 
 //Start polling messages
 bot.startPolling((err) => {
@@ -317,24 +346,23 @@ const randCurr = (min, max) => {
 
 //enegry regen check
 const energy = new CronJob("*/3 * * * *", null, true, "Europe/Moscow");
-energy.addCallback(() => {
-  userdb.find({ _bm: 1 }).then((user) => {
-    user.forEach(async (x, i, z) => {
-      if (user[i].energy >= Math.round(100 * user[i].boosters.energyCount)) {
-        if (user[i].alert) {
-          if (!user[i].timers.eFullAlert) {
-            await user[i].set("timers", true, "eFullAlert");
-            await bot.sendMessage(
-              user[i].id,
-              `⚡ Энергия полная, вперед тратить. 🥳\nЕсли вы не хотите получать это уведомление вы можете отключить его в Настройках => Уведомления`
-            );
-          }
+energy.addCallback(async () => {
+  const userList = await userdb.find({ _bm: 1 });
+  userList.forEach(async (user) => {
+    if (user.energy <= Math.round(100 * user.boosters.energyCount)) {
+      await user.set("timers", false, "eFullAlert");
+      await user.inc("energy", user.boosters.energyRegen);
+    } else {
+      if (!user.timers.eFullAlert) {
+        await user.set("timers", true, "eFullAlert");
+        if (user.alert) {
+          await bot.sendMessage(
+            user.id,
+            `⚡ Энергия полная, вперед тратить. 🥳\nЕсли вы не хотите получать это уведомление вы можете отключить его в Настройках => Уведомления`
+          );
         }
-      } else {
-        await user[i].set("timers", false, "eFullAlert");
-        await user[i].inc("energy", user[i].boosters.energyRegen);
       }
-    });
+    }
   });
 });
 
@@ -375,11 +403,9 @@ minute.addCallback(() => {
 
 //buff check
 setInterval(async () => {
-  const userBuff = userdb.find({ _bm: 1 });
-  userBuff.then((user) => {
-    user.forEach(async (x, i, z) => {
-      await buff(bot, i, user, lang);
-    });
+  const userBuff = await userdb.find({ _bm: 1 });
+  userBuff.forEach(async (user, i, z) => {
+    await buff(bot, user, lang);
   });
 }, 4000);
 
@@ -435,17 +461,19 @@ updater.addCallback(async () => {
       id: user[i].id,
       name: user[i].f_name,
       balance: user[i].balance,
-      buff: i < 3 ? i + 1 : 9
-    })
+      buff: i < 3 ? i + 1 : 9,
+    });
   }
 
   try {
-    const buffTime = +timestamp + 31 * 60 * 1000
+    const buffTime = +timestamp + 31 * 60 * 1000;
     res.forEach(async (x, i) => {
       await userdb.findOne({ id: x.id }).then(async (user) => {
         await user.set("buffs", buffTime, `rate${x.buff}st`);
-      })
-    })
+        // await user.set("balance", (x.balance - (x.buff >= 3 ? 10 : 5)));
+        // await bank.set("balance", (bank.balance + (x.buff >= 3 ? 10 : 5)));
+      });
+    });
   } catch (e) {
     "Error: " + console.log(e);
   }
@@ -472,7 +500,7 @@ updater.addCallback(async () => {
         {
           icon_id: "205234117_774066",
           text: res[0].name,
-          url: `https://vk.com/id${res[0].id}`
+          url: `https://vk.com/id${res[0].id}`,
         },
         {
           text: `${res[0].balance} ${lang.curr}`,
@@ -498,7 +526,7 @@ updater.addCallback(async () => {
         {
           icon_id: "205234117_774069",
           text: res[2].name,
-          url: `https://vk.com/id${res[2].id}`
+          url: `https://vk.com/id${res[2].id}`,
         },
         {
           text: `${res[2].balance} ${lang.curr}`,
@@ -720,8 +748,29 @@ userdb.prototype.ench = async function (field, locItem, value) {
   return this.save();
 };
 
+//write error log
+function errorLog(e) {
+  let date = new Date();
+  let time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+  let day = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+  let error = `${time} ${day} ${e}`;
+  fs.appendFile("./error.log", error + "\n", function (err) {
+    if (err) throw err;
+  });
+}
+//bot error handler
+bot.on("error", (err) => {
+  errorLog(err);
+  bot.sendMessage([tea.OWNER], `В боте ошибка ${err}`);
+});
+
 process.on("uncaughtException", function (err) {
-  console.errore(err);
+  errorLog(err);
+  bot.sendMessage([tea.OWNER], `В боте ошибка ${err}`);
+});
+
+process.on("unhandledRejection", function (err) {
+  errorLog(err);
   bot.sendMessage([tea.OWNER], `В боте ошибка ${err}`);
 });
 
